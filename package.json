@@ -4,7 +4,8 @@
   "type": "module",
   "description": "Virtual Science Hub — AI Presentation Generator",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "build": "echo 'Static build ready'"
   },
   "dependencies": {
     "cors": "^2.8.5",
