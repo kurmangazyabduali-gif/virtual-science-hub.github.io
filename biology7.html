@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Биология Зертханасы - 7 сынып</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --bg-void: #020617; --neon-blue: #38bdf8; --text-primary: #f8fafc; --text-sec: #94a3b8; }
+        body, html { margin:0; padding:0; height:100%; width:100%; font-family:'Roboto', sans-serif; background: radial-gradient(circle at center, #0f172a 0%, var(--bg-void) 100%); color:#fff; overflow-x:hidden; }
+        .dash-header { display:flex; justify-content:space-between; align-items:center; padding:25px 50px; border-bottom:1px solid rgba(255,255,255,0.05); background:rgba(0,0,0,0.3); backdrop-filter:blur(10px); }
+        .btn-exit { color:var(--text-sec); text-decoration:none; font-weight:500; display:flex; gap:8px; align-items:center; transition:0.3s; padding:10px 20px; border:1px solid transparent; border-radius:8px; }
+        .btn-exit:hover { color:#ef4444; background:rgba(239,68,68,0.1); border-color:#ef4444; }
+        .logo { font-family:'Orbitron', sans-serif; font-size:1.8rem; font-weight:900; display:flex; gap:10px; align-items:center; letter-spacing:1px; }
+        .dash-content { padding:40px 10%; flex:1; display:flex; flex-direction:column; align-items:center; }
+        .glitch-text { font-family:'Orbitron', sans-serif; font-size:3rem; margin:0; text-transform:uppercase; text-shadow:0 0 20px rgba(56,189,248,0.5); text-align:center;}
+        .subtitle { color:var(--neon-blue); font-size:1.1rem; margin-bottom:50px; opacity:0.8; text-align:center;}
+        .mission-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:25px; width:100%; max-width:1100px; }
+        .mission-card { position:relative; background:rgba(15,23,42,0.8); border:1px solid rgba(56,189,248,0.2); border-radius:12px; padding:30px; cursor:pointer; transition:0.3s; display:flex; flex-direction:column; min-height:220px; text-decoration:none; color:inherit; }
+        .mission-card:hover { transform:translateY(-8px) scale(1.02); box-shadow:0 15px 30px rgba(0,0,0,0.8); border-color:rgba(255,255,255,0.3); }
+        .card-bg { position:absolute; inset:0; opacity:0; transition:0.5s; border-radius:12px; pointer-events:none;}
+        .mission-card:hover .card-bg { opacity:0.2; }
+        .card-icon { font-size:2.5rem; color:#fff; margin-bottom:15px; z-index:2; position:relative; }
+        .mission-card h2 { font-family:'Orbitron', sans-serif; font-size:1.3rem; margin:0 0 10px 0; z-index:2; position:relative;}
+        .mission-card p { color:var(--text-sec); font-size:0.9rem; line-height:1.5; margin:0; z-index:2; position:relative;}
+    </style>
+</head>
+<body>
+    <header class="dash-header">
+        <a href="subjects.html" class="btn-exit"><i class="fa-solid fa-power-off"></i> Шығу</a>
+        <div class="logo">
+            <i class="fa-solid fa-dna" style="color:#38bdf8;"></i> BIO-LAB <span style="background:linear-gradient(90deg, #d946ef, #8b5cf6); padding:4px 8px; font-size:0.7rem; border-radius:4px;">PRO</span>
+        </div>
+    </header>
+    
+    <div class="dash-content">
+        <h1 class="glitch-text">Тапсырманы таңдаңыз</h1>
+        <p class="subtitle">Интерактивті зертханалық үстел симуляциялары</p>
+        
+        <div class="mission-grid">
+            <a href="bio7_lab1.html" class="mission-card">
+                <div class="card-bg" style="background: linear-gradient(135deg, #166534, #064e3b);"></div>
+                <div class="card-icon"><i class="fa-solid fa-leaf"></i></div>
+                <h2>Зертхана №1: Экожүйе</h2>
+                <p>Террариум құру: Өлі және тірі табиғат факторларын біріктіру.</p>
+            </a>
+            
+            <a href="bio7_lab2.html" class="mission-card">
+                <div class="card-bg" style="background: linear-gradient(135deg, #1e3a8a, #0f172a);"></div>
+                <div class="card-icon"><i class="fa-solid fa-folder-tree"></i></div>
+                <h2>Зертхана №2: Таксономия</h2>
+                <p>Ағзаларды жүйелеу: Ватман мен фотосуреттермен жұмыс.</p>
+            </a>
+            
+            <a href="bio7_lab3.html" class="mission-card">
+                <div class="card-bg" style="background: linear-gradient(135deg, #991b1b, #450a0a);"></div>
+                <div class="card-icon"><i class="fa-solid fa-flask-vial"></i></div>
+                <h2>Зертхана №3: Органика</h2>
+                <p>Химиялық стол: Крахмал мен Липидтерді (майды) анықтау.</p>
+            </a>
+
+            <a href="bio7_lab4.html" class="mission-card">
+                <div class="card-bg" style="background: linear-gradient(135deg, #b45309, #451a03);"></div>
+                <div class="card-icon"><i class="fa-solid fa-microscope"></i></div>
+                <h2>Зертхана №4: Микроскоп</h2>
+                <p>Оптика: Ағаш құрылысын зерттеу, Камбий қабатын табу.</p>
+            </a>
+
+            <a href="bio7_lab5.html" class="mission-card">
+                <div class="card-bg" style="background: linear-gradient(135deg, #6d28d9, #2e1065);"></div>
+                <div class="card-icon"><i class="fa-solid fa-chalkboard"></i></div>
+                <h2>Зертхана №5: Қоректік Тізбек</h2>
+                <p>Маркерлі тақта: Энергия ағынын бағыттау және модельдеу.</p>
+            </a>
+
+            <a href="bio7_lab6.html" class="mission-card">
+                <div class="card-bg" style="background: linear-gradient(135deg, #0f766e, #042f2e);"></div>
+                <div class="card-icon"><i class="fa-solid fa-seedling"></i></div>
+                <h2>Зертхана №6: Өсу (Инкубатор)</h2>
+                <p>Тірі организмнің өсуіне қажетті параметрлерді басқару.</p>
+            </a>
+        </div>
+    </div>
+</body>
+</html>

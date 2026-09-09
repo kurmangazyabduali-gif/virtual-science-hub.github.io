@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лаборатория: Логические Схемы</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .logic-canvas {
+            background-color: #0b0d17;
+            background-image:
+                linear-gradient(rgba(0, 255, 157, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 157, 0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .toolbar {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .component-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-main);
+        }
+
+        .component-btn:hover {
+            background: rgba(0, 255, 157, 0.1);
+            border-color: #00ff9d;
+        }
+
+        .component-btn span {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        /* Mission Panel */
+        .mission-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 300px;
+            padding: 20px;
+            z-index: 100;
+            border: 1px solid var(--accent-primary);
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.1);
+            transition: all 0.3s;
+        }
+
+        .mission-panel.hidden {
+            transform: translateX(-150%);
+            opacity: 0;
+        }
+
+        .mission-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .mission-header h3 {
+            margin: 0;
+            color: var(--accent-primary);
+        }
+
+        .mission-desc {
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .mission-progress {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        #mission-status {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.8rem;
+            color: #aaa;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        #progress-fill {
+            height: 100%;
+            background: var(--accent-primary);
+            width: 0%;
+            transition: width 0.3s;
+        }
+    </style>
+
+    <script id="early-lang-sync">
+        (function() {
+            let cl = localStorage.getItem('vsh-lang') || 'kk';
+            var gt = '/ru/' + cl;
+            if (cl === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+                document.cookie = "googtrans=" + gt + "; path=/";
+                if (location.hostname) {
+                    document.cookie = "googtrans=" + gt + "; domain=" + location.hostname + "; path=/";
+                    document.cookie = "googtrans=" + gt + "; domain=." + location.hostname + "; path=/";
+                }
+            }
+        })();
+    </script>
+</head>
+
+<body class="lab-logic info-theme">
+    <div class="app-container">
+        <header class="glass-header">
+            <div class="header-left">
+                <a href="index.html#informatics" class="btn-back" title="Меню">⬅</a>
+                <h1>Logic <span class="accent" style="color: #00ff9d;">Sim</span></h1>
+            </div>
+            <div class="header-right">
+                <button id="btn-clear" class="btn danger small">Очистить</button>
+            </div>
+        </header>
+
+        <main class="simulation-container">
+            <canvas id="logic-canvas" class="logic-canvas"></canvas>
+
+            <!-- Mission Overlay -->
+            <div id="mission-ui" class="mission-panel glass-panel hidden">
+                <div class="mission-header">
+                    <h3>🎯 Задание <span id="level-num">1</span></h3>
+                    <button id="btn-next-level" class="btn primary small hidden">Далее ➡</button>
+                    <button id="btn-close-mission" class="btn icon-only">✖</button>
+                </div>
+                <p id="mission-desc" class="mission-desc">Подключи выключатель к лампочке и включи свет.</p>
+                <div class="mission-progress">
+                    <span id="mission-status">Ожидание...</span>
+                    <div class="progress-bar">
+                        <div id="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <aside class="controls-panel glass-panel">
+                <h3>Компоненты</h3>
+                <div class="toolbar" id="toolbar">
+                    <div class="component-btn" data-type="switch">
+                        <span>🔌</span>
+                        <small>Переключатель</small>
+                    </div>
+                    <div class="component-btn" data-type="bulb">
+                        <span>💡</span>
+                        <small>Лампочка</small>
+                    </div>
+                    <div class="component-btn" data-type="and">
+                        <span>AND</span>
+                        <small>И (A & B)</small>
+                    </div>
+                    <div class="component-btn" data-type="or">
+                        <span>OR</span>
+                        <small>ИЛИ (A | B)</small>
+                    </div>
+                    <div class="component-btn" data-type="not">
+                        <span>NOT</span>
+                        <small>НЕ (!A)</small>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 20px;">Продвинутые</h3>
+                <div class="toolbar">
+                    <div class="component-btn" data-type="clock">
+                        <span>⏰</span>
+                        <small>Тактовый (Clock)</small>
+                    </div>
+                    <div class="component-btn" data-type="display">
+                        <span>🔢</span>
+                        <small>Дисплей (Hex)</small>
+                    </div>
+                </div>
+
+                <hr class="divider">
+
+                <div class="control-group">
+                    <button id="btn-tasks" class="btn accent" style="width:100%; margin-bottom: 10px;">🏆 Задания /
+                        Уровни</button>
+                    <button id="btn-delete-mode" class="btn danger" style="width:100%">🗑️ Режим Удаления: Выкл</button>
+                </div>
+
+                <div class="instruction">
+                    <p>👇 <b>Как пользоваться:</b></p>
+                    <ul style="padding-left: 20px; font-size: 0.9em; color: var(--text-muted)">
+                        <li><b>ЛКМ:</b> Добавить / Перетащить / Соединить.</li>
+                        <li><b>ПКМ:</b> Удалить элемент.</li>
+                        <li><b>Задания:</b> Нажми кнопку выше, чтобы начать обучение.</li>
+                    </ul>
+                </div>
+            </aside>
+        </main>
+    </div>
+    <script src="logic.js"></script>
+
+<!-- Global Language Switcher & Google Translate -->
+<div id="google_translate_element" style="display:none;"></div>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({pageLanguage: 'ru', includedLanguages: 'ru,en,kk', autoDisplay: false}, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script>
+(function() {
+    let currentLang = localStorage.getItem('vsh-lang') || 'kk';
+
+    // Synchronize cookie if needed
+    var gtrans = '/ru/' + currentLang;
+    if (currentLang === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) {
+            document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+        }
+    }
+
+    // Floating UI
+    const isIndex = location.pathname.endsWith('index.html') || location.pathname.endsWith('/') || location.pathname.endsWith('studio.html');
+    if (!document.querySelector('.floating-lang-switcher')) {
+        const style = document.createElement('style');
+        style.innerHTML = `
+            body { top: 0 !important; }
+            .skiptranslate { display: none !important; }
+            .floating-lang-switcher {
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                background: rgba(15, 23, 42, 0.9);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 20px;
+                padding: 10px;
+                display: flex;
+                gap: 10px;
+                z-index: 999999;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+                font-family: 'Roboto', sans-serif;
+            }
+            .floating-lang-btn {
+                background: transparent;
+                border: 1px solid rgba(255,255,255,0.2);
+                color: #94a3b8;
+                font-size: 14px;
+                font-weight: 600;
+                padding: 8px 15px;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: 0.3s;
+            }
+            .floating-lang-btn:hover {
+                color: #fff;
+                background: rgba(255,255,255,0.1);
+            }
+            .floating-lang-btn.active {
+                background: linear-gradient(135deg, #a855f7, #3b82f6);
+                color: #fff;
+                border-color: transparent;
+            }
+        `;
+        document.head.appendChild(style);
+
+        const switcher = document.createElement('div');
+        switcher.className = 'floating-lang-switcher notranslate';
+        switcher.innerHTML = `
+            <button class="floating-lang-btn " onclick="changeLangGlobal('ru')">RU</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('kk')">ҚАЗ</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('en')">EN</button>
+        `;
+        
+        // set active
+        const btns = switcher.querySelectorAll('.floating-lang-btn');
+        if (currentLang === 'ru') btns[0].classList.add('active');
+        else if (currentLang === 'kk') btns[1].classList.add('active');
+        else if (currentLang === 'en') btns[2].classList.add('active');
+
+        document.body.appendChild(switcher);
+    }
+})();
+
+function changeLangGlobal(lang) {
+    localStorage.setItem('vsh-lang', lang);
+    var gtrans = '/ru/' + lang;
+    if (lang === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+    }
+    location.reload();
+}
+</script>
+\n</body>
+
+</html>

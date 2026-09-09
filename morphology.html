@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="kk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сөз Конструкторы</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* MORPHOLOGY STYLES */
+        .morph-container {
+            margin-top: 30px;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .target-word-display {
+            font-size: 1.2rem;
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+
+        .target-word-display strong {
+            color: #fff;
+            font-size: 1.5rem;
+        }
+
+        .construction-area {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            min-height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            position: relative;
+        }
+
+        .morph-block {
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            user-select: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .morph-block:hover {
+            transform: translateY(-5px);
+            z-index: 10;
+        }
+
+        /* Connecting visual (Jigsaw style hint) */
+        .morph-block::after {
+            content: '';
+            position: absolute;
+            right: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 10px;
+            height: 10px;
+            background: inherit;
+            border-radius: 50%;
+            z-index: -1;
+        }
+
+        .morph-block:last-child::after {
+            display: none;
+        }
+
+        .block-root {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            border: 1px solid #4da3ff;
+            padding-left: 35px;
+            padding-right: 35px;
+        }
+
+        .block-suffix {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+            border: 1px solid #5cd07b;
+        }
+
+        .block-suffix[data-type="plural"] {
+            background: linear-gradient(135deg, #ffc107, #d39e00);
+            color: black;
+        }
+
+        .block-suffix[data-type="possessive"] {
+            background: linear-gradient(135deg, #17a2b8, #117a8b);
+        }
+
+        .block-suffix[data-type="case"] {
+            background: linear-gradient(135deg, #e83e8c, #c21766);
+        }
+
+        .parts-pool {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+        }
+
+        .msg-grammar {
+            margin-top: 30px;
+            font-size: 1.2rem;
+            min-height: 30px;
+            font-weight: bold;
+        }
+
+        .msg-grammar.correct {
+            color: #00cc66;
+        }
+
+        .msg-grammar.wrong {
+            color: #ff4d4d;
+        }
+
+        /* Kaz Pattern Overlay */
+        .kaz-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.05;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTIwIDIwIEwwIDAgTTAgNDAgTDIwIDIwIEw0MCA0MCBMNDAgMCBMMjAgMjAiIHN0cm9rZT0iI2ZmZiIgZmlsbD0ibm9uZSIvPjwvc3ZnPg==');
+            pointer-events: none;
+        }
+    </style>
+
+    <script id="early-lang-sync">
+        (function() {
+            let cl = localStorage.getItem('vsh-lang') || 'kk';
+            var gt = '/ru/' + cl;
+            if (cl === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+                document.cookie = "googtrans=" + gt + "; path=/";
+                if (location.hostname) {
+                    document.cookie = "googtrans=" + gt + "; domain=" + location.hostname + "; path=/";
+                    document.cookie = "googtrans=" + gt + "; domain=." + location.hostname + "; path=/";
+                }
+            }
+        })();
+    </script>
+</head>
+
+<body class="lab-lobby kaz-theme">
+    <div class="app-container">
+        <header class="glass-header">
+            <div class="header-left">
+                <a href="index.html#kazakh" class="btn-back" title="Артқа">⬅</a>
+                <h1>Сөз <span class="accent" style="color: #00cccc;">Конструкторы</span></h1>
+            </div>
+        </header>
+
+        <main class="simulation-container" style="background: transparent;">
+            <div class="kaz-pattern"></div>
+
+            <div id="section-morphology" style="width: 100%; max-width: 900px; margin: 0 auto; text-align: center;">
+
+                <div class="target-word-display">
+                    Тапсырма (Задание): <strong id="morph-goal">...</strong>
+                </div>
+
+                <div class="morph-container">
+                    <!-- Area where we build -->
+                    <div class="construction-area" id="construct-area">
+                        <!-- Root will be here initially or dragged here -->
+                    </div>
+
+                    <!-- Available parts -->
+                    <div class="parts-pool" id="parts-pool">
+                        <!-- Suffixes go here -->
+                    </div>
+                </div>
+
+                <div class="msg-grammar" id="morph-msg"></div>
+
+                <div style="margin-top: 20px;">
+                    <button id="btn-check-morph" class="btn primary">Тексеру (Проверить)</button>
+                    <button id="btn-next-morph" class="btn secondary" style="display:none; margin-left: 10px;">Келесі
+                        ➡</button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+    <script src="morphology.js"></script>
+
+<!-- Global Language Switcher & Google Translate -->
+<div id="google_translate_element" style="display:none;"></div>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({pageLanguage: 'ru', includedLanguages: 'ru,en,kk', autoDisplay: false}, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script>
+(function() {
+    let currentLang = localStorage.getItem('vsh-lang') || 'kk';
+
+    // Synchronize cookie if needed
+    var gtrans = '/ru/' + currentLang;
+    if (currentLang === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) {
+            document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+        }
+    }
+
+    // Floating UI
+    const isIndex = location.pathname.endsWith('index.html') || location.pathname.endsWith('/') || location.pathname.endsWith('studio.html');
+    if (!document.querySelector('.floating-lang-switcher')) {
+        const style = document.createElement('style');
+        style.innerHTML = `
+            body { top: 0 !important; }
+            .skiptranslate { display: none !important; }
+            .floating-lang-switcher {
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                background: rgba(15, 23, 42, 0.9);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 20px;
+                padding: 10px;
+                display: flex;
+                gap: 10px;
+                z-index: 999999;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+                font-family: 'Roboto', sans-serif;
+            }
+            .floating-lang-btn {
+                background: transparent;
+                border: 1px solid rgba(255,255,255,0.2);
+                color: #94a3b8;
+                font-size: 14px;
+                font-weight: 600;
+                padding: 8px 15px;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: 0.3s;
+            }
+            .floating-lang-btn:hover {
+                color: #fff;
+                background: rgba(255,255,255,0.1);
+            }
+            .floating-lang-btn.active {
+                background: linear-gradient(135deg, #a855f7, #3b82f6);
+                color: #fff;
+                border-color: transparent;
+            }
+        `;
+        document.head.appendChild(style);
+
+        const switcher = document.createElement('div');
+        switcher.className = 'floating-lang-switcher notranslate';
+        switcher.innerHTML = `
+            <button class="floating-lang-btn " onclick="changeLangGlobal('ru')">RU</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('kk')">ҚАЗ</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('en')">EN</button>
+        `;
+        
+        // set active
+        const btns = switcher.querySelectorAll('.floating-lang-btn');
+        if (currentLang === 'ru') btns[0].classList.add('active');
+        else if (currentLang === 'kk') btns[1].classList.add('active');
+        else if (currentLang === 'en') btns[2].classList.add('active');
+
+        document.body.appendChild(switcher);
+    }
+})();
+
+function changeLangGlobal(lang) {
+    localStorage.setItem('vsh-lang', lang);
+    var gtrans = '/ru/' + lang;
+    if (lang === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+    }
+    location.reload();
+}
+</script>
+\n</body>
+
+</html>

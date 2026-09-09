@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Зертхана №6 — Инкубатор</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Jura:wght@400;600;700&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="biology7.css">
+</head>
+<body>
+<canvas id="fx-layer"></canvas>
+<nav class="lab-nav">
+  <a href="biology7.html" class="nav-back-btn"><i class="fa-solid fa-chevron-left"></i> Мәзір</a>
+  <span class="t-orb c-blue" style="font-size:1rem;">№6 — ИНКУБАТОР КАПСУЛАСЫ</span>
+  <span class="t-jura" style="color:var(--text-dim);font-size:.8rem;">Көбею және өсу — 4 параметр</span>
+</nav>
+<main id="workspace" class="workspace-desk"></main>
+<div class="tools-tray">
+  <div class="tool-btn" id="tb-seed"  onclick="grab('seed')"  data-label="🫘 Тұқым">🫘</div>
+  <div class="tool-btn" id="tb-water" onclick="grab('water')" data-label="💧 Ылғал">🚿</div>
+</div>
+<div id="end-modal" class="end-modal">
+  <div class="end-card sci-panel">
+    <div class="end-title c-green">✅ АЯҚТАЛДЫ</div>
+    <p class="end-body">...</p>
+    <a href="biology7.html" class="end-btn">← МӘЗІРГЕ ОРАЛУ</a>
+  </div>
+</div>
+<script src="biology7.js"></script>
+<script>document.addEventListener('DOMContentLoaded',()=>initBioLab(6));</script>
+</body>
+</html>

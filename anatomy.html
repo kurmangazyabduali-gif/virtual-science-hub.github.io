@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Эксперимент: Рентген-анализ (Анатомия) — Virtual Science Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Roboto', sans-serif; user-select: none; }
+        
+        /* CSS VARIABLES FOR THEMES */
+        :root {
+            --theme-color: #f472b6;       /* Pink/Magenta for MRI */
+            --theme-glow: rgba(244,114,182,0.5);
+            --theme-bg: #831843;          /* Dark pink */
+            --grid-color: rgba(244,114,182,0.2);
+        }
+
+        .theme-xray {
+            --theme-color: #22d3ee;       /* Cyan for X-Ray */
+            --theme-glow: rgba(34,211,238,0.5);
+            --theme-bg: #083344;          /* Dark cyan */
+            --grid-color: rgba(34,211,238,0.2);
+        }
+
+        .theme-nervous {
+            --theme-color: #a855f7;       /* Purple for Nervous */
+            --theme-glow: rgba(168,85,247,0.5);
+            --theme-bg: #3b0764;          /* Dark purple */
+            --grid-color: rgba(168,85,247,0.2);
+        }
+
+        body { 
+            background: #020617; color: #fff; height: 100vh; display: flex; overflow: hidden;
+            transition: all 0.5s;
+        }
+
+        /* HEADER */
+        .header { text-align: center; padding: 15px; background: rgba(0,0,0,0.5); z-index: 10; border-bottom: 1px solid rgba(255,255,255,0.1); width: 100%; position: absolute; top:0; left:0; pointer-events: none; }
+        .header h1 { font-size: 30px; color: #fff; text-shadow: 0 0 15px var(--theme-color); transition: 0.5s; }
+        .header p { color: #94a3b8; font-size: 14px; }
+
+        /* DASHBOARD (LEFT PANEL) */
+        .dashboard { 
+            width: 400px; background: rgba(15,23,42,0.9); border-right: 2px solid rgba(255,255,255,0.1);
+            padding: 30px; display: flex; flex-direction: column; overflow-y: auto; z-index: 10; padding-top: 100px;
+        }
+        
+        /* MODE SWITCHERS */
+        .mode-container { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }
+        .btn-mode { 
+            flex: 1 1 30%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2);
+            color: #94a3b8; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 13px;
+        }
+        .btn-mode:hover { background: rgba(255,255,255,0.1); }
+        .btn-mode.active { background: rgba(255,255,255,0.1); border-color: var(--theme-color); color: var(--theme-color); box-shadow: inset 0 0 15px var(--theme-glow); }
+
+        .scan-header { color: var(--theme-color); font-family: monospace; font-size: 14px; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; display: flex; align-items: center; gap: 10px; transition: 0.5s; }
+        .scan-header::before { content: ''; width: 10px; height: 10px; background: var(--theme-color); border-radius: 50%; box-shadow: 0 0 10px var(--theme-color); animation: blink 1s infinite; transition: 0.5s; }
+        
+        .scan-progress-bar { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin-bottom: 20px; overflow: hidden; display: none; }
+        .scan-progress-fill { width: 0%; height: 100%; background: var(--theme-color); transition: width 0.05s linear; box-shadow: 0 0 10px var(--theme-color); }
+
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        .organ-title { font-size: 32px; font-weight: 800; color: #fff; margin-bottom: 5px; min-height: 40px;}
+        .organ-system { color: var(--theme-color); font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; font-weight: bold; min-height: 20px; transition: 0.5s; }
+        
+        .fact-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 15px; position: relative; overflow: hidden; }
+        .fact-card h4 { color: #fff; font-size: 14px; margin-bottom: 8px; text-transform: uppercase; border-bottom: 2px solid var(--theme-color); display: inline-block; padding-bottom: 2px;}
+        .fact-card p { color: #cbd5e1; font-size: 15px; line-height: 1.5; }
+
+        /* SCENE AREA */
+        .lab-scene {
+            flex: 1; background: radial-gradient(circle at 50% 50%, var(--theme-bg) 0%, #020617 100%);
+            display: flex; justify-content: center; align-items: center; position: relative; padding-top: 50px; cursor: crosshair;
+            transition: 0.5s;
+        }
+
+        /* THE PATIENT Silhouette */
+        .patient {
+            width: 320px; height: 750px; position: relative; 
+            filter: drop-shadow(0 0 20px var(--theme-glow)); transition: 0.5s;
+        }
+
+        .silhouette {
+            position: absolute; inset: 0; background: rgba(255,255,255,0.02);
+            border: 2px solid var(--theme-color); border-radius: 5px;
+            /* Precise Human Contour SVG-like Clip Path */
+            clip-path: polygon(
+                50% 0%, 58% 2%, 60% 8%, 56% 12%, /* head */
+                62% 14%, 80% 18%, 88% 25%, /* right shoulder */
+                95% 45%, 90% 60%, 82% 58%, 85% 35%, /* right arm */
+                82% 50%, 80% 65%, 85% 95%, 75% 100%, 65% 65%, /* right leg & torso */
+                55% 60%, 35% 65%, 25% 100%, 15% 95%, 20% 65%, /* left leg & crotch */
+                18% 50%, 15% 35%, 18% 58%, 10% 60%, 5% 45%, /* left arm & torso */
+                12% 25%, 20% 18%, 38% 14%, /* left shoulder */
+                44% 12%, 40% 8%, 42% 2% /* left head */
+            );
+            background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, var(--theme-bg) 100%);
+            transition: 0.5s;
+        }
+
+        /* HIDDEN SCAN LAYER */
+        .xray-layer {
+            position: absolute; inset: 0; z-index: 5;
+            background: rgba(0,0,0,0.8);
+            clip-path: circle(0px at 50% 50%); 
+        }
+
+        /* Grid Pattern inside the scan */
+        .xray-layer::before {
+            content:''; position: absolute; inset:0; 
+            background-image: 
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none; opacity: 0.5; transition: 0.5s;
+        }
+
+        .organ {
+            position: absolute; transform: translate(-50%, -50%);
+            display: flex; justify-content: center; align-items: center; 
+            filter: drop-shadow(0 0 12px var(--theme-color));
+            transition: transform 0.2s, filter 0.2s;
+            width: 80px; height: 80px;
+        }
+        .organ svg { width: 100%; height: 100%; }
+        .organ:hover { transform: translate(-50%, -50%) scale(1.15); filter: drop-shadow(0 0 25px var(--theme-color)) brightness(1.3); }
+        .organ.scanned svg { animation: pulseGlow 2s ease-in-out infinite; }
+        @keyframes pulseGlow { 0%,100% { opacity:1; } 50% { opacity:0.6; } }
+        /* organ-specific sizes — larger for clarity */
+        [data-id='brain']       { width:130px; height:108px; }
+        [data-id='lungs']       { width:150px; height:130px; }
+        [data-id='heart']       { width:90px;  height:92px;  }
+        [data-id='liver']       { width:140px; height:96px;  }
+        [data-id='stomach']     { width:100px; height:102px; }
+        [data-id='kidneys']     { width:130px; height:88px;  }
+        [data-id='intestine']   { width:130px; height:130px; }
+        [data-id='bladder']     { width:95px;  height:100px; }
+        [data-id='skull']       { width:90px;  height:108px; }
+        [data-id='spine']       { width:62px;  height:155px; }
+        [data-id='ribs']        { width:140px; height:138px; }
+        [data-id='pelvis']      { width:130px; height:100px; }
+        [data-id='humerus']     { width:52px;  height:138px; }
+        [data-id='femur']       { width:62px;  height:148px; }
+        [data-id='brain_nerve'] { width:120px; height:100px; }
+        [data-id='spinal_cord'] { width:62px;  height:155px; }
+        [data-id='sciatic']     { width:82px;  height:148px; }
+
+        /* THEME TOGGLING DISPLAY */
+        .theme-xray .mode-org, .theme-xray .mode-nervous { display: none; }
+        .theme-mri .mode-bone, .theme-mri .mode-nervous { display: none; }
+        .theme-nervous .mode-org, .theme-nervous .mode-bone { display: none; }
+
+        /* THE LENS */
+        .lens-ring {
+            position: absolute; width: 160px; height: 160px; border: 3px solid var(--theme-color);
+            border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 10;
+            box-shadow: 0 0 25px var(--theme-glow), inset 0 0 30px rgba(0,0,0,0.5);
+            display: flex; justify-content: center; align-items: center; transition: 0.1s border-color;
+        }
+        .lens-ring::after { content:'+'; color: var(--theme-color); font-size: 30px; font-weight: 300; transition: 0.5s;}
+
+        .btn-back { position: absolute; top: 20px; left: 420px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; text-decoration: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; z-index: 100; transition: 0.2s; }
+        .btn-back:hover { background: rgba(255,255,255,0.2); border-color: #fff; }
+
+    </style>
+
+    <script id="early-lang-sync">
+        (function() {
+            let cl = localStorage.getItem('vsh-lang') || 'kk';
+            var gt = '/ru/' + cl;
+            if (cl === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+                document.cookie = "googtrans=" + gt + "; path=/";
+                if (location.hostname) {
+                    document.cookie = "googtrans=" + gt + "; domain=" + location.hostname + "; path=/";
+                    document.cookie = "googtrans=" + gt + "; domain=." + location.hostname + "; path=/";
+                }
+            }
+        })();
+    </script>
+</head>
+<body class="theme-mri" id="bodyEl">
+
+    <div class="header">
+        <h1>🩺 Мульти-Сканер Тела Человека V2</h1>
+        <p>Используйте панель слева для переключения режимов сканирования и наводите мышь на пациента.</p>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="dashboard">
+        <a href="index.html" style="color:#94a3b8; text-decoration:none; margin-bottom:20px; font-weight:bold; font-size: 14px;">⬅ В меню</a>
+
+        <div class="mode-container">
+            <button class="btn-mode active" id="btn-organs" onclick="setMode('organs')">🧠 МРТ</button>
+            <button class="btn-mode" id="btn-skeleton" onclick="setMode('skeleton')">🦴 Рентген</button>
+            <button class="btn-mode" id="btn-nervous" onclick="setMode('nervous')">⚡ Нервы</button>
+        </div>
+
+        <div class="scan-header" id="scanHeaderTxt">СТАТУС: ОЖИДАНИЕ СКАНИРОВАНИЯ</div>
+        <div id="scanCounter" style="color:var(--theme-color); font-weight:bold; font-size:14px; margin-bottom: 20px; text-align:right;">Найдено: 0 / 0</div>
+        <div class="scan-progress-bar" id="scanBar"><div class="scan-progress-fill" id="scanFill"></div></div>
+        
+        <h1 class="organ-title" id="dbName">Неизвестно</h1>
+        <div class="organ-system" id="dbSys">Наведите сканер на орган</div>
+        
+        <div class="fact-card" id="cardFunc" style="display:none;">
+            <h4>⚙️ Функция</h4>
+            <p id="dbFunc">...</p>
+        </div>
+
+        <div class="fact-card" id="cardFact" style="display:none;">
+            <h4>🔬 Интересный факт</h4>
+            <p id="dbFact">...</p>
+        </div>
+
+        <div style="margin-top:auto; color:rgba(255,255,255,0.4); font-size:12px; text-align:center;">
+            Оборудование: Quantum Scanner Pro <br> Virtual Science Hub Medical
+        </div>
+    </div>
+
+    <!-- SCENE -->
+    <div class="lab-scene" id="scene">
+        
+        <div class="patient" id="patientBox">
+            <div class="silhouette"></div>
+            
+            <div class="xray-layer" id="xray">
+                
+                <!-- ORGANS LAYER (MRI) -->
+                <div class="organ mode-org" data-id="brain"   style="top:9%; left:50%; font-size:65px;" onmouseover="startScan('brain')" onmouseout="stopScan()"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--theme-color);"><svg viewBox="0 0 120 105" xmlns="http://www.w3.org/2000/svg">
+<defs><radialGradient id="b1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="currentColor" stop-opacity="0.4"/><stop offset="100%" stop-color="currentColor" stop-opacity="0.05"/></radialGradient></defs>
+<ellipse cx="60" cy="58" rx="56" ry="42" fill="url(#b1)" stroke="currentColor" stroke-width="2.5"/>
+<line x1="60" y1="16" x2="60" y2="100" stroke="currentColor" stroke-width="2" opacity="0.6"/>
+<path d="M10,50 Q14,34 28,30 Q22,40 16,52 Q10,62 10,50Z" fill="currentColor" opacity="0.38" stroke="currentColor" stroke-width="1.2"/>
+<path d="M10,66 Q16,54 30,52 Q24,64 16,72Z" fill="currentColor" opacity="0.3" stroke="currentColor" stroke-width="1.2"/>
+<path d="M14,80 Q22,70 36,68 Q30,80 18,86Z" fill="currentColor" opacity="0.28" stroke="currentColor" stroke-width="1.2"/>
+<path d="M22,34 Q34,22 46,24 Q40,34 28,36Z" fill="currentColor" opacity="0.32" stroke="currentColor" stroke-width="1.2"/>
+<path d="M44,20 Q54,14 60,16 Q56,26 46,28Z" fill="currentColor" opacity="0.28" stroke="currentColor" stroke-width="1.2"/>
+<path d="M110,50 Q106,34 92,30 Q98,40 104,52 Q110,62 110,50Z" fill="currentColor" opacity="0.38" stroke="currentColor" stroke-width="1.2"/>
+<path d="M110,66 Q104,54 90,52 Q96,64 104,72Z" fill="currentColor" opacity="0.3" stroke="currentColor" stroke-width="1.2"/>
+<path d="M106,80 Q98,70 84,68 Q90,80 102,86Z" fill="currentColor" opacity="0.28" stroke="currentColor" stroke-width="1.2"/>
+<path d="M98,34 Q86,22 74,24 Q80,34 92,36Z" fill="currentColor" opacity="0.32" stroke="currentColor" stroke-width="1.2"/>
+<path d="M76,20 Q66,14 60,16 Q64,26 74,28Z" fill="currentColor" opacity="0.28" stroke="currentColor" stroke-width="1.2"/>
+<ellipse cx="50" cy="68" rx="9" ry="7" fill="currentColor" opacity="0.22" stroke="currentColor" stroke-width="1.3"/>
+<ellipse cx="70" cy="68" rx="9" ry="7" fill="currentColor" opacity="0.22" stroke="currentColor" stroke-width="1.3"/>
+<path d="M52,98 Q60,105 68,98 L66,102 Q60,106 54,102Z" fill="currentColor" opacity="0.5" stroke="currentColor" stroke-width="1.5"/>
+<path d="M36,28 Q48,20 60,22 Q72,20 84,28" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.7"/>
+</svg></div></div>
+                <div class="organ mode-org" data-id="lungs"   style="top:27%; left:50%; font-size:95px; width:120px;" onmouseover="startScan('lungs')" onmouseout="stopScan()"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--theme-color);"><svg viewBox="0 0 120 110" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<radialGradient id="ll" cx="30%" cy="40%" r="65%"><stop offset="0%" stop-color="currentColor" stop-opacity="0.35"/><stop offset="100%" stop-color="currentColor" stop-opacity="0.04"/></radialGradient>
+<radialGradient id="rl" cx="70%" cy="40%" r="65%"><stop offset="0%" stop-color="currentColor" stop-opacity="0.35"/><stop offset="100%" stop-color="currentColor" stop-opacity="0.04"/></radialGradient>
+</defs>
+<rect x="55" y="2" width="10" height="20" rx="5" fill="currentColor" opacity="0.5" stroke="currentColor" stroke-width="1.8"/>
+<path d="M60,20 Q42,26 30,34" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
+<path d="M60,20 Q78,26 90,34" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
+<path d="M57,22 C52,22 12,30 8,56 C4,76 12,96 28,100 C44,104 54,88 54,68 L54,22Z" fill="url(#ll)" stroke="currentColor" stroke-width="2.5"/>
+<path d="M63,22 C68,22 108,30 112,56 C116,76 108,96 92,100 C76,104 66,88 66,68 L66,22Z" fill="url(#rl)" stroke="currentColor" stroke-width="2.5"/>
+<path d="M30,34 Q20,46 16,58 Q14,68 18,78" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+<path d="M30,34 Q28,50 30,64" stroke="currentColor" stroke-width="1.6" fill="none"/>
+<path d="M30,34 Q36,50 36,64" stroke="currentColor" stroke-width="1.4" fill="none"/>
+<path d="M16,58 Q16,68 20,76" stroke="currentColor" stroke-width="1.3" fill="none"/>
+<path d="M30,64 Q28,76 32,86" stroke="currentColor" stroke-width="1.3" fill="none"/>
+<path d="M90,34 Q100,46 104,58 Q106,68 102,78" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+<path d="M90,34 Q92,50 90,64" stroke="currentColor" stroke-width="1.6" fill="none"/>
+<path d="M90,34 Q84,50 84,64" stroke="currentColor" stroke-width="1.4" fill="none"/>
+<path d="M104,58 Q104,68 100,76" stroke="currentColor" stroke-width="1.3" fill="none"/>
+<path d="M90,64 Q92,76 88,86" stroke="currentColor" stroke-width="1.3" fill="none"/>
+<path d="M14,58 Q30,65 54,63" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.6" stroke-dasharray="3,2"/>
+<path d="M106,58 Q90,65 66,63" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.6" stroke-dasharray="3,2"/>
+</svg></div></div>
+                <div class="organ mode-org" data-id="heart"   style="top:30%; left:54%; font-size:38px; z-index:10;" onmouseover="startScan('heart')" onmouseout="stopScan()"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--theme-color);"><svg viewBox="0 0 115 108" xmlns="http://www.w3.org/2000/svg">
+<defs><radialGradient id="h1" cx="50%" cy="65%" r="58%"><stop offset="0%" stop-color="currentColor" stop-opacity="0.45"/><stop offset="100%" stop-color="currentColor" stop-opacity="0.05"/></radialGradient></defs>
+<path d="M50,10 C48,4 54,1 58,3 L58,16" fill="none" stroke="currentColor" stroke-width="5.5" stroke-linecap="round"/>
+<path d="M54,2 L54,16" stroke="currentColor" stroke-width="4.5" opacity="0.8"/>
+<path d="M58,10 Q72,8 78,16" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+<path d="M50,12 Q36,10 28,20" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
+<path d="M57,92 C57,92 8,64 8,38 C8,22 22,14 34,18 C43,21 57,33 57,33 C57,33 71,21 80,18 C92,14 106,22 106,38 C106,64 57,92 57,92Z" fill="url(#h1)" stroke="currentColor" stroke-width="2.8"/>
+<path d="M57,33 L57,82" stroke="currentColor" stroke-width="2" opacity="0.55"/>
+<path d="M22,34 Q57,28 92,34" fill="none" stroke="currentColor" stroke-width="1.8" opacity="0.65"/>
+<path d="M28,44 Q43,40 55,46" stroke="currentColor" stroke-width="1.3" fill="none" opacity="0.55"/>
+<path d="M24,56 Q40,52 55,58" stroke="currentColor" stroke-width="1.3" fill="none" opacity="0.5"/>
+<path d="M26,68 Q42,64 55,70" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.45"/>
+<path d="M86,44 Q71,40 59,46" stroke="currentColor" stroke-width="1.3" fill="none" opacity="0.55"/>
+<path d="M90,56 Q74,52 59,58" stroke="currentColor" stroke-width="1.3" fill="none" opacity="0.5"/>
+<path d="M88,68 Q72,64 59,70" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.45"/>
+<ellipse cx="34" cy="24" rx="8" ry="6" fill="currentColor" opacity="0.2" stroke="currentColor" stroke-width="1.2"/>
+<ellipse cx="80" cy="24" rx="8" ry="6" fill="currentColor" opacity="0.2" stroke="currentColor" stroke-width="1.2"/>
+</svg></div></div>
+                <div class="organ mode-org" data-id="liver"   style="top:41%; left:45%; font-size:80px; transform:translate(-50%, -50%) scaleX(-1);" onmouseover="startScan('liver')" onmouseout="stopScan()"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--theme-color);"><svg viewBox="0 0 130 90" xmlns="http://www.w3.org/2000/svg">
+<defs><radialGradient id="lv" cx="38%" cy="38%" r="62%"><stop offset="0%" stop-color="currentColor" stop-opacity="0.42"/><stop offset="100%" stop-color="currentColor" stop-opacity="0.05"/></radialGradient></defs>
+<path d="M12,60 C9,42 16,22 30,14 C48,5 88,8 106,22 C120,34 116,57 100,67 C76,78 13,76 12,60Z" fill="url(#lv)" stroke="currentColor" stroke-width="2.8"/>
+<path d="M64,11 Q68,38 66,70" stroke="currentColor" stroke-width="1.8" fill="none" opacity="0.55"/>
+<path d="M52,62 Q62,50 76,47" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M76,47 Q88,40 96,36" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+<path d="M76,47 Q80,54 84,62" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+<path d="M96,36 Q102,30 106,25" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+<path d="M96,36 Q98,44 100,52" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+<path d="M52,62 Q38,54 26,46" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" opacity="0.8"/>
+<path d="M26,46 Q18,36 16,26" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" opacity="0.65"/>
+<path d="M26,46 Q20,52 18,60" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.6"/>
+<ellipse cx="84" cy="72" rx="13" ry="9" fill="currentColor" opacity="0.28" stroke="currentColor" stroke-width="2"/>
+<path d="M66,68 Q70,78 72,86" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+<path d="M28,30 Q60,22 100,30" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.5"/>
+<path d="M22,46 Q60,38 102,46" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.45"/>
+</svg></div></div>
+                <div class="organ mode-org" data-id="stomach" style="top:44%; left:58%; font-size:55px;" onmouseover="startScan('stomach')" onmouseout="stopScan()"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--theme-color);"><svg viewBox="0 0 105 105" xmlns="http://www.w3.org/2000/svg">
+<defs><radialGradient id="st" cx="38%" cy="45%" r="58%"><stop offset="0%" stop-color="currentColor" stop-opacity="0.42"/><stop offset="100%" stop-color="currentColor" stop-opacity="0.05"/></radialGradient></defs>
+<rect x="30" y="0" width="10" height="18" rx="5" fill="currentColor" opacity="0.5" stroke="currentColor" stroke-width="1.8"/>
+<path d="M34,16 C20,18 10,30 10,46 C10,68 20,86 44,88 C64,90 86,76 88,59 C93,36 80,18 58,15 C50,13 42,14 34,16Z" fill="url(#st)" stroke="currentColor" stroke-width="2.8"/>
+<path d="M76,60 Q86,58 90,62" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
+<path d="M34,24 Q54,28 62,46" stroke="currentColor" stroke-width="1.4" fill="none" opacity="0.6"/>
+<path d="M20,46 Q38,38 63,46" stroke="currentColor" stroke-width="1.7" fill="none" opacity="0.75"/>
+<path d="M17,58 Q38,50 65,58" stroke="currentColor" stroke-width="1.6" fill="none" opacity="0.7"/>
+<path d="M18,70 Q38,62 66,70" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.6"/>
+<path d="M20,80 Q40,74 64,80" stroke="currentColor" stroke-width="1.3" fill="none" opacity="0.5"/>
+</svg></div></div>
+                <div class="organ mode-org" data-id="kidneys" style="top:52%; left:50%; font-size:60px;" onmouseover="startScan('kidneys')" onmouseout="stopScan()"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--theme-color);"><svg viewBox="0 0 120 84" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<radialGradient id="kl" cx="38%" cy="50%" r="62%"><stop offset="0%" stop-color="currentColor" stop-opacity="0.4"/><stop offset="100%" stop-color="currentColor" stop-opacity="0.05"/></radialGradient>
+<radialGradient id="kr" cx="62%" cy="50%" r="62%"><stop offset="0%" stop-color="currentColor" stop-opacity="0.4"/><stop offset="100%" stop-color="currentColor" stop-opacity="0.05"/></radialGradient>
+</defs>
+<path d="M6,42 C6,20 16,6 28,6 C35,6 40,13 40,22 C40,30 34,37 34,42 C34,47 40,54 40,62 C40,73 34,80 27,80 C14,80 6,62 6,42Z" fill="url(#kl)" stroke="currentColor" stroke-width="2.5"/>
+<path d="M28,14 Q36,24 36,34 Q34,44 28,48" fill="none" stroke="currentColor" stroke-width="2" opacity="0.75"/>
+<path d="M20,18 Q26,26 28,30" stroke="currentColor" stroke-width="1.5" fill="none"/>
+<path d="M14,38 Q22,36 28,38" stroke="currentColor" stroke-width="1.5" fill="none"/>
+<path d="M20,58 Q26,52 28,48" stroke="currentColor" stroke-width="1.5" fill="none"/>
+<path d="M40,44 L58,44" stroke="currentColor" stroke-width="2.2" fill="none" opacity="0.75"/>
+<path d="M114,42 C114,20 104,6 92,6 C85,6 80,13 80,22 C80,30 86,37 86,42 C86,47 80,54 80,62 C80,73 86,80 93,80 C106,80 114,62 114,42Z" fill="url(#kr)" stroke="currentColor" stroke-width="2.5"/>
+<path d="M92,14 Q84,24 84,34 Q86,44 92,48" fill="none" stroke="currentColor" stroke-width="2" opacity="0.75"/>
+<path d="M100,18 Q94,26 92,30" stroke="currentColor" stroke-width="1.5" fill="none"/>
+<path d="M106,38 Q98,36 92,38" stroke="currentColor" stroke-width="1.5" fill="none"/>
+<path d="M100,58 Q94,52 92,48" stroke="currentColor" stroke-width="1.5" fill="none"/>
+<path d="M80,44 L62,44" stroke="currentColor" stroke-width="2.2" fill="none" opacity="0.75"/>
+<rect x="54" y="8" width="12" height="68" rx="6" fill="currentColor" opacity="0.22" stroke="currentColor" stroke-width="1.8"/>
+</svg></div></div>
+                <div class="organ mode-org" data-id="intestine" style="top:63%; left:50%; font-size:85px;" onmouseover="startScan('intestine')" onmouseout="stopScan()"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--theme-color);"><svg viewBox="0 0 115 120" xmlns="http://www.w3.org/2000/svg">
+<defs><radialGradient id="in" cx="50%" cy="50%" r="55%"><stop offset="0%" stop-color="currentColor" stop-opacity="0.18"/><stop offset="100%" stop-color="currentColor" stop-opacity="0.01"/></radialGradient></defs>
+<ellipse cx="58" cy="60" rx="53" ry="56" fill="url(#in)"/>
+<path d="M20,16 Q96,16 96,36 Q96,56 20,56 Q20,76 96,76 Q96,96 58,102" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" opacity="0.18"/>
+<path d="M20,16 Q96,16 96,36 Q96,56 20,56 Q20,76 96,76 Q96,96 58,102" fill="none" stroke="currentColor" stroke-width="6.5" stroke-linecap="round"/>
+<path d="M32,10 Q38,16 44,10 M52,10 Q58,16 64,10 M72,10 Q78,16 84,10" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.65"/>
+<path d="M32,62 Q38,56 44,62 M52,62 Q58,56 64,62 M72,62 Q78,56 84,62" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.65"/>
+<path d="M26,26 Q40,20 55,28 Q40,36 26,26Z" fill="none" stroke="currentColor" stroke-width="1.6" opacity="0.55"/>
+<path d="M36,40 Q52,34 66,42 Q52,50 36,40Z" fill="none" stroke="currentColor" stroke-width="1.6" opacity="0.55"/>
+<path d="M28,68 Q44,62 60,70 Q44,78 28,68Z" fill="none" stroke="currentColor" stroke-width="1.6" opacity="0.55"/>
+</svg></div></div>
+                <div class="organ mode-org" data-id="bladder" style="top:74%; left:50%; font-size:45px;" onmouseover="startScan('bladder')" onmouseout="stopScan()"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--theme-color);"><svg viewBox="0 0 105 110" xmlns="http://www.w3.org/2000/svg">
+<defs><radialGradient id="bl" cx="50%" cy="38%" r="56%"><stop offset="0%" stop-color="currentColor" stop-opacity="0.46"/><stop offset="100%" stop-color="currentColor" stop-opacity="0.05"/></radialGradient></defs>
+<path d="M26,38 Q30,26 40,20" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M79,38 Q75,26 65,20" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/>
+<ellipse cx="52" cy="58" rx="42" ry="38" fill="url(#bl)" stroke="currentColor" stroke-width="2.8"/>
+<path d="M16,46 Q52,34 88,46" fill="none" stroke="currentColor" stroke-width="1.6" opacity="0.7"/>
+<path d="M12,58 Q52,46 92,58" fill="none" stroke="currentColor" stroke-width="1.6" opacity="0.65"/>
+<path d="M14,70 Q52,60 90,70" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.55"/>
+<path d="M18,80 Q52,72 86,80" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.5"/>
+<path d="M36,88 Q52,82 68,88 Q62,96 52,98 Q42,96 36,88Z" fill="currentColor" opacity="0.3" stroke="currentColor" stroke-width="1.8"/>
+<path d="M44,98 Q48,106 52,110 Q56,106 60,98" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>
+</svg></div></div>
+
+                <!-- SKELETON LAYER (X-RAY) -->
+                <div class="organ mode-bone" data-id="skull"    style="top:9%; left:50%; font-size:75px;" onmouseover="startScan('skull')" onmouseout="stopScan()"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--theme-color);"><svg viewBox="0 0 100 125" xmlns="http://www.w3.org/2000/svg">
+<path d="M50,6 C26,6 10,24 10,48 C10,64 18,76 30,84 L30,98 Q32,100 34,100 L34,96 L66,96 L66,100 Q68,100 70,98 L70,84 C82,76 90,64 90,48 C90,24 74,6 50,6 Z" fill="currentColor" opacity="0.18" stroke="currentColor" stroke-width="2.5"/>
+<path d="M30,96 L70,96" stroke="currentColor" stroke-width="1.5" opacity="0.6"/>
+<path d="M30,100 L70,100" stroke="currentColor" stroke-width="2" opacity="0.5"/>
+<ellipse cx="34" cy="54" rx="13" ry="16" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<ellipse cx="66" cy="54" rx="13" ry="16" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M47,54 L53,54" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+<path d="M44,70 Q50,75 56,70" fill="none" stroke="currentColor" stroke-width="1.8" opacity="0.7"/>
+<ellipse cx="50" cy="46" rx="5" ry="7" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.6"/>
+<path d="M36,87 L38,96 M50,88 L50,96 M62,87 L64,96" stroke="currentColor" stroke-width="1.5"/>
+<path d="M36,78 Q43,76 50,77 Q57,76 64,78" fill="none" stroke="currentColor" stroke-width="1.3" opacity="0.6"/>
+<path d="M12,40 Q22,28 50,26 Q78,28 88,40" fill="none" stroke="currentColor" stroke-width="1.3" opacity="0.5"/>
+</svg></div></div>
+                <div class="organ mode-bone" data-id="spine"    style="top:32%; left:50%; font-size:45px; transform:translate(-50%, -50%) scaleY(2.2);" onmouseover="startScan('spine')" onmouseout="stopScan()"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--theme-color);"><svg viewBox="0 0 64 200" xmlns="http://www.w3.org/2000/svg">
+<rect x="21" y="4" width="22" height="14" rx="3" fill="currentColor" opacity="0.2" stroke="currentColor" stroke-width="2"/>
+<rect x="21" y="22" width="22" height="14" rx="3" fill="currentColor" opacity="0.2" stroke="currentColor" stroke-width="2"/>
+<rect x="21" y="40" width="22" height="14" rx="3" fill="currentColor" opacity="0.2" stroke="currentColor" stroke-width="2"/>
+<rect x="21" y="58" width="22" height="14" rx="3" fill="currentColor" opacity="0.2" stroke="currentColor" stroke-width="2"/>
+<rect x="21" y="76" width="22" height="14" rx="3" fill="currentColor" opacity="0.2" stroke="currentColor" stroke-width="2"/>
+<rect x="21" y="94" width="22" height="14" rx="3" fill="currentColor" opacity="0.2" stroke="currentColor" stroke-width="2"/>
+<rect x="21" y="112" width="22" height="14" rx="3" fill="currentColor" opacity="0.2" stroke="currentColor" stroke-width="2"/>
+<rect x="21" y="130" width="22" height="14" rx="3" fill="currentColor" opacity="0.2" stroke="currentColor" stroke-width="2"/>
+<path d="M6,64 L21,70 M58,64 L43,70" stroke="currentColor" stroke-width="1.8" fill="none"/>
+<path d="M6,82 L21,88 M58,82 L43,88" stroke="currentColor" stroke-width="1.8" fill="none"/>
+<path d="M6,100 L21,106 M58,100 L43,106" stroke="currentColor" stroke-width="1.8" fill="none"/>
+<path d="M6,118 L21,124 M58,118 L43,124" stroke="currentColor" stroke-width="1.8" fill="none"/>
+<path d="M27,144 C24,158 22,172 28,184 C31,191 33,192 35,191 C37,192 39,191 42,184 C48,172 46,158 43,144 Z" fill="currentColor" opacity="0.2" stroke="currentColor" stroke-width="2"/>
+</svg></div></div>
+                <div class="organ mode-bone" data-id="ribs"     style="top:27%; left:50%; font-size:110px;" onmouseover="startScan('ribs')" onmouseout="stopScan()"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--theme-color);"><svg viewBox="0 0 125 135" xmlns="http://www.w3.org/2000/svg">
+<line x1="63" y1="4" x2="63" y2="128" stroke="currentColor" stroke-width="3.5"/>
+<rect x="48" y="4" width="30" height="10" rx="4" fill="currentColor" opacity="0.25" stroke="currentColor" stroke-width="2"/>
+<path d="M63,18 C58,18 30,20 14,36 C6,46 9,58 20,58 C32,58 56,47 63,36" fill="currentColor" opacity="0.12" stroke="currentColor" stroke-width="2.2"/>
+<path d="M63,18 C68,18 96,20 112,36 C120,46 117,58 106,58 C94,58 70,47 63,36" fill="currentColor" opacity="0.12" stroke="currentColor" stroke-width="2.2"/>
+<path d="M63,34 C58,34 28,36 12,52 C4,62 8,76 19,74 C32,72 56,62 63,52" fill="currentColor" opacity="0.1" stroke="currentColor" stroke-width="2"/>
+<path d="M63,34 C68,34 98,36 114,52 C122,62 118,76 107,74 C94,72 70,62 63,52" fill="currentColor" opacity="0.1" stroke="currentColor" stroke-width="2"/>
+<path d="M63,50 C58,50 32,52 18,66 C12,76 16,88 27,86 C40,84 58,75 63,66" fill="currentColor" opacity="0.1" stroke="currentColor" stroke-width="1.8"/>
+<path d="M63,50 C68,50 94,52 108,66 C114,76 110,88 99,86 C86,84 68,75 63,66" fill="currentColor" opacity="0.1" stroke="currentColor" stroke-width="1.8"/>
+<path d="M63,66 C59,66 36,68 24,80 C18,90 22,100 32,98 C44,96 59,87 63,80" fill="none" stroke="currentColor" stroke-width="1.6"/>
+<path d="M63,66 C67,66 90,68 102,80 C108,90 104,100 94,98 C82,96 67,87 63,80" fill="none" stroke="currentColor" stroke-width="1.6"/>
+</svg></div></div>
+                <div class="organ mode-bone" data-id="pelvis"   style="top:52%; left:50%; font-size:95px;" onmouseover="startScan('pelvis')" onmouseout="stopScan()"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--theme-color);"><svg viewBox="0 0 135 105" xmlns="http://www.w3.org/2000/svg">
+<path d="M67,10 C42,10 16,22 10,48 C6,64 14,80 30,82 C46,85 57,72 67,72 C77,72 88,85 104,82 C120,80 128,64 124,48 C118,22 92,10 67,10 Z" fill="currentColor" opacity="0.15" stroke="currentColor" stroke-width="2.5"/>
+<ellipse cx="67" cy="46" rx="24" ry="28" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M44,46 Q67,38 90,46" fill="none" stroke="currentColor" stroke-width="1.3" opacity="0.6"/>
+<circle cx="28" cy="73" r="10" fill="currentColor" opacity="0.2" stroke="currentColor" stroke-width="2"/>
+<circle cx="106" cy="73" r="10" fill="currentColor" opacity="0.2" stroke="currentColor" stroke-width="2"/>
+<path d="M28,83 L24,98 M106,83 L110,98" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+<path d="M35,20 Q67,14 99,20" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.5"/>
+</svg></div></div>
+                <div class="organ mode-bone" data-id="humerus"  style="top:32%; left:20%; font-size:45px; transform:translate(-50%, -50%) rotate(20deg) scaleY(1.5);" onmouseover="startScan('humerus')" onmouseout="stopScan()"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--theme-color);"><svg viewBox="0 0 55 185" xmlns="http://www.w3.org/2000/svg">
+<ellipse cx="28" cy="24" rx="20" ry="20" fill="currentColor" opacity="0.2" stroke="currentColor" stroke-width="2.2"/>
+<ellipse cx="28" cy="20" rx="11" ry="11" fill="currentColor" opacity="0.15" stroke="currentColor" stroke-width="1.6"/>
+<path d="M18,38 L14,145 Q14,160 28,163 Q42,160 42,145 L38,38 Z" fill="currentColor" opacity="0.15" stroke="currentColor" stroke-width="2.2"/>
+<rect x="8" y="143" width="40" height="24" rx="6" fill="currentColor" opacity="0.2" stroke="currentColor" stroke-width="2.2"/>
+<ellipse cx="16" cy="158" rx="9" ry="9" fill="none" stroke="currentColor" stroke-width="1.8"/>
+<ellipse cx="40" cy="158" rx="9" ry="9" fill="none" stroke="currentColor" stroke-width="1.8"/>
+</svg></div></div>
+                <div class="organ mode-bone" data-id="humerus"  style="top:32%; left:80%; font-size:45px; transform:translate(-50%, -50%) rotate(-20deg) scaleY(1.5) scaleX(-1);" onmouseover="startScan('humerus')" onmouseout="stopScan()"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--theme-color);"><svg viewBox="0 0 55 185" xmlns="http://www.w3.org/2000/svg">
+<ellipse cx="28" cy="24" rx="20" ry="20" fill="currentColor" opacity="0.2" stroke="currentColor" stroke-width="2.2"/>
+<ellipse cx="28" cy="20" rx="11" ry="11" fill="currentColor" opacity="0.15" stroke="currentColor" stroke-width="1.6"/>
+<path d="M18,38 L14,145 Q14,160 28,163 Q42,160 42,145 L38,38 Z" fill="currentColor" opacity="0.15" stroke="currentColor" stroke-width="2.2"/>
+<rect x="8" y="143" width="40" height="24" rx="6" fill="currentColor" opacity="0.2" stroke="currentColor" stroke-width="2.2"/>
+<ellipse cx="16" cy="158" rx="9" ry="9" fill="none" stroke="currentColor" stroke-width="1.8"/>
+<ellipse cx="40" cy="158" rx="9" ry="9" fill="none" stroke="currentColor" stroke-width="1.8"/>
+</svg></div></div>
+                <div class="organ mode-bone" data-id="femur"    style="top:72%; left:32%; font-size:65px; transform:translate(-50%, -50%) rotate(5deg) scaleY(1.8);" onmouseover="startScan('femur')" onmouseout="stopScan()"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--theme-color);"><svg viewBox="0 0 65 205" xmlns="http://www.w3.org/2000/svg">
+<circle cx="18" cy="20" r="15" fill="currentColor" opacity="0.2" stroke="currentColor" stroke-width="2.2"/>
+<path d="M18,34 Q24,48 32,60" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
+<path d="M24,58 L22,160 Q22,175 33,178 Q44,175 44,160 L42,58 Z" fill="currentColor" opacity="0.15" stroke="currentColor" stroke-width="2.2"/>
+<rect x="12" y="160" width="42" height="30" rx="7" fill="currentColor" opacity="0.2" stroke="currentColor" stroke-width="2.2"/>
+<ellipse cx="20" cy="177" rx="10" ry="10" fill="none" stroke="currentColor" stroke-width="1.8"/>
+<ellipse cx="45" cy="177" rx="10" ry="10" fill="none" stroke="currentColor" stroke-width="1.8"/>
+</svg></div></div>
+                <div class="organ mode-bone" data-id="femur"    style="top:72%; left:68%; font-size:65px; transform:translate(-50%, -50%) rotate(-5deg) scaleY(1.8) scaleX(-1);" onmouseover="startScan('femur')" onmouseout="stopScan()"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--theme-color);"><svg viewBox="0 0 65 205" xmlns="http://www.w3.org/2000/svg">
+<circle cx="18" cy="20" r="15" fill="currentColor" opacity="0.2" stroke="currentColor" stroke-width="2.2"/>
+<path d="M18,34 Q24,48 32,60" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
+<path d="M24,58 L22,160 Q22,175 33,178 Q44,175 44,160 L42,58 Z" fill="currentColor" opacity="0.15" stroke="currentColor" stroke-width="2.2"/>
+<rect x="12" y="160" width="42" height="30" rx="7" fill="currentColor" opacity="0.2" stroke="currentColor" stroke-width="2.2"/>
+<ellipse cx="20" cy="177" rx="10" ry="10" fill="none" stroke="currentColor" stroke-width="1.8"/>
+<ellipse cx="45" cy="177" rx="10" ry="10" fill="none" stroke="currentColor" stroke-width="1.8"/>
+</svg></div></div>
+
+                <!-- NERVOUS LAYER -->
+                <div class="organ mode-nervous" data-id="brain_nerve" style="top:9%; left:50%; font-size:65px;" onmouseover="startScan('brain_nerve')" onmouseout="stopScan()"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--theme-color);"><svg viewBox="0 0 100 95" xmlns="http://www.w3.org/2000/svg">
+<ellipse cx="50" cy="42" rx="44" ry="32" fill="currentColor" opacity="0.12" stroke="currentColor" stroke-width="2"/>
+<line x1="50" y1="10" x2="50" y2="74" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+<path d="M50,74 L50,92" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+<circle cx="26" cy="36" r="5" fill="currentColor" opacity="0.7"/>
+<circle cx="50" cy="28" r="5" fill="currentColor" opacity="0.7"/>
+<circle cx="74" cy="36" r="5" fill="currentColor" opacity="0.7"/>
+<circle cx="35" cy="54" r="3.5" fill="currentColor" opacity="0.5"/>
+<circle cx="65" cy="54" r="3.5" fill="currentColor" opacity="0.5"/>
+<path d="M26,36 L50,28 L74,36" stroke="currentColor" stroke-width="1.5" fill="none" stroke-dasharray="3,2"/>
+<path d="M35,54 L50,46 L65,54" stroke="currentColor" stroke-width="1.2" fill="none" stroke-dasharray="3,2" opacity="0.7"/>
+<path d="M26,36 L35,54" stroke="currentColor" stroke-width="1" fill="none" opacity="0.5"/>
+<path d="M74,36 L65,54" stroke="currentColor" stroke-width="1" fill="none" opacity="0.5"/>
+</svg></div></div>
+                <div class="organ mode-nervous" data-id="spinal_cord" style="top:35%; left:50%; font-size:45px; transform:translate(-50%, -50%) scaleY(3);" onmouseover="startScan('spinal_cord')" onmouseout="stopScan()"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--theme-color);"><svg viewBox="0 0 64 205" xmlns="http://www.w3.org/2000/svg">
+<path d="M24,5 Q32,3 40,5 L42,185 Q32,190 22,185 Z" fill="currentColor" opacity="0.15" stroke="currentColor" stroke-width="2.5"/>
+<ellipse cx="32" cy="22" rx="6" ry="7" fill="currentColor" opacity="0.6"/>
+<ellipse cx="32" cy="52" rx="6" ry="7" fill="currentColor" opacity="0.6"/>
+<ellipse cx="32" cy="82" rx="6" ry="7" fill="currentColor" opacity="0.6"/>
+<ellipse cx="32" cy="112" rx="6" ry="7" fill="currentColor" opacity="0.6"/>
+<ellipse cx="32" cy="142" rx="6" ry="7" fill="currentColor" opacity="0.6"/>
+<path d="M24,22 L6,19 M40,22 L58,19" stroke="currentColor" stroke-width="2" fill="none"/>
+<path d="M24,52 L6,49 M40,52 L58,49" stroke="currentColor" stroke-width="2" fill="none"/>
+<path d="M24,82 L6,79 M40,82 L58,79" stroke="currentColor" stroke-width="2" fill="none"/>
+<path d="M24,112 L6,109 M40,112 L58,109" stroke="currentColor" stroke-width="2" fill="none"/>
+<path d="M24,142 L6,139 M40,142 L58,139" stroke="currentColor" stroke-width="2" fill="none"/>
+</svg></div></div>
+                <div class="organ mode-nervous" data-id="sciatic" style="top:70%; left:35%; font-size:40px; transform:translate(-50%, -50%) rotate(10deg) scaleY(2);" onmouseover="startScan('sciatic')" onmouseout="stopScan()"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--theme-color);"><svg viewBox="0 0 85 205" xmlns="http://www.w3.org/2000/svg">
+<path d="M30,5 L55,5 L58,85 C55,105 62,130 65,165 L60,200 M58,85 C55,105 48,130 45,165 L50,200 M58,85 Q42,88 27,85 C24,105 18,130 20,165 L15,200 M27,85 C24,105 30,130 32,165 L35,200" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" opacity="0.5"/>
+<path d="M35,5 Q42,3 50,5 L52,85 C50,105 55,135 58,168" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+<path d="M52,85 C48,108 40,135 38,168" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
+<circle cx="42" cy="5" r="6" fill="currentColor" opacity="0.7"/>
+<circle cx="52" cy="85" r="5" fill="currentColor" opacity="0.6"/>
+</svg></div></div>
+                <div class="organ mode-nervous" data-id="sciatic" style="top:70%; left:65%; font-size:40px; transform:translate(-50%, -50%) rotate(-10deg) scaleY(2);" onmouseover="startScan('sciatic')" onmouseout="stopScan()"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--theme-color);"><svg viewBox="0 0 85 205" xmlns="http://www.w3.org/2000/svg">
+<path d="M30,5 L55,5 L58,85 C55,105 62,130 65,165 L60,200 M58,85 C55,105 48,130 45,165 L50,200 M58,85 Q42,88 27,85 C24,105 18,130 20,165 L15,200 M27,85 C24,105 30,130 32,165 L35,200" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" opacity="0.5"/>
+<path d="M35,5 Q42,3 50,5 L52,85 C50,105 55,135 58,168" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+<path d="M52,85 C48,108 40,135 38,168" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
+<circle cx="42" cy="5" r="6" fill="currentColor" opacity="0.7"/>
+<circle cx="52" cy="85" r="5" fill="currentColor" opacity="0.6"/>
+</svg></div></div>
+
+            </div>
+        </div>
+
+        <div class="lens-ring" id="lens"></div>
+    </div>
+
+    <script>
+        const db = {
+            // ORGANS
+            'brain': { name: 'Головной мозг', sys: 'Нервная система', latin: 'Cerebrum', func: 'Центральный компьютер тела. Обрабатывает информацию, управляет движениями, формирует память и эмоции.', fact: 'Мозг не чувствует собственной боли — в нем нет болевых рецепторов, поэтому операции на мозге могут делать пациенту в сознании.'},
+            'lungs': { name: 'Лёгкие', sys: 'Дыхательная система', latin: 'Pulmones', func: 'Обеспечивают газообмен: насыщают кровь кислородом из воздуха и выводят токсичный углекислый газ.', fact: 'Левое легкое чуть меньше правого, так как освобождает место в грудной клетке для сердца.'},
+            'heart': { name: 'Сердце', sys: 'Кровеносная система', latin: 'Cor', func: 'Мощный мышечный насос, который непрерывно гонит кровь по километрам сосудов, доставляя жизнь к каждой клетке.', fact: 'Если извлечь сердце из тела, оно может продолжать биться некоторое время, так как генерирует собственные электрические импульсы.'},
+            'liver': { name: 'Печень', sys: 'Пищеварительная система', latin: 'Hepar', func: 'Крупнейшая химическая лаборатория. Обезвреживает токсины, запасает энергию (гликоген) и вырабатывает желчь.', fact: 'Печень обладает уникальной суперсилой — она может регенерировать и восстановить свой полный размер, даже если потеряла 75% ткани.'},
+            'stomach': { name: 'Желудок', sys: 'Пищеварительная система', latin: 'Gaster', func: 'Резервуар с соляной кислотой, где пища дезинфицируется и начинает химически расщепляться.', fact: 'Кислота внутри настолько едкая, что желудок вынужден обновлять свою внутреннюю слизистую каждые 3-4 дня, иначе бы переварил сам себя.'},
+            'kidneys': { name: 'Почки', sys: 'Выделительная система', latin: 'Renes', func: 'Парный биофильтр тела. Ежесекундно очищают кровь от ядов и избытка воды, формируя мочу.', fact: 'Каждый день через этот маленький орган под давлением проходит около 180 литров крови для фильтрации.'},
+            'intestine': { name: 'Кишечник', sys: 'Пищеварительная система', latin: 'Intestinum', func: 'Здесь обработанная еда окончательно расщепляется и всасывается в кровь для питания клеток.', fact: 'Если извлечь и растянуть кишечник взрослого человека, он составит длину от 6 до 8 метров!'},
+            'bladder': { name: 'Мочевой пузырь', sys: 'Выделительная система', latin: 'Vesica urinaria', func: 'Эластичный резервуар для временного накопления и удержания отфильтрованной почками мочи.', fact: 'Его стенки могут феноменально растягиваться: от размера грецкого ореха до объема в 500-700 мл жидкости.'},
+            // BONES
+            'skull': { name: 'Череп', sys: 'Скелетная система', latin: 'Cranium', func: 'Монолитный костный шлем головы. Образует бронированное вместилище для мозга и глаз.', fact: 'Череп взрослого человека состоит из 23-х сросшихся костей, из которых подвижна только одна — нижняя челюсть.' },
+            'spine': { name: 'Позвоночный Столб', sys: 'Скелетная система', latin: 'Columna vertebralis', func: 'Главная продольная ось тела. Могучий столб, удерживающий спину прямо и прячущий внутри хрупкий спинной мозг.', fact: 'Утром ваш рост примерно на 1-2 сантиметра больше, чем вечером, так как хрящевые диски позвоночника за день "стаптываются".' },
+            'ribs': { name: 'Грудная клетка', sys: 'Скелетная система', latin: 'Thorax', func: 'Надежная костная клетка, оберегающая жизненно важные органы: сердце и легкие. Двигается при дыхании.', fact: 'У человека 12 пар ребер. Две самые нижние пары называются "плавающими" — они вообще не крепятся к грудине.' },
+            'pelvis': { name: 'Кости Таза', sys: 'Скелетная система', latin: 'Pelvis', func: 'Массивная костная чаша в основании позвоночника. Связывает верхнюю часть туловища с двигательными осями ног.', fact: 'По строению таза археологи легче всего определяют пол скелета. У женщин таз шире и круглее — адаптация для деторождения.' },
+            'femur': { name: 'Бедренная кость', sys: 'Скелетная система', latin: 'Os femoris', func: 'Главная кость ноги, передающая всю массу туловища на голени. Самая тяжелая кость организма.', fact: 'Бедренная кость прочнее бетона! Она может выдержать статическую нагрузку на излом весом до 1.5 тонн (как легковой автомобиль).' },
+            'humerus': { name: 'Плечевая кость', sys: 'Скелетная система', latin: 'Humerus', func: 'Длинная трубчатая кость руки. В связке с лопаткой образует один из самых подвижных суставов тела.', fact: 'Популярное название "funny bone" (забавная кость) относится к нерву, струящемуся по её низу — удар по нерву вызывает характерное покалывание.' },
+            // NERVES
+            'brain_nerve': { name: 'Головной мозг (ЦНС)', sys: 'Нервная система', latin: 'Encephalon', func: 'Центр обработки всех нервных сигналов. Управляет рефлексами, мыслями и координацией.', fact: 'Нервные импульсы в мозге и от него могут перемещаться со скоростью до 400 км/ч.' },
+            'spinal_cord': { name: 'Спинной мозг', sys: 'Нервная система', latin: 'Medulla spinalis', func: 'Главный информационный кабель тела. Передает команды от мозга к мышцам и органам.', fact: 'Спинной мозг может самостоятельно принимать решения! Это называется "рефлекс" (например, отдергивание руки от огня).' },
+            'sciatic': { name: 'Седалищный нерв', sys: 'Нервная система', latin: 'Nervus ischiadicus', func: 'Самый длинный нерв в организме. Иннервирует всю ногу, от бедра до пальцев стопы.', fact: 'Его толщина может достигать толщины вашего большого пальца руки.' }
+        };
+
+        let currentMode = 'organs';
+        let scanInterval = null;
+        let scanProgress = 0;
+        let isScanning = false;
+        let currentTarget = null;
+        let scannedItems = new Set();
+        let totalItemsInMode = 0;
+        
+        function updateCounter() {
+            const currentOrgans = document.querySelectorAll('.mode-' + (currentMode==='organs'?'org':currentMode==='skeleton'?'bone':'nervous'));
+            totalItemsInMode = currentOrgans.length;
+            let found = 0;
+            currentOrgans.forEach(el => {
+                if (scannedItems.has(el.getAttribute('data-id'))) found++;
+            });
+            document.getElementById('scanCounter').textContent = 'Найдено: ' + found + ' / ' + totalItemsInMode;
+            
+            if (found > 0 && found === totalItemsInMode) {
+                document.getElementById('scanCounter').textContent = '✅ СКАНИРОВАНИЕ ЗАВЕРШЕНО';
+                document.getElementById('scanCounter').style.color = '#10b981'; // green
+            } else {
+                document.getElementById('scanCounter').style.color = 'var(--theme-color)';
+            }
+        }
+
+        // Audio System
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+        
+        function playSnd(type) {
+            if (!audioCtx) audioCtx = new AudioContext();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            if (type === 'tick') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.05);
+                gain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.05);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+            } else if (type === 'success') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(880, audioCtx.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+            } else if (type === 'switch') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.1);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+            }
+        }
+
+        function setMode(newMode) {
+            playSnd('switch');
+            currentMode = newMode;
+            document.getElementById('bodyEl').className = 'theme-' + (newMode === 'organs' ? 'mri' : newMode === 'skeleton' ? 'xray' : 'nervous');
+            
+            // UI Toggle
+            document.querySelectorAll('.btn-mode').forEach(b => b.classList.remove('active'));
+            document.getElementById('btn-' + newMode).classList.add('active');
+
+            // Reset dashboard
+            document.getElementById('scanHeaderTxt').textContent = 'СТАТУС: КАЛИБРОВКА НОВОГО РЕЖИМА...';
+            document.getElementById('dbName').textContent = 'Ожидание';
+            document.getElementById('dbSys').textContent = 'Наведите сканер';
+            document.getElementById('cardFunc').style.display = 'none';
+            document.getElementById('cardFact').style.display = 'none';
+            stopScan();
+        }
+
+        // Mouse tracking for Scanner Lens
+        const scene = document.getElementById('scene');
+        const xray = document.getElementById('xray');
+        const lens = document.getElementById('lens');
+        const patientBox = document.getElementById('patientBox');
+
+        // Initial hide
+        xray.style.clipPath = `circle(0px at 0px 0px)`;
+        lens.style.opacity = '0';
+
+        let hasInteracted = false;
+
+        scene.addEventListener('mousemove', (e) => {
+            if (!hasInteracted && audioCtx) {
+                audioCtx.resume();
+                hasInteracted = true;
+            }
+            lens.style.opacity = '1';
+            
+            // Position lens relative to scene (not viewport)
+            const sceneRect = scene.getBoundingClientRect();
+            lens.style.left = (e.clientX - sceneRect.left) + 'px';
+            lens.style.top = (e.clientY - sceneRect.top) + 'px';
+
+            // Coordinates relative to patient box for clip-path
+            const rect = patientBox.getBoundingClientRect();
+            let x = e.clientX - rect.left;
+            let y = e.clientY - rect.top;
+
+            // X-Ray aperture radius — matches lens-ring size (80px radius = 160px diameter)
+            const radius = 80;
+            xray.style.clipPath = `circle(${radius}px at ${x}px ${y}px)`;
+        });
+
+        scene.addEventListener('mouseleave', () => {
+            xray.style.clipPath = `circle(0px at 0px 0px)`;
+            lens.style.opacity = '0';
+            stopScan();
+        });
+
+        // Advanced Scan System
+        function startScan(id) {
+            if (!db[id]) return;
+            if (scannedItems.has(id)) {
+                showData(id);
+                return;
+            }
+            
+            currentTarget = id;
+            isScanning = true;
+            scanProgress = 0;
+            
+            document.getElementById('scanBar').style.display = 'block';
+            document.getElementById('scanFill').style.width = '0%';
+            document.getElementById('scanHeaderTxt').textContent = 'СТАТУС: ИДЕНТИФИКАЦИЯ ОБЪЕКТА...';
+            document.getElementById('dbName').textContent = 'Анализ...';
+            document.getElementById('dbSys').textContent = 'Пожалуйста, не отводите сканер';
+            document.getElementById('cardFunc').style.display = 'none';
+            document.getElementById('cardFact').style.display = 'none';
+
+            scanInterval = setInterval(() => {
+                scanProgress += 10;
+                document.getElementById('scanFill').style.width = scanProgress + '%';
+                playSnd('tick');
+                
+                if (scanProgress >= 100) {
+                    clearInterval(scanInterval);
+                    scannedItems.add(id);
+                    // Mark all organs with this data-id as scanned
+                    document.querySelectorAll(`[data-id="${id}"]`).forEach(el => el.classList.add('scanned'));
+                    playSnd('success');
+                    showData(id);
+                    updateCounter();
+                }
+            }, 50); // Takes 0.5 seconds to scan
+        }
+
+        function stopScan() {
+            if (isScanning && scanProgress < 100) {
+                clearInterval(scanInterval);
+                isScanning = false;
+                scanProgress = 0;
+                document.getElementById('scanBar').style.display = 'none';
+                document.getElementById('scanHeaderTxt').textContent = 'СТАТУС: СКАНИРОВАНИЕ ПРЕРВАНО';
+                document.getElementById('dbName').textContent = 'Ожидание';
+                document.getElementById('dbSys').textContent = 'Наведите сканер заново';
+            }
+        }
+
+        // Display Data
+        function showData(id) {
+            if (!db[id]) return;
+            const data = db[id];
+            
+            document.getElementById('scanBar').style.display = 'none';
+            document.getElementById('scanHeaderTxt').textContent = 'СТАТУС: ОБЪЕКТ ЗАФИКСИРОВАН ✓';
+            
+            document.getElementById('dbName').textContent = data.name;
+            document.getElementById('dbSys').textContent = `${data.sys} | ${data.latin}`;
+            
+            document.getElementById('cardFunc').style.display = 'block';
+            document.getElementById('dbFunc').textContent = data.func;
+            
+            document.getElementById('cardFact').style.display = 'block';
+            document.getElementById('dbFact').textContent = data.fact;
+        }
+
+        updateCounter();
+        
+        // Start Audio Context on First Click to respect browser policies
+        document.body.addEventListener('click', () => {
+            if (!audioCtx) audioCtx = new AudioContext();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            hasInteracted = true;
+        }, { once: true });
+
+    </script>
+
+<!-- Global Language Switcher & Google Translate -->
+<div id="google_translate_element" style="display:none;"></div>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({pageLanguage: 'ru', includedLanguages: 'ru,en,kk', autoDisplay: false}, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script>
+(function() {
+    let currentLang = localStorage.getItem('vsh-lang') || 'kk';
+
+    // Synchronize cookie if needed
+    var gtrans = '/ru/' + currentLang;
+    if (currentLang === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) {
+            document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+        }
+    }
+
+    // Floating UI
+    const isIndex = location.pathname.endsWith('index.html') || location.pathname.endsWith('/') || location.pathname.endsWith('studio.html');
+    if (!document.querySelector('.floating-lang-switcher')) {
+        const style = document.createElement('style');
+        style.innerHTML = `
+            body { top: 0 !important; }
+            .skiptranslate { display: none !important; }
+            .floating-lang-switcher {
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                background: rgba(15, 23, 42, 0.9);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 20px;
+                padding: 10px;
+                display: flex;
+                gap: 10px;
+                z-index: 999999;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+                font-family: 'Roboto', sans-serif;
+            }
+            .floating-lang-btn {
+                background: transparent;
+                border: 1px solid rgba(255,255,255,0.2);
+                color: #94a3b8;
+                font-size: 14px;
+                font-weight: 600;
+                padding: 8px 15px;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: 0.3s;
+            }
+            .floating-lang-btn:hover {
+                color: #fff;
+                background: rgba(255,255,255,0.1);
+            }
+            .floating-lang-btn.active {
+                background: linear-gradient(135deg, #a855f7, #3b82f6);
+                color: #fff;
+                border-color: transparent;
+            }
+        `;
+        document.head.appendChild(style);
+
+        const switcher = document.createElement('div');
+        switcher.className = 'floating-lang-switcher notranslate';
+        switcher.innerHTML = `
+            <button class="floating-lang-btn " onclick="changeLangGlobal('ru')">RU</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('kk')">ҚАЗ</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('en')">EN</button>
+        `;
+        
+        // set active
+        const btns = switcher.querySelectorAll('.floating-lang-btn');
+        if (currentLang === 'ru') btns[0].classList.add('active');
+        else if (currentLang === 'kk') btns[1].classList.add('active');
+        else if (currentLang === 'en') btns[2].classList.add('active');
+
+        document.body.appendChild(switcher);
+    }
+})();
+
+function changeLangGlobal(lang) {
+    localStorage.setItem('vsh-lang', lang);
+    var gtrans = '/ru/' + lang;
+    if (lang === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+    }
+    location.reload();
+}
+</script>
+</body>
+</html>

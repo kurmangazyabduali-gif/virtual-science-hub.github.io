@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="kk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Қазақ тілі: Грамматика</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .grammar-container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            padding-top: 30px;
+        }
+
+        .grammar-task {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            color: #fff;
+        }
+
+        .sentence-area {
+            min-height: 80px;
+            border-bottom: 2px dashed rgba(255, 255, 255, 0.3);
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding: 10px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .word-pool {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .word-chip {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
+            padding: 12px 25px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.3rem;
+            user-select: none;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .word-chip:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .word-chip.in-sentence {
+            background: #00cccc;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .msg-grammar {
+            margin-top: 30px;
+            font-size: 1.2rem;
+            min-height: 30px;
+            font-weight: bold;
+        }
+
+        .msg-grammar.correct {
+            color: #00cc66;
+        }
+
+        .msg-grammar.wrong {
+            color: #ff4d4d;
+        }
+
+        /* Kaz Pattern Overlay */
+        .kaz-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.05;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTIwIDIwIEwwIDAgTTAgNDAgTDIwIDIwIEw0MCA0MCBMNDAgMCBMMjAgMjAiIHN0cm9rZT0iI2ZmZiIgZmlsbD0ibm9uZSIvPjwvc3ZnPg==');
+            pointer-events: none;
+        }
+    </style>
+
+    <script id="early-lang-sync">
+        (function() {
+            let cl = localStorage.getItem('vsh-lang') || 'kk';
+            var gt = '/ru/' + cl;
+            if (cl === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+                document.cookie = "googtrans=" + gt + "; path=/";
+                if (location.hostname) {
+                    document.cookie = "googtrans=" + gt + "; domain=" + location.hostname + "; path=/";
+                    document.cookie = "googtrans=" + gt + "; domain=." + location.hostname + "; path=/";
+                }
+            }
+        })();
+    </script>
+</head>
+
+<body class="lab-lobby kaz-theme">
+    <div class="app-container">
+        <header class="glass-header">
+            <div class="header-left">
+                <a href="index.html#kazakh" class="btn-back" title="Артқа">⬅</a>
+                <h1>Грамматика: <span class="accent" style="color: #00cccc;">Сөйлем Құрау</span></h1>
+            </div>
+        </header>
+
+        <main class="simulation-container" style="background: transparent;">
+            <div class="kaz-pattern"></div>
+
+            <div class="grammar-container">
+                <div class="grammar-task" id="grammar-task-text">Сөйлемді дұрыс құраңыз:</div>
+
+                <div class="sentence-area" id="sentence-area">
+                    <!-- Dropped words go here -->
+                </div>
+
+                <div class="word-pool" id="word-pool">
+                    <!-- Word chips go here -->
+                </div>
+
+                <div class="msg-grammar" id="grammar-msg"></div>
+
+                <div style="margin-top: 40px;">
+                    <button id="btn-check-grammar" class="btn primary">Тексеру (Проверить)</button>
+                    <button id="btn-next-grammar" class="btn secondary" style="display:none; margin-left: 10px;">Келесі
+                        ➡</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const SENTENCES = [
+            { text: "Менің атым Арман", trans: "Меня зовут Арман" },
+            { text: "Бүгін күн суық", trans: "Сегодня холодно" },
+            { text: "Мен мектепке барамын", trans: "Я иду в школу" },
+            { text: "Сенің жасың нешеде", trans: "Сколько тебе лет?" },
+            { text: "Аспан өте ашық", trans: "Небо очень ясное" },
+            { text: "Біз футбол ойнаймыз", trans: "Мы играем в футбол" }
+        ];
+
+        let currentSentIdx = 0;
+        let currentBuiltSentence = [];
+
+        function initGrammar() {
+            document.getElementById('btn-check-grammar').addEventListener('click', checkGrammar);
+            document.getElementById('btn-next-grammar').addEventListener('click', () => {
+                currentSentIdx = (currentSentIdx + 1) % SENTENCES.length;
+                loadGrammarLevel(currentSentIdx);
+            });
+            loadGrammarLevel(0);
+        }
+
+        function loadGrammarLevel(idx) {
+            const data = SENTENCES[idx];
+            document.getElementById('grammar-task-text').innerHTML = `Сөйлем құра: <br><span style="color:#aaa; font-size:1rem">"${data.trans}"</span>`;
+
+            const pool = document.getElementById('word-pool');
+            const area = document.getElementById('sentence-area');
+            pool.innerHTML = '';
+            area.innerHTML = '';
+            document.getElementById('grammar-msg').innerText = '';
+            document.getElementById('grammar-msg').className = 'msg-grammar';
+            document.getElementById('btn-next-grammar').style.display = 'none';
+            document.getElementById('btn-check-grammar').style.display = 'inline-block';
+
+            currentBuiltSentence = [];
+
+            // Create Chips (Shuffled)
+            const words = data.text.split(' ');
+            const shuffled = [...words].sort(() => Math.random() - 0.5);
+
+            shuffled.forEach(word => {
+                const chip = document.createElement('div');
+                chip.className = 'word-chip';
+                chip.innerText = word;
+                chip.addEventListener('click', () => toggleWord(chip, word));
+                pool.appendChild(chip);
+            });
+        }
+
+        function toggleWord(chip, word) {
+            const pool = document.getElementById('word-pool');
+            const area = document.getElementById('sentence-area');
+
+            if (chip.parentElement === pool) {
+                // Move to area
+                area.appendChild(chip);
+                currentBuiltSentence.push(word);
+                chip.classList.add('in-sentence');
+            } else {
+                // Move back to pool
+                pool.appendChild(chip);
+                chip.classList.remove('in-sentence');
+            }
+        }
+
+        function checkGrammar() {
+            const data = SENTENCES[currentSentIdx];
+            const currentWords = Array.from(document.getElementById('sentence-area').children).map(c => c.innerText);
+            const attempt = currentWords.join(' ');
+
+            const msg = document.getElementById('grammar-msg');
+
+            if (attempt === data.text) {
+                msg.innerText = "✅ Дұрыс! (Правильно!)";
+                msg.className = "msg-grammar correct";
+                document.getElementById('btn-check-grammar').style.display = 'none';
+                document.getElementById('btn-next-grammar').style.display = 'inline-block';
+            } else {
+                msg.innerText = "❌ Қате. Қайталап көр. (Неверно)";
+                msg.className = "msg-grammar wrong";
+            }
+        }
+
+        initGrammar();
+    </script>
+
+<!-- Global Language Switcher & Google Translate -->
+<div id="google_translate_element" style="display:none;"></div>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({pageLanguage: 'ru', includedLanguages: 'ru,en,kk', autoDisplay: false}, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script>
+(function() {
+    let currentLang = localStorage.getItem('vsh-lang') || 'kk';
+
+    // Synchronize cookie if needed
+    var gtrans = '/ru/' + currentLang;
+    if (currentLang === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) {
+            document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+        }
+    }
+
+    // Floating UI
+    const isIndex = location.pathname.endsWith('index.html') || location.pathname.endsWith('/') || location.pathname.endsWith('studio.html');
+    if (!document.querySelector('.floating-lang-switcher')) {
+        const style = document.createElement('style');
+        style.innerHTML = `
+            body { top: 0 !important; }
+            .skiptranslate { display: none !important; }
+            .floating-lang-switcher {
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                background: rgba(15, 23, 42, 0.9);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 20px;
+                padding: 10px;
+                display: flex;
+                gap: 10px;
+                z-index: 999999;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+                font-family: 'Roboto', sans-serif;
+            }
+            .floating-lang-btn {
+                background: transparent;
+                border: 1px solid rgba(255,255,255,0.2);
+                color: #94a3b8;
+                font-size: 14px;
+                font-weight: 600;
+                padding: 8px 15px;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: 0.3s;
+            }
+            .floating-lang-btn:hover {
+                color: #fff;
+                background: rgba(255,255,255,0.1);
+            }
+            .floating-lang-btn.active {
+                background: linear-gradient(135deg, #a855f7, #3b82f6);
+                color: #fff;
+                border-color: transparent;
+            }
+        `;
+        document.head.appendChild(style);
+
+        const switcher = document.createElement('div');
+        switcher.className = 'floating-lang-switcher notranslate';
+        switcher.innerHTML = `
+            <button class="floating-lang-btn " onclick="changeLangGlobal('ru')">RU</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('kk')">ҚАЗ</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('en')">EN</button>
+        `;
+        
+        // set active
+        const btns = switcher.querySelectorAll('.floating-lang-btn');
+        if (currentLang === 'ru') btns[0].classList.add('active');
+        else if (currentLang === 'kk') btns[1].classList.add('active');
+        else if (currentLang === 'en') btns[2].classList.add('active');
+
+        document.body.appendChild(switcher);
+    }
+})();
+
+function changeLangGlobal(lang) {
+    localStorage.setItem('vsh-lang', lang);
+    var gtrans = '/ru/' + lang;
+    if (lang === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+    }
+    location.reload();
+}
+</script>
+\n</body>
+
+</html>

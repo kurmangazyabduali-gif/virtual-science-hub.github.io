@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Предметы и классы — Virtual Science Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .subjects-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            color: white;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .page-header p {
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+
+        .row-title {
+            color: #e2e8f0;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            padding-bottom: 5px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .subject-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            margin-bottom: 40px;
+            align-items: start;
+        }
+
+        @media (max-width: 992px) {
+            .subject-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 650px) {
+            .subject-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Card and Accordion Styles */
+        .subject-card {
+            background: rgba(15, 23, 42, 0.85); /* Dark background blending with canvas */
+            border: 1px solid rgba(255,255,255,0.08); /* Subtle border */
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .subject-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+
+        .subject-card-header:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .subject-header-small {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .subject-icon-small {
+            font-size: 1.8rem;
+        }
+
+        .subject-title-small {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .expand-icon {
+            color: #94a3b8;
+            font-size: 1rem;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .expanded .expand-icon {
+            transform: rotate(180deg);
+            color: var(--theme-color, white);
+        }
+
+        /* Smooth CSS Grid Accordion */
+        .class-list-container {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .expanded .class-list-container {
+            grid-template-rows: 1fr;
+        }
+
+        .class-list-inner {
+            overflow: hidden;
+        }
+
+        .class-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 0 20px 20px 20px;
+        }
+
+        .class-btn {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            color: #e2e8f0;
+            border-radius: 10px;
+            padding: 12px 18px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1rem;
+        }
+
+        .class-btn span.emoji {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            transition: transform 0.2s;
+        }
+
+        .class-btn:hover {
+            transform: translateX(6px);
+            background: var(--theme-color, #38bdf8);
+            color: white;
+            box-shadow: 0 4px 15px var(--theme-shadow, rgba(56, 189, 248, 0.3));
+            border-color: transparent;
+        }
+
+        .class-btn:hover span.emoji {
+            transform: scale(1.1);
+            opacity: 1;
+        }
+
+        .lang-info {
+            padding: 15px 20px;
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+
+<body class="lab-lobby">
+
+    <!-- Interactive Background -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="nav-brand">
+            <span class="nav-logo">
+                <svg viewBox="0 0 100 100" class="nav-logo-svg">
+                    <defs>
+                        <linearGradient id="vshNavGradSub" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#00f3ff" />
+                            <stop offset="50%" stop-color="#a855f7" />
+                            <stop offset="100%" stop-color="#bc13fe" />
+                        </linearGradient>
+                    </defs>
+                    <polygon points="50,6 90,28 90,72 50,94 10,72 10,28" 
+                             fill="url(#vshNavGradSub)" fill-opacity="0.15" 
+                             stroke="url(#vshNavGradSub)" stroke-width="3" 
+                             stroke-linejoin="round" />
+                    <ellipse cx="50" cy="50" rx="38" ry="14" 
+                             fill="none" stroke="#00f3ff" stroke-width="2" 
+                             stroke-dasharray="8 4" transform="rotate(-30 50 50)" class="vsh-orbit-ring1" />
+                    <circle cx="82" cy="32" r="3.5" fill="#00f3ff" />
+                    <ellipse cx="50" cy="50" rx="38" ry="14" 
+                             fill="none" stroke="#bc13fe" stroke-width="2" 
+                             stroke-dasharray="6 3" transform="rotate(35 50 50)" class="vsh-orbit-ring2" />
+                    <circle cx="20" cy="36" r="3.5" fill="#bc13fe" />
+                    <text x="50" y="59" text-anchor="middle" font-family="'Roboto', sans-serif" 
+                          font-weight="900" font-size="28" fill="url(#vshNavGradSub)">VSH</text>
+                </svg>
+            </span>
+            <span class="nav-title">Virtual Science Hub</span>
+        </div>
+        <div class="nav-actions">
+            <a href="index.html" style="background:rgba(255,255,255,0.1); color:white; padding:6px 14px; border-radius:8px; font-weight:bold; text-decoration:none; margin-right:15px; font-size:0.9rem; transition:0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'"><i class="fa-solid fa-arrow-left"></i> Назад на главную</a>
+            
+            <div class="lang-switcher">
+                <button class="lang-btn active" data-lang="ru" onclick="setLang('ru')">RU</button>
+                <button class="lang-btn" data-lang="kk" onclick="setLang('kk')">ҚАЗ</button>
+                <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="subjects-container">
+        
+        <div class="page-header">
+            <h1>Предметы и классы</h1>
+            <p>Нажмите на предмет, чтобы раскрыть доступные классы для обучения</p>
+        </div>
+
+        <!-- ROW 1: Biology, Chemistry, Physics -->
+        <h2 class="row-title">Естественные науки</h2>
+        <div class="subject-row">
+            <!-- Biology -->
+            <div class="subject-card" style="--theme-color: #28a745; --theme-shadow: rgba(40,167,69,0.4);">
+                <div class="subject-card-header" onclick="this.parentElement.classList.toggle('expanded')">
+                    <div class="subject-header-small">
+                        <div class="subject-icon-small">🧬</div>
+                        <div class="subject-title-small">Биология</div>
+                    </div>
+                    <div class="expand-icon"><i class="fa-solid fa-chevron-down"></i></div>
+                </div>
+                <div class="class-list-container">
+                    <div class="class-list-inner">
+                        <div class="class-list">
+                            <br>
+                            <a href="biology7.html" class="class-btn"><span class="emoji">🎓</span> 7 класс</a>
+                            <a href="biology8.html" class="class-btn"><span class="emoji">🎓</span> 8 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 9 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 10 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 11 класс</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chemistry -->
+            <div class="subject-card" style="--theme-color: #f0c040; --theme-shadow: rgba(240,192,64,0.4);">
+                <div class="subject-card-header" onclick="this.parentElement.classList.toggle('expanded')">
+                    <div class="subject-header-small">
+                        <div class="subject-icon-small">⚗️</div>
+                        <div class="subject-title-small">Химия</div>
+                    </div>
+                    <div class="expand-icon"><i class="fa-solid fa-chevron-down"></i></div>
+                </div>
+                <div class="class-list-container">
+                    <div class="class-list-inner">
+                        <div class="class-list">
+                            <br>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 7 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 8 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 9 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 10 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 11 класс</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Physics -->
+            <div class="subject-card" style="--theme-color: #a855f7; --theme-shadow: rgba(168,85,247,0.4);">
+                <div class="subject-card-header" onclick="this.parentElement.classList.toggle('expanded')">
+                    <div class="subject-header-small">
+                        <div class="subject-icon-small">⚛️</div>
+                        <div class="subject-title-small">Физика</div>
+                    </div>
+                    <div class="expand-icon"><i class="fa-solid fa-chevron-down"></i></div>
+                </div>
+                <div class="class-list-container">
+                    <div class="class-list-inner">
+                        <div class="class-list">
+                            <br>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 7 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 8 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 9 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 10 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 11 класс</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ROW 2: Geometry, Mathematics, Informatics -->
+        <h2 class="row-title">Точные науки и информатика</h2>
+        <div class="subject-row">
+            <!-- Geometry -->
+            <div class="subject-card" style="--theme-color: #f43f5e; --theme-shadow: rgba(244,63,94,0.4);">
+                <div class="subject-card-header" onclick="this.parentElement.classList.toggle('expanded')">
+                    <div class="subject-header-small">
+                        <div class="subject-icon-small">📐</div>
+                        <div class="subject-title-small">Геометрия</div>
+                    </div>
+                    <div class="expand-icon"><i class="fa-solid fa-chevron-down"></i></div>
+                </div>
+                <div class="class-list-container">
+                    <div class="class-list-inner">
+                        <div class="class-list">
+                            <br>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 7 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 8 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 9 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 10 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 11 класс</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mathematics -->
+            <div class="subject-card" style="--theme-color: #3b82f6; --theme-shadow: rgba(59,130,246,0.4);">
+                <div class="subject-card-header" onclick="this.parentElement.classList.toggle('expanded')">
+                    <div class="subject-header-small">
+                        <div class="subject-icon-small">🔢</div>
+                        <div class="subject-title-small">Математика</div>
+                    </div>
+                    <div class="expand-icon"><i class="fa-solid fa-chevron-down"></i></div>
+                </div>
+                <div class="class-list-container">
+                    <div class="class-list-inner">
+                        <div class="class-list">
+                            <br>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 1 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 2 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 3 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 4 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 5 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 6 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 7 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 8 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 9 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 10 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 11 класс</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informatics -->
+            <div class="subject-card" style="--theme-color: #0ea5e9; --theme-shadow: rgba(14,165,233,0.4);">
+                <div class="subject-card-header" onclick="this.parentElement.classList.toggle('expanded')">
+                    <div class="subject-header-small">
+                        <div class="subject-icon-small">💻</div>
+                        <div class="subject-title-small">Информатика</div>
+                    </div>
+                    <div class="expand-icon"><i class="fa-solid fa-chevron-down"></i></div>
+                </div>
+                <div class="class-list-container">
+                    <div class="class-list-inner">
+                        <div class="class-list">
+                            <br>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 5 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 6 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 7 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 8 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 9 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 10 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 11 класс</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ROW 3: Languages -->
+        <h2 class="row-title">Языки (Тілдер / Languages)</h2>
+        <div class="subject-row">
+            <!-- Kazakh -->
+            <div class="subject-card" style="--theme-color: #0d9488; --theme-shadow: rgba(13,148,136,0.4);">
+                <div class="subject-card-header" onclick="this.parentElement.classList.toggle('expanded')">
+                    <div class="subject-header-small">
+                        <div class="subject-icon-small">🇰🇿</div>
+                        <div class="subject-title-small">Қазақ тілі</div>
+                    </div>
+                    <div class="expand-icon"><i class="fa-solid fa-chevron-down"></i></div>
+                </div>
+                <div class="class-list-container">
+                    <div class="class-list-inner">
+                        <div class="lang-info">
+                            <i class="fa-solid fa-circle-info"></i> Басталуы: 1-сынып. Аяқталуы: 11-сынып.
+                        </div>
+                        <div class="class-list">
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 1 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 2 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 3 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 4 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 5 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 6 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 7 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 8 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 9 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 10 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 11 класс</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- English -->
+            <div class="subject-card" style="--theme-color: #e11d48; --theme-shadow: rgba(225,29,72,0.4);">
+                <div class="subject-card-header" onclick="this.parentElement.classList.toggle('expanded')">
+                    <div class="subject-header-small">
+                        <div class="subject-icon-small">🇬🇧</div>
+                        <div class="subject-title-small">English</div>
+                    </div>
+                    <div class="expand-icon"><i class="fa-solid fa-chevron-down"></i></div>
+                </div>
+                <div class="class-list-container">
+                    <div class="class-list-inner">
+                        <div class="lang-info">
+                            <i class="fa-solid fa-circle-info"></i> Басталуы: 1-сынып. Аяқталуы: 11-сынып.
+                        </div>
+                        <div class="class-list">
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 1 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 2 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 3 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 4 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 5 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 6 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 7 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 8 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 9 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 10 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 11 класс</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Russian -->
+            <div class="subject-card" style="--theme-color: #f97316; --theme-shadow: rgba(249,115,22,0.4);">
+                <div class="subject-card-header" onclick="this.parentElement.classList.toggle('expanded')">
+                    <div class="subject-header-small">
+                        <div class="subject-icon-small">🇷🇺</div>
+                        <div class="subject-title-small">Русский язык</div>
+                    </div>
+                    <div class="expand-icon"><i class="fa-solid fa-chevron-down"></i></div>
+                </div>
+                <div class="class-list-container">
+                    <div class="class-list-inner">
+                        <div class="lang-info">
+                            <i class="fa-solid fa-circle-info"></i> Басталуы: 1-сынып. Аяқталуы: 11-сынып.
+                        </div>
+                        <div class="class-list">
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 1 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 2 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 3 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 4 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 5 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 6 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 7 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 8 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 9 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 10 класс</a>
+                            <a href="#" class="class-btn"><span class="emoji">🎓</span> 11 класс</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+    <!-- Background Animation Script -->
+    <script src="lobby.js"></script>
+
+</body>
+
+</html>

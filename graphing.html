@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Графики функций — Virtual Science Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body { background: #0f172a; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; font-family: 'Roboto', sans-serif; padding: 20px; }
+        h1 { font-size: 32px; color: #00cba9; margin-bottom: 5px; text-align: center; }
+        p.sub { color: #94a3b8; margin-bottom: 20px; text-align: center; }
+        .lab { background: rgba(0,30,25,0.8); border: 1px solid rgba(0,203,169,0.2); border-radius: 20px; padding: 30px; width: 100%; max-width: 1000px; }
+
+        .presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; justify-content: center; }
+        .preset-btn { background: rgba(0,0,0,0.4); border: 1px solid rgba(0,203,169,0.2); color: #cbd5e1; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 13px; transition: all 0.2s; }
+        .preset-btn:hover, .preset-btn.active { background: rgba(0,203,169,0.15); border-color: #00cba9; color: white; }
+
+        .input-row { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+        .func-input { flex: 1; min-width: 200px; background: rgba(0,0,0,0.4); border: 2px solid rgba(0,203,169,0.3); color: white; padding: 12px 15px; border-radius: 10px; font-family: 'JetBrains Mono', monospace; font-size: 16px; transition: all 0.2s; }
+        .func-input:focus { outline: none; border-color: #00cba9; }
+        .btn-plot { background: #00cba9; border: none; color: white; padding: 12px 25px; border-radius: 10px; font-family: inherit; font-size: 16px; font-weight: 800; cursor: pointer; transition: all 0.2s; }
+        .btn-plot:hover { background: #00a88e; transform: scale(1.05); }
+        .btn-clear { background: rgba(239,68,68,0.2); border: 1px solid #ef4444; color: #ef4444; padding: 12px 20px; border-radius: 10px; font-family: inherit; font-size: 15px; cursor: pointer; transition: all 0.2s; }
+        .btn-clear:hover { background: rgba(239,68,68,0.3); }
+
+        .range-row { display: flex; gap: 15px; align-items: center; margin-bottom: 15px; flex-wrap: wrap; }
+        .range-row label { color: #94a3b8; font-size: 14px; }
+        .range-input { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 8px 12px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 14px; width: 80px; }
+
+        canvas { background: rgba(0,0,0,0.4); border-radius: 12px; width: 100%; border: 1px solid rgba(255,255,255,0.05); cursor: crosshair; display: block; }
+        .func-list { margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px; }
+        .func-tag { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.3); border-radius: 20px; padding: 5px 15px; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+        .color-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .error-msg { color: #f87171; font-size: 14px; min-height: 20px; margin-top: 5px; font-style: italic; }
+
+        .btn-back { display: block; width: max-content; margin: 20px auto 0; background: rgba(255,255,255,0.1); color: white; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; transition: all 0.3s; }
+        .btn-back:hover { background: rgba(255,255,255,0.2); }
+    </style>
+
+    <script id="early-lang-sync">
+        (function() {
+            let cl = localStorage.getItem('vsh-lang') || 'kk';
+            var gt = '/ru/' + cl;
+            if (cl === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+                document.cookie = "googtrans=" + gt + "; path=/";
+                if (location.hostname) {
+                    document.cookie = "googtrans=" + gt + "; domain=" + location.hostname + "; path=/";
+                    document.cookie = "googtrans=" + gt + "; domain=." + location.hostname + "; path=/";
+                }
+            }
+        })();
+    </script>
+</head>
+<body>
+    <div class="lab">
+        <h1>📈 Графики функций</h1>
+        <p class="sub">Введите любую функцию f(x) и постройте её график в интерактивном режиме.</p>
+
+        <div class="presets">
+            <button class="preset-btn" onclick="setFunc('x')">y = x</button>
+            <button class="preset-btn" onclick="setFunc('x*x')">y = x²</button>
+            <button class="preset-btn" onclick="setFunc('x*x*x')">y = x³</button>
+            <button class="preset-btn" onclick="setFunc('Math.sin(x)')">y = sin(x)</button>
+            <button class="preset-btn" onclick="setFunc('Math.cos(x)')">y = cos(x)</button>
+            <button class="preset-btn" onclick="setFunc('Math.tan(x)')">y = tan(x)</button>
+            <button class="preset-btn" onclick="setFunc('Math.abs(x)')">y = |x|</button>
+            <button class="preset-btn" onclick="setFunc('Math.sqrt(Math.abs(x))')">y = √|x|</button>
+            <button class="preset-btn" onclick="setFunc('1/x')">y = 1/x</button>
+            <button class="preset-btn" onclick="setFunc('Math.exp(x)')">y = eˣ</button>
+            <button class="preset-btn" onclick="setFunc('Math.log(Math.abs(x))')">y = ln|x|</button>
+            <button class="preset-btn" onclick="setFunc('2*x*x - 3*x + 1')">y = 2x²-3x+1</button>
+        </div>
+
+        <div class="input-row">
+            <input type="text" class="func-input" id="funcInput" placeholder="e.g. Math.sin(x) * x" value="Math.sin(x)">
+            <button class="btn-plot" onclick="addFunction()">Plot +</button>
+            <button class="btn-clear" onclick="clearAll()">Clear ✕</button>
+        </div>
+        <div class="error-msg" id="errorMsg"></div>
+        <div class="range-row">
+            <label>X min: <input type="number" class="range-input" id="xMin" value="-10"></label>
+            <label>X max: <input type="number" class="range-input" id="xMax" value="10"></label>
+            <label>Y min: <input type="number" class="range-input" id="yMin" value="-10"></label>
+            <label>Y max: <input type="number" class="range-input" id="yMax" value="10"></label>
+            <button class="btn-plot" style="padding: 8px 15px; font-size: 14px;" onclick="redraw()">Redraw</button>
+        </div>
+
+        <canvas id="graphCanvas" height="450"></canvas>
+        <div class="func-list" id="funcList"></div>
+
+        <a href="index.html" class="btn-back">← Вернуться в лобби</a>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('graphCanvas');
+        const ctx = canvas.getContext('2d');
+        const colors = ['#00cba9', '#f87171', '#fbbf24', '#60a5fa', '#a78bfa', '#4ade80', '#fb923c'];
+        let functions = [];
+
+        function setFunc(expr) {
+            document.getElementById('funcInput').value = expr;
+            addFunction();
+        }
+
+        function addFunction() {
+            const expr = document.getElementById('funcInput').value.trim();
+            if (!expr) return;
+            try {
+                // Test if it's valid
+                const test = new Function('x', `return ${expr}`);
+                test(1);
+                document.getElementById('errorMsg').textContent = '';
+                functions.push({ expr, color: colors[functions.length % colors.length] });
+                document.getElementById('funcInput').value = '';
+                redraw();
+            } catch(e) {
+                document.getElementById('errorMsg').textContent = `⚠️ Syntax error: ${e.message}. Use Math.sin(x), x*x, etc.`;
+            }
+        }
+
+        function clearAll() {
+            functions = [];
+            document.getElementById('funcList').innerHTML = '';
+            redraw();
+        }
+
+        function redraw() {
+            const W = canvas.width = canvas.offsetWidth;
+            const H = canvas.height;
+            const xMin = parseFloat(document.getElementById('xMin').value) || -10;
+            const xMax = parseFloat(document.getElementById('xMax').value) || 10;
+            const yMin = parseFloat(document.getElementById('yMin').value) || -10;
+            const yMax = parseFloat(document.getElementById('yMax').value) || 10;
+
+            ctx.clearRect(0, 0, W, H);
+
+            // Grid
+            const toCanvasX = x => ((x - xMin) / (xMax - xMin)) * W;
+            const toCanvasY = y => H - ((y - yMin) / (yMax - yMin)) * H;
+
+            ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+            ctx.lineWidth = 1;
+            for (let x = Math.ceil(xMin); x <= xMax; x++) {
+                ctx.beginPath(); ctx.moveTo(toCanvasX(x), 0); ctx.lineTo(toCanvasX(x), H); ctx.stroke();
+            }
+            for (let y = Math.ceil(yMin); y <= yMax; y++) {
+                ctx.beginPath(); ctx.moveTo(0, toCanvasY(y)); ctx.lineTo(W, toCanvasY(y)); ctx.stroke();
+            }
+
+            // Axes
+            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+            ctx.lineWidth = 2;
+            if (xMin <= 0 && xMax >= 0) {
+                const cx = toCanvasX(0);
+                ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, H); ctx.stroke();
+            }
+            if (yMin <= 0 && yMax >= 0) {
+                const cy = toCanvasY(0);
+                ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(W, cy); ctx.stroke();
+            }
+
+            // Axis labels
+            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            ctx.font = '12px JetBrains Mono';
+            for (let x = Math.ceil(xMin); x <= xMax; x++) {
+                if (x !== 0) ctx.fillText(x, toCanvasX(x) - 5, toCanvasY(0) + 15);
+            }
+            for (let y = Math.ceil(yMin); y <= yMax; y++) {
+                if (y !== 0) ctx.fillText(y, toCanvasX(0) + 5, toCanvasY(y) + 4);
+            }
+
+            // Functions
+            functions.forEach(fn => {
+                const f = new Function('x', `return ${fn.expr}`);
+                ctx.strokeStyle = fn.color;
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                let started = false;
+                const steps = W * 2;
+                for (let i = 0; i <= steps; i++) {
+                    const x = xMin + (i / steps) * (xMax - xMin);
+                    let y;
+                    try { y = f(x); } catch(e) { continue; }
+                    if (!isFinite(y) || isNaN(y) || Math.abs(y) > 1e6) { started = false; continue; }
+                    const cx = toCanvasX(x);
+                    const cy = toCanvasY(y);
+                    if (!started) { ctx.moveTo(cx, cy); started = true; }
+                    else ctx.lineTo(cx, cy);
+                }
+                ctx.stroke();
+            });
+
+            // Function list
+            document.getElementById('funcList').innerHTML = functions.map((f, i) => `
+                <div class="func-tag">
+                    <div class="color-dot" style="background:${f.color}"></div>
+                    <span>y = ${f.expr}</span>
+                    <span style="cursor:pointer;color:#f87171;margin-left:5px;" onclick="removeFunc(${i})">✕</span>
+                </div>
+            `).join('');
+        }
+
+        function removeFunc(i) {
+            functions.splice(i, 1);
+            redraw();
+        }
+
+        document.getElementById('funcInput').addEventListener('keydown', e => {
+            if (e.key === 'Enter') addFunction();
+        });
+
+        window.addEventListener('resize', redraw);
+        setFunc('Math.sin(x)');
+    </script>
+
+<!-- Global Language Switcher & Google Translate -->
+<div id="google_translate_element" style="display:none;"></div>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({pageLanguage: 'ru', includedLanguages: 'ru,en,kk', autoDisplay: false}, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script>
+(function() {
+    let currentLang = localStorage.getItem('vsh-lang') || 'kk';
+
+    // Synchronize cookie if needed
+    var gtrans = '/ru/' + currentLang;
+    if (currentLang === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) {
+            document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+        }
+    }
+
+    // Floating UI
+    const isIndex = location.pathname.endsWith('index.html') || location.pathname.endsWith('/') || location.pathname.endsWith('studio.html');
+    if (!document.querySelector('.floating-lang-switcher')) {
+        const style = document.createElement('style');
+        style.innerHTML = `
+            body { top: 0 !important; }
+            .skiptranslate { display: none !important; }
+            .floating-lang-switcher {
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                background: rgba(15, 23, 42, 0.9);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 20px;
+                padding: 10px;
+                display: flex;
+                gap: 10px;
+                z-index: 999999;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+                font-family: 'Roboto', sans-serif;
+            }
+            .floating-lang-btn {
+                background: transparent;
+                border: 1px solid rgba(255,255,255,0.2);
+                color: #94a3b8;
+                font-size: 14px;
+                font-weight: 600;
+                padding: 8px 15px;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: 0.3s;
+            }
+            .floating-lang-btn:hover {
+                color: #fff;
+                background: rgba(255,255,255,0.1);
+            }
+            .floating-lang-btn.active {
+                background: linear-gradient(135deg, #a855f7, #3b82f6);
+                color: #fff;
+                border-color: transparent;
+            }
+        `;
+        document.head.appendChild(style);
+
+        const switcher = document.createElement('div');
+        switcher.className = 'floating-lang-switcher notranslate';
+        switcher.innerHTML = `
+            <button class="floating-lang-btn " onclick="changeLangGlobal('ru')">RU</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('kk')">ҚАЗ</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('en')">EN</button>
+        `;
+        
+        // set active
+        const btns = switcher.querySelectorAll('.floating-lang-btn');
+        if (currentLang === 'ru') btns[0].classList.add('active');
+        else if (currentLang === 'kk') btns[1].classList.add('active');
+        else if (currentLang === 'en') btns[2].classList.add('active');
+
+        document.body.appendChild(switcher);
+    }
+})();
+
+function changeLangGlobal(lang) {
+    localStorage.setItem('vsh-lang', lang);
+    var gtrans = '/ru/' + lang;
+    if (lang === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+    }
+    location.reload();
+}
+</script>
+\n</body>
+</html>

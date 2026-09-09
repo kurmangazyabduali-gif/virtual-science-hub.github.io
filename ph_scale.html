@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Эксперимент: Шкала pH — Virtual Science Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Roboto', sans-serif; user-select: none; }
+        body { 
+            background: #0f172a; 
+            color: #fff; height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+        }
+
+        .header { text-align: center; padding: 15px; background: rgba(0,0,0,0.5); z-index: 10; border-bottom: 1px solid #1e293b; }
+        .header h1 { font-size: 32px; color: #ec4899; text-shadow: 0 0 15px rgba(236,72,153,0.5); margin-bottom: 5px; }
+        .header p { color: #cbd5e1; font-size: 15px; }
+
+        .app-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-around; padding: 20px; }
+
+        /* The Custom pH Scale Bar */
+        .ph-scale-container { width: 100%; max-width: 900px; text-align: center; }
+        .ph-bar { 
+            width: 100%; height: 40px; border-radius: 20px; display: flex; overflow: hidden; margin: 10px 0;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5); border: 3px solid #334155; position: relative;
+        }
+        .ph-block { flex: 1; display: flex; justify-content: center; align-items: center; color: rgba(0,0,0,0.5); font-weight: 900; opacity: 0.5; transition: 0.3s; }
+        .ph-block.active { opacity: 1; box-shadow: inset 0 0 15px rgba(255,255,255,0.8); z-index: 5; transform: scale(1.1); color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.8);}
+        
+        .labels { display: flex; justify-content: space-between; font-weight: bold; color: #94a3b8; padding: 0 10px;}
+
+        /* Shelf of Items */
+        .drinks-shelf { display: flex; gap: 15px; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 20px; flex-wrap: wrap; justify-content: center; max-width: 900px;}
+        .drink-item {
+            background: rgba(0,0,0,0.4); border: 2px solid #334155; border-radius: 12px; padding: 10px 20px;
+            font-size: 20px; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 5px;
+        }
+        .drink-item:hover { border-color: #ec4899; transform: translateY(-5px); background: rgba(236,72,153,0.1); }
+        .drink-item.used { filter: opacity(0.5); pointer-events: none; }
+        .drink-lbl { font-size: 12px; color: #cbd5e1; text-transform: uppercase; font-weight: bold; }
+
+        /* Testing Area */
+        .test-zone { display: flex; align-items: flex-end; gap: 50px; }
+
+        /* The Indicator Pipette */
+        .pipette-tool {
+            width: 80px; height: 160px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.2s; position: relative;
+        }
+        .pipette-tool:hover { transform: scale(1.05); }
+        .pip-bulb { width: 50px; height: 60px; background: #ef4444; border-radius: 50% 50% 10px 10px; border: 3px solid #b91c1c; }
+        .pip-tube { width: 14px; height: 100px; background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.5); border-radius: 0 0 10px 10px; border-top: none; }
+        .pip-tool-lbl { position: absolute; bottom: -30px; font-weight: bold; color: #ef4444; font-size:14px; text-align:center; width: 120px; left: -20px;}
+
+        /* The Test Beaker */
+        .beaker {
+            width: 150px; height: 180px; border: 5px solid rgba(255,255,255,0.4); border-top: none;
+            border-radius: 0 0 20px 20px; position: relative; background: rgba(255,255,255,0.05);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 20px 30px rgba(0,0,0,0.5);
+            display: flex; align-items: flex-end; justify-content: center;
+        }
+        .b-liquid { width: 100%; height: 0%; background: transparent; transition: all 1s; border-radius: 0 0 15px 15px; }
+        
+        /* Dashboard Result */
+        .result-hud { background: #1e293b; border-left: 5px solid #ec4899; padding: 20px; border-radius: 0 12px 12px 0; width: 300px; }
+        .res-type { font-size: 14px; color: #ec4899; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
+        .res-ph { font-size: 40px; color: #fff; font-weight: 900; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;}
+        .res-desc { color: #cbd5e1; font-size: 14px; line-height: 1.5; }
+
+        .btn-back { position: absolute; top: 15px; left: 20px; background: rgba(255,255,255,0.1); color: white; text-decoration: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; z-index: 100; transition: 0.2s; }
+        .btn-back:hover { background: rgba(255,255,255,0.2); }
+
+    </style>
+
+    <script id="early-lang-sync">
+        (function() {
+            let cl = localStorage.getItem('vsh-lang') || 'kk';
+            var gt = '/ru/' + cl;
+            if (cl === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+                document.cookie = "googtrans=" + gt + "; path=/";
+                if (location.hostname) {
+                    document.cookie = "googtrans=" + gt + "; domain=" + location.hostname + "; path=/";
+                    document.cookie = "googtrans=" + gt + "; domain=." + location.hostname + "; path=/";
+                }
+            }
+        })();
+    </script>
+</head>
+<body>
+
+    <a href="index.html" class="btn-back">⬅ В меню</a>
+
+    <div class="header">
+        <h1>📊 Определение уровня pH</h1>
+        <p>Налейте жидкость в стакан и капните универсальный индикатор, чтобы узнать её кислотность.</p>
+    </div>
+
+    <div class="app-container">
+        
+        <div class="ph-scale-container">
+            <div class="labels">
+                <div>⬅ КИСЛОТА</div>
+                <div>НЕЙТРАЛЬНАЯ 💧</div>
+                <div>ЩЕЛОЧЬ ➡</div>
+            </div>
+            <div class="ph-bar" id="phBar">
+                <!-- Configured in JS -->
+            </div>
+        </div>
+
+        <div class="drinks-shelf" id="shelf">
+            <!-- Populated by JS -->
+        </div>
+
+        <div class="test-zone">
+            
+            <div class="pipette-tool" id="btnIndicator" onclick="applyIndicator()">
+                <div class="pip-bulb" id="bulb"></div>
+                <div class="pip-tube"></div>
+                <div class="pip-tool-lbl">💧 Индикатор</div>
+            </div>
+
+            <div class="beaker">
+                <div class="b-liquid" id="liquid"></div>
+            </div>
+
+            <div class="result-hud">
+                <div class="res-type" id="hudType">СТАТУС АНАЛИЗА</div>
+                <div class="res-ph" id="hudVal">pH: -- <span id="hudEmoji" style="font-size:30px;"></span></div>
+                <div class="res-desc" id="hudDesc">Выберите вещество на полке выше и налейте его в стакан.</div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        // Universal Indicator Colors approx mapping
+        const phColors = [
+            '#ef4444', '#f97316', '#f59e0b', '#fbbf24', '#fcd34d', '#fef08a', '#a3e635', // 0-6
+            '#22c55e', // 7 Neutral
+            '#10b981', '#14b8a6', '#06b6d4', '#0ea5e9', '#3b82f6', '#6366f1', '#8b5cf6'  // 8-14
+        ];
+
+        const db = [
+            { id: 'lemon', emoji: '🍋', name: 'Лимонный сок', ph: 2, c: '#fef08a', desc: 'Очень кислая среда. Содержит высокую концентрацию лимонной кислоты.' },
+            { id: 'vinegar', emoji: '🥗', name: 'Уксус', ph: 3, c: '#f1f5f9', desc: 'Уксусная кислота. Обычно используется в кулинарии и консервировании.' },
+            { id: 'tomato', emoji: '🍅', name: 'Томатный сок', ph: 4, c: '#ef4444', desc: 'Слабокислая среда, типичная для многих овощей и фруктов.' },
+            { id: 'coffee', emoji: '☕', name: 'Черный кофе', ph: 5, c: '#451a03', desc: 'Слегка кислая среда, которая может раздражать пустой желудок.' },
+            { id: 'milk', emoji: '🥛', name: 'Молоко', ph: 6, c: '#ffffff', desc: 'Почти нейтральная среда, но имеет легкую кислинку из-за молочной кислоты.' },
+            { id: 'water', emoji: '💧', name: 'Чистая Вода', ph: 7, c: '#bae6fd', desc: 'Идеально нейтральная среда. Баланс ионов H+ и OH-.' },
+            { id: 'blood', emoji: '🩸', name: 'Кровь', ph: 8, c: '#b91c1c', desc: 'Слабощелочная среда. Организм строго поддерживает pH крови в пределах 7.35-7.45.' },
+            { id: 'baking', emoji: '🧁', name: 'Раствор соды', ph: 9, c: '#f8fafc', desc: 'Щелочная среда. Пищевая сода (бикарбонат натрия) нейтрализует кислоты.' },
+            { id: 'soap', emoji: '🧼', name: 'Мыло', ph: 10, c: '#c4b5fd', desc: 'Средне-щелочная среда. Помогает смывать жир.' },
+            { id: 'ammonia', emoji: '🪟', name: 'Нашатырь', ph: 11, c: '#ffffff', desc: 'Щелочной раствор аммиака. Используется как мощный очиститель стекол.' },
+            { id: 'bleach', emoji: '👕', name: 'Отбеливатель', ph: 12, c: '#fef3c7', desc: 'Сильная щелочь. Разрушает красители (отбеливает) и убивает бактерии.' },
+            { id: 'drain', emoji: '🚰', name: 'Крот (для труб)', ph: 14, c: '#f1f5f9', desc: 'Экстремально сильная щелочь (NaOH). Разъедает жиры и волосы в стоках.' }
+        ];
+
+        // Build the pH Bar
+        const phBar = document.getElementById('phBar');
+        for (let i = 0; i <= 14; i++) {
+            const block = document.createElement('div');
+            block.className = 'ph-block';
+            block.style.backgroundColor = phColors[i];
+            block.textContent = i;
+            block.id = 'ph-' + i;
+            phBar.appendChild(block);
+        }
+
+        // Build Shelf
+        const shelf = document.getElementById('shelf');
+        db.forEach(item => {
+            const el = document.createElement('div');
+            el.className = 'drink-item';
+            el.innerHTML = `<div>${item.emoji}</div><div class="drink-lbl">${item.name}</div>`;
+            el.onclick = () => loadLiquid(item);
+            shelf.appendChild(el);
+        });
+
+        let currentItem = null;
+        let isTested = false;
+        const liqDiv = document.getElementById('liquid');
+
+        function loadLiquid(item) {
+            currentItem = item;
+            isTested = false;
+
+            // Reset UI
+            liqDiv.style.height = '60%';
+            liqDiv.style.backgroundColor = item.c;
+            
+            document.querySelectorAll('.ph-block').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById('hudType').textContent = 'В ОЖИДАНИИ РЕАКТИВА...';
+            document.getElementById('hudType').style.color = '#94a3b8';
+            document.getElementById('hudVal').innerHTML = `pH: ?? <span style="font-size:30px;">${item.emoji}</span>`;
+            document.getElementById('hudDesc').textContent = `В стакане: ${item.name}. Теперь кликните по пипетке с индикатором, чтобы узнать pH.`;
+            
+            // Pipette animation logic
+            document.getElementById('bulb').style.transform = 'scale(1)';
+        }
+
+        function applyIndicator() {
+            if (!currentItem || isTested) return;
+            isTested = true;
+
+            // Animate pipette click
+            document.getElementById('bulb').style.transform = 'scale(0.8)';
+            setTimeout(() => document.getElementById('bulb').style.transform = 'scale(1)', 200);
+
+            // Animate color change
+            const correctColor = phColors[currentItem.ph];
+            liqDiv.style.backgroundColor = correctColor;
+            
+            // Light up the bar
+            document.getElementById('ph-' + currentItem.ph).classList.add('active');
+
+            // Update Dashboard
+            let category = currentItem.ph < 7 ? 'КИСЛОТА' : (currentItem.ph === 7 ? 'НЕЙТРАЛЬНАЯ' : 'ЩЕЛОЧЬ');
+            let catColor = currentItem.ph < 7 ? '#ef4444' : (currentItem.ph === 7 ? '#22c55e' : '#3b82f6');
+
+            document.getElementById('hudType').textContent = 'РЕЗУЛЬТАТ: ' + category;
+            document.getElementById('hudType').style.color = catColor;
+            document.getElementById('hudVal').innerHTML = `pH: ${currentItem.ph} <span style="font-size:30px;">${currentItem.emoji}</span>`;
+            document.getElementById('hudDesc').textContent = currentItem.desc;
+        }
+
+    </script>
+
+<!-- Global Language Switcher & Google Translate -->
+<div id="google_translate_element" style="display:none;"></div>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({pageLanguage: 'ru', includedLanguages: 'ru,en,kk', autoDisplay: false}, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script>
+(function() {
+    let currentLang = localStorage.getItem('vsh-lang') || 'kk';
+
+    // Synchronize cookie if needed
+    var gtrans = '/ru/' + currentLang;
+    if (currentLang === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) {
+            document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+        }
+    }
+
+    // Floating UI
+    const isIndex = location.pathname.endsWith('index.html') || location.pathname.endsWith('/') || location.pathname.endsWith('studio.html');
+    if (!document.querySelector('.floating-lang-switcher')) {
+        const style = document.createElement('style');
+        style.innerHTML = `
+            body { top: 0 !important; }
+            .skiptranslate { display: none !important; }
+            .floating-lang-switcher {
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                background: rgba(15, 23, 42, 0.9);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 20px;
+                padding: 10px;
+                display: flex;
+                gap: 10px;
+                z-index: 999999;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+                font-family: 'Roboto', sans-serif;
+            }
+            .floating-lang-btn {
+                background: transparent;
+                border: 1px solid rgba(255,255,255,0.2);
+                color: #94a3b8;
+                font-size: 14px;
+                font-weight: 600;
+                padding: 8px 15px;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: 0.3s;
+            }
+            .floating-lang-btn:hover {
+                color: #fff;
+                background: rgba(255,255,255,0.1);
+            }
+            .floating-lang-btn.active {
+                background: linear-gradient(135deg, #a855f7, #3b82f6);
+                color: #fff;
+                border-color: transparent;
+            }
+        `;
+        document.head.appendChild(style);
+
+        const switcher = document.createElement('div');
+        switcher.className = 'floating-lang-switcher notranslate';
+        switcher.innerHTML = `
+            <button class="floating-lang-btn " onclick="changeLangGlobal('ru')">RU</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('kk')">ҚАЗ</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('en')">EN</button>
+        `;
+        
+        // set active
+        const btns = switcher.querySelectorAll('.floating-lang-btn');
+        if (currentLang === 'ru') btns[0].classList.add('active');
+        else if (currentLang === 'kk') btns[1].classList.add('active');
+        else if (currentLang === 'en') btns[2].classList.add('active');
+
+        document.body.appendChild(switcher);
+    }
+})();
+
+function changeLangGlobal(lang) {
+    localStorage.setItem('vsh-lang', lang);
+    var gtrans = '/ru/' + lang;
+    if (lang === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+    }
+    location.reload();
+}
+</script>
+\n</body>
+</html>

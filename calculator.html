@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Научный калькулятор — Virtual Science Hub</title>
+    <meta name="description" content="Научный калькулятор для школьников с историей вычислений">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body.page-tool {
+            background: #0b0d17;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .tool-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 2rem;
+            background: rgba(255, 255, 255, 0.04);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+            flex-shrink: 0;
+        }
+
+        .tool-header h1 {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .tool-header p {
+            font-size: 0.8rem;
+            color: #a0a0a0;
+        }
+
+        .btn-back-home {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: #a0a0a0;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-back-home:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+        }
+
+        .calc-page {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            padding: 2rem;
+            flex: 1;
+            flex-wrap: wrap;
+            align-items: flex-start;
+        }
+
+        /* ── CALCULATOR ─────────────────────────── */
+        .calc-wrapper {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            overflow: hidden;
+            width: 380px;
+            flex-shrink: 0;
+        }
+
+        /* Display */
+        .calc-display {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1.5rem 1.5rem 1rem;
+            text-align: right;
+        }
+
+        .calc-expr {
+            font-size: 0.85rem;
+            color: #555;
+            min-height: 1.2em;
+            word-break: break-all;
+            margin-bottom: 4px;
+        }
+
+        .calc-output {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: #fff;
+            word-break: break-all;
+            line-height: 1.1;
+            min-height: 1.1em;
+            background: linear-gradient(90deg, #fff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .calc-output.error {
+            -webkit-text-fill-color: #ff6b6b;
+        }
+
+        /* Angle mode */
+        .calc-mode {
+            display: flex;
+            gap: 6px;
+            padding: 0 1.5rem 0.8rem;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .mode-btn {
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: none;
+            background: transparent;
+            color: #555;
+            font-family: 'Roboto', sans-serif;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .mode-btn.active {
+            background: rgba(0, 243, 255, 0.15);
+            color: #00f3ff;
+        }
+
+        /* Buttons Grid */
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .cbtn {
+            padding: 18px 0;
+            border: none;
+            font-family: 'Roboto', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            background: rgba(20, 22, 40, 0.85);
+            color: #a0a0a0;
+        }
+
+        .cbtn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+        }
+
+        .cbtn:active {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(0.95);
+        }
+
+        .cbtn.op {
+            color: #00f3ff;
+        }
+
+        .cbtn.fn {
+            color: #bc13fe;
+            font-size: 0.85rem;
+        }
+
+        .cbtn.equals {
+            background: linear-gradient(135deg, #bc13fe, #7c3aed);
+            color: #fff;
+        }
+
+        .cbtn.equals:hover {
+            filter: brightness(1.15);
+        }
+
+        .cbtn.clear {
+            color: #ff6b6b;
+        }
+
+        .cbtn.num {
+            color: #fff;
+        }
+
+        .cbtn.const {
+            color: #ffd93d;
+            font-size: 0.85rem;
+        }
+
+        /* ── HISTORY ────────────────────────────── */
+        .history-panel {
+            flex: 1;
+            min-width: 260px;
+            max-width: 400px;
+        }
+
+        .history-panel h2 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #555;
+            margin-bottom: 1rem;
+            border: none;
+        }
+
+        .history-entries {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .hist-entry {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .hist-entry:hover {
+            background: rgba(0, 243, 255, 0.05);
+            border-color: rgba(0, 243, 255, 0.15);
+        }
+
+        .hist-expr {
+            font-size: 0.75rem;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .hist-res {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #00f3ff;
+        }
+
+        .no-hist {
+            color: #444;
+            font-size: 0.85rem;
+            padding: 1rem 0;
+        }
+
+        /* ── CONSTANTS PANEL ────────────────────── */
+        .constants-panel {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .constants-panel h2 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #555;
+            margin-bottom: 1rem;
+            border: none;
+        }
+
+        .constants-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .const-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 12px 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .const-card:hover {
+            background: rgba(255, 211, 61, 0.06);
+            border-color: rgba(255, 211, 61, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .const-name {
+            font-size: 0.8rem;
+            color: #a0a0a0;
+            margin-bottom: 4px;
+        }
+
+        .const-sym {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #ffd93d;
+        }
+
+        .const-val {
+            font-size: 0.75rem;
+            color: #555;
+            margin-top: 4px;
+        }
+    </style>
+
+    <script id="early-lang-sync">
+        (function() {
+            let cl = localStorage.getItem('vsh-lang') || 'kk';
+            var gt = '/ru/' + cl;
+            if (cl === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+                document.cookie = "googtrans=" + gt + "; path=/";
+                if (location.hostname) {
+                    document.cookie = "googtrans=" + gt + "; domain=" + location.hostname + "; path=/";
+                    document.cookie = "googtrans=" + gt + "; domain=." + location.hostname + "; path=/";
+                }
+            }
+        })();
+    </script>
+</head>
+
+<body class="page-tool">
+
+    <header class="tool-header">
+        <a href="index.html" class="btn-back-home">← Главная</a>
+        <div>
+            <h1>🧮 Научный калькулятор</h1>
+            <p>Тригонометрия, логарифмы, степени и константы</p>
+        </div>
+    </header>
+
+    <div class="calc-page">
+
+        <!-- CALCULATOR -->
+        <div class="calc-wrapper">
+            <div class="calc-display">
+                <div class="calc-expr" id="calcExpr"></div>
+                <div class="calc-output" id="calcOutput">0</div>
+            </div>
+            <div class="calc-mode">
+                <button class="mode-btn active" id="modeRad" onclick="setMode('rad')">RAD</button>
+                <button class="mode-btn" id="modeDeg" onclick="setMode('deg')">DEG</button>
+            </div>
+            <div class="calc-grid" id="calcGrid"></div>
+        </div>
+
+        <!-- HISTORY -->
+        <div class="history-panel">
+            <h2>📝 История</h2>
+            <div class="history-entries" id="historyList">
+                <div class="no-hist">Вычисления появятся здесь...</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- CONSTANTS -->
+    <div style="max-width:820px;margin:0 auto;padding:0 2rem 2rem;">
+        <div class="constants-panel">
+            <h2>⚛️ Физические константы (нажми для вставки)</h2>
+            <div class="constants-grid" id="constGrid"></div>
+        </div>
+    </div>
+
+    <script>
+        // ── STATE ───────────────────────────────────────
+        let expr = '';
+        let angleMode = 'rad'; // 'rad' | 'deg'
+        let calcHistory = [];
+
+        // ── BUTTONS ─────────────────────────────────────
+        const BUTTONS = [
+            // Row 1
+            { label: 'sin', cls: 'fn', action: () => append('sin(') },
+            { label: 'cos', cls: 'fn', action: () => append('cos(') },
+            { label: 'tan', cls: 'fn', action: () => append('tan(') },
+            { label: '(', cls: 'op', action: () => append('(') },
+            { label: ')', cls: 'op', action: () => append(')') },
+            // Row 2
+            { label: 'asin', cls: 'fn', action: () => append('asin(') },
+            { label: 'acos', cls: 'fn', action: () => append('acos(') },
+            { label: 'atan', cls: 'fn', action: () => append('atan(') },
+            { label: 'n!', cls: 'fn', action: () => append('fact(') },
+            { label: '%', cls: 'op', action: () => append('%') },
+            // Row 3
+            { label: 'log', cls: 'fn', action: () => append('log10(') },
+            { label: 'ln', cls: 'fn', action: () => append('log(') },
+            { label: '√', cls: 'fn', action: () => append('sqrt(') },
+            { label: 'xʸ', cls: 'fn', action: () => append('**') },
+            { label: 'π', cls: 'const', action: () => append('Math.PI') },
+            // Row 4
+            { label: 'C', cls: 'clear', action: () => clearAll() },
+            { label: '⌫', cls: 'op', action: () => backspace() },
+            { label: 'e', cls: 'const', action: () => append('Math.E') },
+            { label: '÷', cls: 'op', action: () => append('/') },
+            { label: '×', cls: 'op', action: () => append('*') },
+            // Row 5
+            { label: '7', cls: 'num', action: () => append('7') },
+            { label: '8', cls: 'num', action: () => append('8') },
+            { label: '9', cls: 'num', action: () => append('9') },
+            { label: '−', cls: 'op', action: () => append('-') },
+            { label: '+', cls: 'op', action: () => append('+') },
+            // Row 6
+            { label: '4', cls: 'num', action: () => append('4') },
+            { label: '5', cls: 'num', action: () => append('5') },
+            { label: '6', cls: 'num', action: () => append('6') },
+            { label: '1/x', cls: 'fn', action: () => append('1/') },
+            { label: 'x²', cls: 'fn', action: () => append('**2') },
+            // Row 7
+            { label: '1', cls: 'num', action: () => append('1') },
+            { label: '2', cls: 'num', action: () => append('2') },
+            { label: '3', cls: 'num', action: () => append('3') },
+            { label: '.', cls: 'num', action: () => append('.') },
+            { label: '=', cls: 'equals', action: () => calculate() },
+            // Row 8
+            { label: '0', cls: 'num', action: () => append('0') },
+            { label: '±', cls: 'op', action: () => toggleSign() },
+            { label: 'ans', cls: 'fn', action: () => useAns() },
+            { label: 'EE', cls: 'fn', action: () => append('e') },
+            { label: '|x|', cls: 'fn', action: () => append('abs(') },
+        ];
+
+        function buildCalc() {
+            const grid = document.getElementById('calcGrid');
+            grid.innerHTML = BUTTONS.map(b =>
+                `<button class="cbtn ${b.cls}">${b.label}</button>`
+            ).join('');
+            grid.querySelectorAll('.cbtn').forEach((btn, i) => {
+                btn.addEventListener('click', BUTTONS[i].action);
+            });
+        }
+
+        // ── CONSTANTS ───────────────────────────────────
+        const CONSTANTS = [
+            { name: 'Скорость света', sym: 'c', val: 299792458, unit: 'м/с', insert: '299792458' },
+            { name: 'Постоянная Планка', sym: 'h', val: 6.626e-34, unit: 'Дж·с', insert: '6.626e-34' },
+            { name: 'Постоянная Больцмана', sym: 'k', val: 1.380649e-23, unit: 'Дж/K', insert: '1.380649e-23' },
+            { name: 'Число Авогадро', sym: 'Nₐ', val: 6.02214076e23, unit: 'моль⁻¹', insert: '6.02214076e23' },
+            { name: 'Заряд электрона', sym: 'e', val: 1.60218e-19, unit: 'Кл', insert: '1.60218e-19' },
+            { name: 'Ускор.свободного пад.', sym: 'g', val: 9.80665, unit: 'м/с²', insert: '9.80665' },
+            { name: 'Гравитац. константа', sym: 'G', val: 6.674e-11, unit: 'м³/(кг·с²)', insert: '6.674e-11' },
+            { name: 'Число π', sym: 'π', val: Math.PI, unit: '', insert: 'Math.PI' },
+            { name: 'Число e', sym: 'e', val: Math.E, unit: '', insert: 'Math.E' },
+            { name: 'Молярная газовая пост.', sym: 'R', val: 8.314, unit: 'Дж/(моль·K)', insert: '8.314' },
+            { name: 'Масса электрона', sym: 'mₑ', val: 9.109e-31, unit: 'кг', insert: '9.109e-31' },
+            { name: 'Масса протона', sym: 'mₚ', val: 1.673e-27, unit: 'кг', insert: '1.673e-27' },
+        ];
+
+        function buildConstants() {
+            const grid = document.getElementById('constGrid');
+            grid.innerHTML = CONSTANTS.map(c => `
+        <div class="const-card" onclick="insertConst('${c.insert}')">
+            <div class="const-name">${c.name}</div>
+            <div class="const-sym">${c.sym}</div>
+            <div class="const-val">${c.val.toExponential ? (Math.abs(c.val) < 0.001 || Math.abs(c.val) > 1e6 ? c.val.toExponential(3) : c.val) : c.val} ${c.unit}</div>
+        </div>
+    `).join('');
+        }
+
+        function insertConst(val) { append(val); }
+
+        // ── LOGIC ────────────────────────────────────────
+        function append(ch) {
+            expr += ch;
+            document.getElementById('calcExpr').textContent = expr
+                .replaceAll('Math.PI', 'π').replaceAll('Math.E', 'e')
+                .replaceAll('sqrt(', '√(').replaceAll('log10(', 'log(')
+                .replaceAll('log(', 'ln(').replaceAll('fact(', 'fact(')
+                .replaceAll('asin(', 'sin⁻¹(').replaceAll('acos(', 'cos⁻¹(')
+                .replaceAll('atan(', 'tan⁻¹(').replaceAll('abs(', '|');
+            document.getElementById('calcOutput').classList.remove('error');
+        }
+
+        function clearAll() {
+            expr = '';
+            document.getElementById('calcExpr').textContent = '';
+            document.getElementById('calcOutput').textContent = '0';
+            document.getElementById('calcOutput').classList.remove('error');
+        }
+
+        function backspace() {
+            expr = expr.slice(0, -1);
+            document.getElementById('calcExpr').textContent = expr
+                .replaceAll('Math.PI', 'π').replaceAll('Math.E', 'e');
+        }
+
+        function toggleSign() {
+            if (expr === '') return;
+            if (expr.startsWith('-')) expr = expr.slice(1);
+            else expr = '-' + expr;
+            document.getElementById('calcExpr').textContent = expr;
+        }
+
+        let lastAnswer = 0;
+        function useAns() { append(String(lastAnswer)); }
+
+        function setMode(mode) {
+            angleMode = mode;
+            document.getElementById('modeRad').classList.toggle('active', mode === 'rad');
+            document.getElementById('modeDeg').classList.toggle('active', mode === 'deg');
+        }
+
+        function fact(n) {
+            n = Math.round(n);
+            if (n < 0) return NaN;
+            if (n > 170) return Infinity;
+            let r = 1;
+            for (let i = 2; i <= n; i++) r *= i;
+            return r;
+        }
+
+        function calculate() {
+            if (!expr.trim()) return;
+
+            // Prepare expression
+            let e = expr;
+            // Trig: wrap in degree conversion if needed
+            if (angleMode === 'deg') {
+                e = e.replace(/\b(sin|cos|tan)\(/g, (_, fn) => `Math.${fn}((Math.PI/180)*`);
+                e = e.replace(/\b(asin|acos|atan)\(/g, (_, fn) => `(180/Math.PI)*Math.${fn}(`);
+            } else {
+                e = e.replace(/\b(sin|cos|tan|asin|acos|atan)\(/g, 'Math.$1(');
+            }
+            e = e.replace(/\bsqrt\(/g, 'Math.sqrt(');
+            e = e.replace(/\blog10\(/g, 'Math.log10(');
+            e = e.replace(/\blog\(/g, 'Math.log(');
+            e = e.replace(/\babs\(/g, 'Math.abs(');
+            e = e.replace(/\bfact\(/g, 'fact(');
+            e = e.replace(/%/g, '/100');
+
+            try {
+                // eslint-disable-next-line no-new-func
+                const result = Function('"use strict"; const fact=' + fact.toString() + '; return (' + e + ')')();
+                if (typeof result !== 'number' || isNaN(result)) throw new Error('NaN');
+
+                const display = Math.abs(result) < 1e-10 && result !== 0
+                    ? result.toExponential(6)
+                    : Math.abs(result) > 1e12
+                        ? result.toExponential(6)
+                        : parseFloat(result.toPrecision(12)).toString();
+
+                document.getElementById('calcOutput').textContent = display;
+                document.getElementById('calcOutput').classList.remove('error');
+                lastAnswer = result;
+
+                // Add to history
+                const nice = expr.replaceAll('Math.PI', 'π').replaceAll('Math.E', 'e');
+                addHistory(nice, display);
+                expr = display;
+                document.getElementById('calcExpr').textContent = nice + ' =';
+            } catch {
+                document.getElementById('calcOutput').textContent = 'Ошибка';
+                document.getElementById('calcOutput').classList.add('error');
+            }
+        }
+
+        function addHistory(ex, res) {
+            calcHistory.unshift({ ex, res });
+            if (calcHistory.length > 20) calcHistory.pop();
+            const el = document.getElementById('historyList');
+            el.innerHTML = calcHistory.map(h =>
+                `<div class="hist-entry" onclick="appendHist('${h.res}')">
+            <div class="hist-expr">${h.ex}</div>
+            <div class="hist-res">= ${h.res}</div>
+        </div>`
+            ).join('');
+        }
+
+        function appendHist(val) {
+            expr = val;
+            document.getElementById('calcExpr').textContent = val;
+            document.getElementById('calcOutput').textContent = val;
+        }
+
+        // ── KEYBOARD ─────────────────────────────────────
+        document.addEventListener('keydown', e => {
+            if (['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-', '*', '/', '(', ')', '.', '^'].includes(e.key)) append(e.key);
+            else if (e.key === 'Enter' || e.key === '=') calculate();
+            else if (e.key === 'Backspace') backspace();
+            else if (e.key === 'Escape') clearAll();
+        });
+
+        buildCalc();
+        buildConstants();
+    </script>
+
+<!-- Global Language Switcher & Google Translate -->
+<div id="google_translate_element" style="display:none;"></div>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({pageLanguage: 'ru', includedLanguages: 'ru,en,kk', autoDisplay: false}, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script>
+(function() {
+    let currentLang = localStorage.getItem('vsh-lang') || 'kk';
+
+    // Synchronize cookie if needed
+    var gtrans = '/ru/' + currentLang;
+    if (currentLang === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) {
+            document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+        }
+    }
+
+    // Floating UI
+    const isIndex = location.pathname.endsWith('index.html') || location.pathname.endsWith('/') || location.pathname.endsWith('studio.html');
+    if (!document.querySelector('.floating-lang-switcher')) {
+        const style = document.createElement('style');
+        style.innerHTML = `
+            body { top: 0 !important; }
+            .skiptranslate { display: none !important; }
+            .floating-lang-switcher {
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                background: rgba(15, 23, 42, 0.9);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 20px;
+                padding: 10px;
+                display: flex;
+                gap: 10px;
+                z-index: 999999;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+                font-family: 'Roboto', sans-serif;
+            }
+            .floating-lang-btn {
+                background: transparent;
+                border: 1px solid rgba(255,255,255,0.2);
+                color: #94a3b8;
+                font-size: 14px;
+                font-weight: 600;
+                padding: 8px 15px;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: 0.3s;
+            }
+            .floating-lang-btn:hover {
+                color: #fff;
+                background: rgba(255,255,255,0.1);
+            }
+            .floating-lang-btn.active {
+                background: linear-gradient(135deg, #a855f7, #3b82f6);
+                color: #fff;
+                border-color: transparent;
+            }
+        `;
+        document.head.appendChild(style);
+
+        const switcher = document.createElement('div');
+        switcher.className = 'floating-lang-switcher notranslate';
+        switcher.innerHTML = `
+            <button class="floating-lang-btn " onclick="changeLangGlobal('ru')">RU</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('kk')">ҚАЗ</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('en')">EN</button>
+        `;
+        
+        // set active
+        const btns = switcher.querySelectorAll('.floating-lang-btn');
+        if (currentLang === 'ru') btns[0].classList.add('active');
+        else if (currentLang === 'kk') btns[1].classList.add('active');
+        else if (currentLang === 'en') btns[2].classList.add('active');
+
+        document.body.appendChild(switcher);
+    }
+})();
+
+function changeLangGlobal(lang) {
+    localStorage.setItem('vsh-lang', lang);
+    var gtrans = '/ru/' + lang;
+    if (lang === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+    }
+    location.reload();
+}
+</script>
+\n</body>
+
+</html>

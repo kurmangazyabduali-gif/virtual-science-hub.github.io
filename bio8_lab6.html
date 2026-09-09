@@ -1,0 +1,370 @@
+<!DOCTYPE html><html lang="kk"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Зертхана №6 — Пульмонолог</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#020c1b;color:#fff;font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+nav{height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:rgba(5,15,35,.97);border-bottom:2px solid #1e293b;box-shadow:0 4px 20px rgba(0,0,0,.5);flex-shrink:0}
+nav a{color:#fb923c;text-decoration:none;font-size:.8rem;font-family:'Orbitron',sans-serif;background:rgba(251,146,60,.1);border:1px solid rgba(251,146,60,.3);padding:7px 14px;border-radius:8px;font-weight:bold;transition:.2s}
+nav a:hover{background:rgba(251,146,60,.2)}
+#snav{font-family:'Orbitron',sans-serif;font-size:.82rem;color:#facc15;background:rgba(250,204,21,.1);border:1px solid rgba(250,204,21,.3);padding:6px 12px;border-radius:8px}
+.main{flex:1;display:grid;grid-template-columns:260px 1fr 300px;overflow:hidden}
+.pn{background:rgba(5,15,35,.95);padding:18px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;box-shadow:0 0 20px rgba(0,0,0,.5)}
+.pl{border-right:2px solid #1e293b}.pr{border-left:2px solid #1e293b}
+.plbl{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:800;letter-spacing:1px;color:#fb923c;border-bottom:1px solid #1e293b;padding-bottom:10px;text-transform:uppercase}
+.pat-btn{border-radius:10px;padding:12px;border:1px solid #334155;background:#0f172a;cursor:pointer;transition:.2s}
+.pat-btn:hover{border-color:#fb923c;background:#1e293b}
+.pat-btn.active{border-color:#fb923c;background:rgba(251,146,60,.08)}
+.pat-btn.solved{border-color:#34d399;background:rgba(52,211,153,.06)}
+.pat-name-sm{font-family:'Orbitron',sans-serif;font-size:11px;color:#fb923c;margin-bottom:5px}
+.pat-sym{font-size:12px;color:#64748b;line-height:1.5}
+.pat-btn.solved .pat-sym{color:#34d399}
+.center{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;background:radial-gradient(circle at 50% 40%,#0d1a2e,#020c1b)}
+.patient-main{width:100%;max-width:460px;border-radius:14px;padding:18px;background:rgba(5,15,35,.95);border:2px solid rgba(251,146,60,.25);position:relative;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.patient-main::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,transparent,#fb923c,transparent)}
+.pm-name{font-family:'Orbitron',sans-serif;font-size:16px;color:#fb923c;margin-bottom:8px}
+.pm-complaint{font-size:13px;color:#94a3b8;line-height:1.6}
+.lung-vis{width:100%;max-width:460px;height:180px;position:relative}
+#lung-canvas{width:100%;height:100%;border-radius:12px;background:rgba(5,15,35,.8);border:1px solid rgba(251,146,60,.2)}
+.breath-bar{width:100%;max-width:460px}
+.breath-bar-outer{height:10px;background:rgba(255,255,255,.05);border-radius:5px;overflow:hidden;margin-top:6px}
+.breath-bar-inner{height:100%;border-radius:5px;background:linear-gradient(90deg,#fb923c,#fbbf24);transition:width .8s ease}
+.test-btn{border-radius:10px;padding:12px;border:1px solid #334155;background:#0f172a;cursor:pointer;font-size:13px;color:#cbd5e1;transition:.2s;display:flex;align-items:center;gap:10px}
+.test-btn:hover{background:#1e293b;border-color:#fb923c;transform:translateX(3px)}
+.test-btn.done{border-color:rgba(52,211,153,.4);color:#34d399;cursor:default;transform:none;background:rgba(52,211,153,.05)}
+.test-result{border-radius:10px;padding:12px;background:rgba(0,0,0,.3);border:1px solid rgba(251,146,60,.15);font-size:12.5px;color:#94a3b8;line-height:1.6;display:none}
+.test-result.show{display:block;animation:fade .3s}
+.diag-section{border-radius:12px;padding:14px;background:rgba(0,0,0,.3);border:1px solid rgba(251,146,60,.15)}
+.diag-lbl{font-family:'Orbitron',sans-serif;font-size:11px;color:rgba(251,146,60,.6);letter-spacing:1px;margin-bottom:12px}
+.treat-btn{padding:12px;border-radius:10px;border:1px solid rgba(251,146,60,.3);background:rgba(251,146,60,.05);cursor:pointer;font-size:13px;color:#e2e8f0;transition:.2s;display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.treat-btn:hover{background:rgba(251,146,60,.15);border-color:#fb923c;transform:scale(1.02)}
+.treat-btn.ok{background:rgba(52,211,153,.15);border-color:#34d399;color:#34d399;pointer-events:none}
+.treat-btn.bad{background:rgba(239,68,68,.15);border-color:#ef4444;color:#ef4444;pointer-events:none}
+.treat-icon{font-size:18px}
+.exp{border-radius:10px;padding:12px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.3);font-size:13px;color:#94a3b8;line-height:1.6;display:none;margin-top:10px}
+.exp.show{display:block;animation:fade .3s}
+.exp strong{color:#34d399}
+.nbtn{padding:12px;border-radius:10px;cursor:pointer;background:rgba(251,146,60,.1);border:2px solid rgba(251,146,60,.4);font-family:'Orbitron',sans-serif;font-size:13px;color:#fb923c;transition:.3s;display:none;text-align:center;margin-top:10px}
+.nbtn.show{display:block;animation:fade .3s}
+.nbtn:hover{background:rgba(251,146,60,.2);transform:translateY(-2px)}
+@keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.ov{position:fixed;inset:0;z-index:100;background:rgba(1,5,15,.97);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center}
+.card{width:min(580px,90vw);padding:40px 48px;text-align:center;background:rgba(5,15,35,.96);border:2px solid #fb923c;border-radius:20px;box-shadow:0 20px 50px rgba(0,0,0,.7)}
+.card h2{font-family:'Orbitron',sans-serif;font-size:22px;color:#fff;margin-bottom:12px;font-weight:900}
+.card p{color:#94a3b8;font-size:15px;line-height:1.8;margin-bottom:24px}
+.cbtn{padding:14px 38px;background:#fb923c;color:#000;font-family:'Orbitron',sans-serif;font-size:14px;font-weight:900;border:none;border-radius:12px;cursor:pointer;transition:.3s;letter-spacing:1px}
+.cbtn:hover{transform:translateY(-3px);box-shadow:0 0 40px rgba(251,146,60,.5)}
+.sbig{font-family:'Orbitron',sans-serif;font-size:2.4rem;color:#fbbf24;margin:10px 0}
+.elink{display:inline-block;text-decoration:none;border:2px solid #fb923c;color:#fb923c;font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:2px;padding:11px 26px;border-radius:10px;transition:.3s;margin-top:10px}
+.elink:hover{background:#fb923c;color:#000}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:#fb923c;border-radius:3px}
+</style>
+</head><body>
+
+<div class="ov" id="intro"><div class="card">
+  <div style="font-size:2.6rem;margin-bottom:14px">🩺🫁📊</div>
+  <h2>ПУЛЬМОНОЛОГ КЛИНИКАСЫ</h2>
+  <p>Пациенттердің өкпесін <strong style="color:#fb923c">аспаптық әдістермен</strong> тексеріңіз.<br>
+  Спирометрия және стетоскоп нәтижелерін талдап,<br>
+  диагноз қоймай-ақ, тікелей <strong style="color:#34d399">емдеу хаттамасын</strong> тағайындаңыз.</p>
+  <button class="cbtn" onclick="start()">▶ КЛИНИКАНЫ АШУ</button>
+</div></div>
+
+<div class="ov" id="end-sc" style="display:none"><div class="card">
+  <div style="font-size:2.6rem;margin-bottom:14px">🏆</div>
+  <h2>БАРЛЫҚ ПАЦИЕНТТЕР ЕМДЕЛДІ!</h2>
+  <div class="sbig" id="fscore">Аяқталды!</div>
+  <p id="fbody" style="margin-bottom:18px"></p>
+  <a href="biology8.html" class="elink">← МӘЗІРГЕ ОРАЛУ</a>
+</div></div>
+
+<nav>
+  <a href="biology8.html">← Мәзір</a>
+  <span style="font-family:'Orbitron',sans-serif;font-size:.85rem;color:#fb923c">🩺 ЗЕРТХАНА №6 — ПУЛЬМОНОЛОГ</span>
+  <span id="snav">🟢 Белсенді</span>
+</nav>
+
+<div class="main">
+
+<div class="pn pl">
+  <div class="plbl">👤 ПАЦИЕНТТЕР</div>
+  <div id="pat-list" style="display:flex;flex-direction:column;gap:8px"></div>
+</div>
+
+<div class="center">
+  <div class="patient-main" id="pat-main">
+    <div class="pm-name" id="pm-name">Пациент</div>
+    <div class="pm-complaint" id="pm-complaint">—</div>
+  </div>
+  <div class="lung-vis"><canvas id="lung-canvas"></canvas></div>
+  <div class="breath-bar">
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:#475569">
+      <span>Қандағы оттегі (SpO₂)</span>
+      <span id="spo2-val" style="color:#fb923c;font-family:'Orbitron',sans-serif;font-weight:bold">—%</span>
+    </div>
+    <div class="breath-bar-outer"><div class="breath-bar-inner" id="spo2-bar" style="width:0%"></div></div>
+  </div>
+</div>
+
+<div class="pn pr">
+  <div class="plbl">🔬 АСПАПТЫҚ ТЕКСЕРУ</div>
+  <div id="test-btns" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px"></div>
+  <div class="test-result" id="test-results">Тексеру жүргізілмеді...</div>
+
+  <div class="diag-section" style="margin-top:14px">
+    <div class="diag-lbl">💊 ЕМДЕУ ХАТТАМАСЫ:</div>
+    <div id="treat-grid"></div>
+    <div class="exp" id="exp"></div>
+    <div class="nbtn" id="nbtn" onclick="nextPat()">Келесі пациент →</div>
+  </div>
+</div>
+
+</div>
+
+<script>
+const PATIENTS=[
+  {
+    name:'Нурзат К., 34 ж.',
+    complaint:'Дем шығару қиын, ысылдаған тыныс. Суық ауада күшейеді.',
+    diag:'Бронх демікпесі',
+    tests:{
+      spiro:{name:'Спирометрия',icon:'📊',result:'FEV1/FVC = 62% (норма >70%). Обструкция.'},
+      spo2:{name:'Пульсоксиметрия',icon:'💉',result:'SpO₂ = 92% (Төмен).'},
+      stetho:{name:'Стетоскоп',icon:'🔊',result:'Ысылдаған хриптер. Бронхоспазм.'}
+    },
+    spo2:92,
+    treatment:'inhaler',
+    why:'Бронхоспазм және обструкция байқалады (Демікпе). Бронхолитик (ингалятор) қажет.'
+  },
+  {
+    name:'Данияр С., 58 ж.',
+    complaint:'3 апта жөтел, температура 38.5°C, кеуде ауырады.',
+    diag:'Пневмония',
+    tests:{
+      spiro:{name:'Спирометрия',icon:'📊',result:'FVC = 72% (норма >80%). Рестрикция. Өкпе көлемі азайған.'},
+      spo2:{name:'Пульсоксиметрия',icon:'💉',result:'SpO₂ = 88% (Критикалық!).'},
+      stetho:{name:'Стетоскоп',icon:'🔊',result:'Крепитация (ылғалды хрип). Сұйықтық жиналған.'}
+    },
+    spo2:88,
+    treatment:'antibiotics',
+    why:'Сұйықтық, қызу, рестрикция (Пневмония). Антибиотик және оттегі терапиясы қажет.'
+  },
+  {
+    name:'Марат А., 65 ж.',
+    complaint:'Ұзақ жылғы шылым шегуші. Тұрақты жөтел, демікпе.',
+    diag:'ӨТБО (ХОБЛ)',
+    tests:{
+      spiro:{name:'Спирометрия',icon:'📊',result:'FEV1 = 45%. Қатты обструкция қайтымсыз.'},
+      spo2:{name:'Пульсоксиметрия',icon:'💉',result:'SpO₂ = 90% (Созылмалы гипоксия).'},
+      stetho:{name:'Стетоскоп',icon:'🔊',result:'Қатқыл тыныс, құрғақ хриптер.'}
+    },
+    spo2:90,
+    treatment:'quit_smoke',
+    why:'Қайтымсыз обструкция (ХОБЛ). Ең басты ем — темекіні тастау және қолдаушы терапия.'
+  },
+  {
+    name:'Бибігүл М., 19 ж.',
+    complaint:'Спорттан кейін дем жетпеу сезімі. Қазір тыныш.',
+    diag:'Норма',
+    tests:{
+      spiro:{name:'Спирометрия',icon:'📊',result:'FEV1/FVC = 82%. Норма.'},
+      spo2:{name:'Пульсоксиметрия',icon:'💉',result:'SpO₂ = 98% (Норма).'},
+      stetho:{name:'Стетоскоп',icon:'🔊',result:'Таза везикулярлы тыныс. Хрип жоқ.'}
+    },
+    spo2:98,
+    treatment:'rest',
+    why:'Барлық көрсеткіштер нормада. Физиологиялық реакция. Ем қажет емес.'
+  }
+];
+
+const TREATMENTS=[
+  {id:'inhaler',icon:'💨',label:'Бронхолитик (Ингалятор)'},
+  {id:'antibiotics',icon:'💊',label:'Антибиотик + Оттегі'},
+  {id:'quit_smoke',icon:'🚭',label:'Темекіні тастау'},
+  {id:'rest',icon:'🏃‍♀️',label:'Ем қажет емес (Норма)'}
+];
+
+let pi=0,score=0,answered=false,testsRun={},solved={};
+let lc,lctx;
+
+function start(){
+  document.getElementById('intro').style.display='none';
+  lc=document.getElementById('lung-canvas');
+  lctx=lc.getContext('2d');
+  buildPatList();
+  loadPat(0);
+}
+
+function buildPatList(){
+  const el=document.getElementById('pat-list');el.innerHTML='';
+  PATIENTS.forEach((p,i)=>{
+    const b=document.createElement('div');
+    b.className='pat-btn'+(i===0?' active':'');b.id='pb-'+i;
+    b.innerHTML=`<div class="pat-name-sm">${p.name}</div><div class="pat-sym">${p.complaint.slice(0,35)}...</div>`;
+    b.onclick=()=>selectPat(i);
+    el.appendChild(b);
+  });
+}
+
+function selectPat(i){
+  document.querySelectorAll('.pat-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('pb-'+i).classList.add('active');
+  loadPat(i);
+}
+
+function loadPat(i){
+  pi=i;answered=!!solved[i];testsRun={};
+  const p=PATIENTS[i];
+  document.getElementById('pm-name').textContent=p.name;
+  document.getElementById('pm-complaint').textContent=p.complaint;
+  document.getElementById('spo2-val').textContent='—%';
+  document.getElementById('spo2-bar').style.width='0%';
+  document.getElementById('test-results').className='test-result';
+  document.getElementById('test-results').innerHTML='Тексеру жүргізілмеді...';
+  document.getElementById('exp').className='exp';
+  document.getElementById('nbtn').className='nbtn';
+  
+  buildTests(i);
+  buildTreatments(i);
+  drawLungs(i,false);
+}
+
+function buildTests(i){
+  const p=PATIENTS[i];
+  const el=document.getElementById('test-btns');el.innerHTML='';
+  Object.entries(p.tests).forEach(([k,t])=>{
+    const b=document.createElement('div');
+    b.className='test-btn';b.id='tb-'+k;
+    b.innerHTML=`<span style="font-size:18px">${t.icon}</span> ${t.name}`;
+    b.onclick=()=>runTest(k,i);
+    el.appendChild(b);
+  });
+}
+
+function runTest(k,i){
+  if(solved[i])return;
+  const p=PATIENTS[i];const t=p.tests[k];
+  
+  if(!testsRun[k]){
+    testsRun[k]=true;
+    document.getElementById('tb-'+k).className='test-btn done';
+    const rbox=document.getElementById('test-results');
+    if(Object.keys(testsRun).length===1){
+      rbox.className='test-result show';
+      rbox.innerHTML='';
+    } else {
+      rbox.innerHTML+='<hr style="border-color:rgba(251,146,60,.1);margin:6px 0">';
+    }
+    rbox.innerHTML+=`<strong style="color:#fb923c">${t.icon} ${t.name}:</strong><br>${t.result}<br>`;
+  }
+
+  if(k==='spo2'){
+    const spo2=p.spo2;
+    document.getElementById('spo2-val').textContent=spo2+'%';
+    document.getElementById('spo2-bar').style.width=spo2+'%';
+    document.getElementById('spo2-bar').style.background=spo2>=95?'#34d399':spo2>=90?'#fbbf24':'#ef4444';
+    drawLungs(i,true,spo2);
+  }
+}
+
+function buildTreatments(i){
+  const p=PATIENTS[i];
+  const el=document.getElementById('treat-grid');el.innerHTML='';
+  TREATMENTS.forEach(t=>{
+    const b=document.createElement('div');
+    b.className='treat-btn';
+    b.innerHTML=`<span class="treat-icon">${t.icon}</span> ${t.label}`;
+    if(solved[i]){
+      b.className='treat-btn '+(t.id===p.treatment?'ok':'');
+      b.style.pointerEvents='none';
+    }
+    b.onclick=()=>pickTreatment(t.id,b,i);
+    el.appendChild(b);
+  });
+}
+
+function pickTreatment(val,btn,i){
+  if(answered)return;
+  if(Object.keys(testsRun).length<3){
+    alert('Алдымен барлық 3 тексеруді (Спирометрия, Пульсоксиметрия, Стетоскоп) өткізіңіз!');
+    return;
+  }
+  
+  answered=true;solved[i]=true;
+  const p=PATIENTS[i];
+  const ok=(val===p.treatment);
+  
+  document.querySelectorAll('.treat-btn').forEach(b=>b.style.pointerEvents='none');
+  btn.classList.add(ok?'ok':'bad');
+  if(!ok){
+    document.querySelectorAll('.treat-btn').forEach(b=>{
+      if(b.innerHTML.includes(TREATMENTS.find(t=>t.id===p.treatment).label)) b.classList.add('ok');
+    });
+  }
+  
+  if(ok){score+=10;document.getElementById('snav').textContent='🟢 Жалғасуда';}
+  document.getElementById('pb-'+i).classList.add('solved');
+  
+  const exp=document.getElementById('exp');exp.className='exp show';
+  exp.innerHTML=(ok?`<strong>✅ Дұрыс ем!</strong>`:`<strong>❌ Қате ем таңдалды.</strong>`)+'<br>'+p.why;
+  
+  const nb=document.getElementById('nbtn');nb.className='nbtn show';
+  nb.textContent=Object.keys(solved).length<PATIENTS.length?'Келесі пациент →':'Нәтижені көру';
+}
+
+function nextPat(){
+  const next=PATIENTS.findIndex((_,i)=>!solved[i]);
+  if(next!==-1)selectPat(next);else showEnd();
+}
+
+function drawLungs(i,showSpo2,spo2){
+  if(!lc)return;
+  lc.width=lc.offsetWidth;lc.height=lc.offsetHeight;
+  const w=lc.width,h=lc.height;
+  
+  const color=!showSpo2?'rgba(251,146,60,.4)':spo2>=95?'rgba(52,211,153,.6)':spo2>=90?'rgba(251,191,36,.6)':'rgba(239,68,68,.6)';
+  const fillColor=!showSpo2?'rgba(251,146,60,.05)':spo2>=95?'rgba(52,211,153,.08)':spo2>=90?'rgba(251,191,36,.1)':'rgba(239,68,68,.15)';
+  
+  lctx.clearRect(0,0,w,h);
+  
+  // Trachea
+  lctx.beginPath();lctx.moveTo(w*.5,h*.1);lctx.lineTo(w*.5,h*.35);
+  lctx.strokeStyle='rgba(251,146,60,.4)';lctx.lineWidth=4;lctx.stroke();
+  // Bronchi
+  lctx.beginPath();lctx.moveTo(w*.5,h*.35);lctx.lineTo(w*.35,h*.45);lctx.stroke();
+  lctx.beginPath();lctx.moveTo(w*.5,h*.35);lctx.lineTo(w*.65,h*.45);lctx.stroke();
+  
+  // Lungs
+  [[w*.28,h*.65,70,50],[w*.72,h*.65,70,50]].forEach(([cx,cy,rx,ry])=>{
+    lctx.beginPath();lctx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);
+    lctx.fillStyle=fillColor;lctx.fill();
+    lctx.strokeStyle=color;lctx.lineWidth=2;lctx.stroke();
+  });
+  
+  lctx.fillStyle='rgba(255,255,255,.5)';lctx.font='bold 12px Orbitron';lctx.textAlign='center';
+  lctx.fillText(showSpo2?`SpO₂: ${spo2}%`:'← Аспаптарды қолданыңыз',w*.5,h*.9);
+}
+
+function showEnd(){
+  document.getElementById('fscore').textContent='Тәжірибе сәтті аяқталды!';
+  document.getElementById('fbody').innerHTML=`
+    💨 <b>Ингалятор</b> — бронхоспазм кезінде (Демікпе)<br>
+    💊 <b>Антибиотик</b> — инфекция мен сұйықтық кезінде (Пневмония)<br>
+    🚭 <b>Темекіні тастау</b> — обструкция мен ХОБЛ кезінде<br>
+    📊 <b>Спирометрия</b> — өкпе көлемі мен обструкцияны көрсетеді`;
+  document.getElementById('end-sc').style.display='flex';
+}
+</script>
+
+<!-- Global Language Switcher -->
+<div id="google_translate_element" style="display:none;"></div>
+<script type="text/javascript">
+function googleTranslateElementInit(){new google.translate.TranslateElement({pageLanguage:'kk',includedLanguages:'ru,en,kk',autoDisplay:false},'google_translate_element');}
+</script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script>
+(function(){let l=localStorage.getItem('vsh-lang')||'kk';let g='/kk/'+l;if(l==='kk'){document.cookie="googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";if(location.hostname){document.cookie="googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain="+location.hostname+"; path=/;";document.cookie="googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=."+location.hostname+"; path=/;";}}else{document.cookie="googtrans="+g+"; path=/";if(location.hostname)document.cookie="googtrans="+g+"; domain="+location.hostname+"; path=/";}
+if(!document.querySelector('.floating-lang-switcher')){const s=document.createElement('style');s.innerHTML=`body{top:0!important}.skiptranslate{display:none!important}.floating-lang-switcher{position:fixed;bottom:20px;left:20px;background:rgba(15,23,42,.9);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:10px;display:flex;gap:10px;z-index:999999;box-shadow:0 5px 15px rgba(0,0,0,.5)}.floating-lang-btn{background:transparent;border:1px solid rgba(255,255,255,.2);color:#94a3b8;font-size:14px;font-weight:600;padding:8px 15px;border-radius:12px;cursor:pointer;transition:.3s}.floating-lang-btn:hover{color:#fff;background:rgba(255,255,255,.1)}.floating-lang-btn.active{background:linear-gradient(135deg,#a855f7,#3b82f6);color:#fff;border-color:transparent}`;document.head.appendChild(s);const sw=document.createElement('div');sw.className='floating-lang-switcher notranslate';sw.innerHTML=`<button class="floating-lang-btn" onclick="changeLangGlobal('ru')">RU</button><button class="floating-lang-btn" onclick="changeLangGlobal('kk')">ҚАЗ</button><button class="floating-lang-btn" onclick="changeLangGlobal('en')">EN</button>`;const bs=sw.querySelectorAll('.floating-lang-btn');if(l==='ru')bs[0].classList.add('active');else if(l==='kk')bs[1].classList.add('active');else bs[2].classList.add('active');document.body.appendChild(sw);}})();
+function changeLangGlobal(lang){localStorage.setItem('vsh-lang',lang);let g='/kk/'+lang;if(lang==='kk'){document.cookie="googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";if(location.hostname){document.cookie="googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain="+location.hostname+"; path=/;";document.cookie="googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=."+location.hostname+"; path=/;";}}else{document.cookie="googtrans="+g+"; path=/";if(location.hostname)document.cookie="googtrans="+g+"; domain="+location.hostname+"; path=/";}location.reload();}
+</script>
+</body></html>

@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Эксперимент: Химические Реакции — Virtual Science Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Roboto', sans-serif; user-select: none; }
+        body { 
+            background: linear-gradient(135deg, #0f172a 0%, #020617 100%); 
+            color: #fff; height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+        }
+
+        .header { text-align: center; padding: 15px; background: rgba(0,0,0,0.5); z-index: 10; border-bottom: 1px solid #1e293b; }
+        .header h1 { font-size: 32px; color: #a855f7; text-shadow: 0 0 15px rgba(168,85,247,0.5); margin-bottom: 5px; }
+        .header p { color: #cbd5e1; font-size: 15px; }
+
+        .lab { flex: 1; display: flex; position: relative; }
+
+        /* Left Dashboard */
+        .dashboard { width: 350px; background: rgba(15,23,42,0.9); padding: 30px; display: flex; flex-direction: column; gap: 20px; border-right: 1px solid #1e293b; z-index: 10; }
+        .board-title { color: #a855f7; font-size: 16px; text-transform: uppercase; font-weight: bold; border-bottom: 2px solid #a855f7; padding-bottom: 5px; }
+        
+        .equation-box {
+            background: rgba(0,0,0,0.4); border: 2px solid #334155; border-radius: 12px; padding: 20px;
+            font-family: monospace; font-size: 24px; text-align: center; color: #f8fafc; font-weight: bold; min-height: 80px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        
+        .desc-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; font-size: 14px; color: #cbd5e1; line-height: 1.5; min-height: 100px; }
+        .type-badge { display: inline-block; padding: 5px 10px; background: #a855f7; color: white; border-radius: 6px; font-size: 12px; font-weight: bold; margin-bottom: 10px; }
+
+        .btn-reset { background: rgba(239,68,68,0.2); border: 2px solid #ef4444; color: #fca5a5; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; text-align: center; transition: 0.2s; margin-top: auto; }
+        .btn-reset:hover { background: #ef4444; color: white; }
+
+        /* Work Area */
+        .workspace { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; background: radial-gradient(circle at 50% 50%, #1e293b 0%, transparent 100%); }
+
+        /* Flasks on a shelf */
+        .shelf { display: flex; gap: 20px; background: rgba(255,255,255,0.05); padding: 20px 40px; border-radius: 20px; border-bottom: 10px solid #334155; position: relative; }
+        
+        .reagent {
+            width: 60px; height: 90px; position: relative; cursor: pointer; transition: 0.2s;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+        }
+        .reagent:hover { transform: translateY(-10px) scale(1.1); }
+        .reagent.used { filter: grayscale(100%); opacity: 0.5; pointer-events: none; }
+        
+        /* Flask drawing */
+        .r-flask { width: 40px; height: 40px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.4); border-top: none; position: relative; }
+        .r-flask::before { content: ''; position: absolute; top: -20px; left: 10px; width: 14px; height: 20px; border: 3px solid rgba(255,255,255,0.4); border-bottom: none; }
+        .r-liquid { position: absolute; bottom: 0; width: 100%; height: 60%; border-radius: 0 0 20px 20px; }
+        .r-label { background: #fff; color: #000; font-size: 12px; font-weight: bold; padding: 2px 6px; border-radius: 4px; position: absolute; bottom: -25px; white-space: nowrap; }
+
+        /* Main Beaker */
+        .beaker-container { position: relative; width: 200px; height: 250px; }
+        .main-beaker {
+            width: 100%; height: 100%; border: 6px solid rgba(255,255,255,0.3); border-top: none;
+            border-radius: 0 0 30px 30px; position: relative; overflow: hidden;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.5), 0 20px 30px rgba(0,0,0,0.5);
+            background: rgba(255,255,255,0.05); /* empty look */
+        }
+        .main-beaker::before { content: ''; position: absolute; top: -6px; left: -10px; width: calc(100% + 20px); height: 6px; background: rgba(255,255,255,0.3); border-radius: 50%; }
+
+        .m-liquid {
+            position: absolute; bottom: 0; width: 100%; height: 0%; background: transparent;
+            transition: all 1s ease-in-out; border-radius: 0 0 24px 24px;
+        }
+
+        /* Effects */
+        .precipitate { position: absolute; bottom: 0; width: 100%; height: 0; background: #fff; opacity: 0; transition: 2s; }
+        .bubble { position: absolute; background: rgba(255,255,255,0.6); border-radius: 50%; bottom: 10px; opacity: 0; }
+        
+        .fire { position: absolute; bottom: 50%; left: 50%; transform: translateX(-50%); width: 100px; height: 100px; background: radial-gradient(circle, #facc15 0%, #ef4444 50%, transparent 100%); filter: blur(10px); opacity: 0; transition: 0.5s; mix-blend-mode: screen; animation: flicker 0.1s infinite alternate;}
+        @keyframes flicker { 0% { transform: translateX(-50%) scale(1); } 100% { transform: translateX(-50%) scale(1.1); } }
+
+        .btn-back { position: absolute; top: 15px; left: 20px; background: rgba(255,255,255,0.1); color: white; text-decoration: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; z-index: 100; transition: 0.2s; }
+        .btn-back:hover { background: rgba(255,255,255,0.2); }
+
+        /* Animations for dropping reagents */
+        @keyframes dropIn { 0% { opacity: 0; transform: translateY(-50px); } 50% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(50px); } }
+        .drop-anim { position: absolute; top: -50px; left: 50%; transform: translateX(-50%); font-size: 30px; animation: dropIn 1s forwards; z-index: 5;}
+    </style>
+
+    <script id="early-lang-sync">
+        (function() {
+            let cl = localStorage.getItem('vsh-lang') || 'kk';
+            var gt = '/ru/' + cl;
+            if (cl === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+                document.cookie = "googtrans=" + gt + "; path=/";
+                if (location.hostname) {
+                    document.cookie = "googtrans=" + gt + "; domain=" + location.hostname + "; path=/";
+                    document.cookie = "googtrans=" + gt + "; domain=." + location.hostname + "; path=/";
+                }
+            }
+        })();
+    </script>
+</head>
+<body>
+
+    <a href="index.html" class="btn-back">⬅ В меню</a>
+
+    <div class="header">
+        <h1>🧪 Химические Реакции</h1>
+        <p>Кликайте по реактивам на полке, чтобы добавить их в колбу и наблюдать визуальный эффект.</p>
+    </div>
+
+    <div class="lab">
+        <div class="dashboard">
+            <div class="board-title">Уравнение реакции</div>
+            <div class="equation-box" id="eqBox">
+                <span style="color:#64748b; font-size:16px;">Добавьте реагенты</span>
+            </div>
+
+            <div class="board-title">Анализ процесса</div>
+            <div class="desc-box" id="descBox">
+                <div class="type-badge" id="rType" style="display:none;"></div>
+                <p id="rDesc">Ожидание действий... Смешайте два разных химических вещества.</p>
+            </div>
+
+            <div class="btn-reset" onclick="resetLab()">Слить в раковину 🚰</div>
+        </div>
+
+        <div class="workspace">
+            <div class="shelf" id="shelf">
+                <!-- Reagents generated by JS -->
+            </div>
+
+            <div class="beaker-container" id="beakerCont">
+                <div class="main-beaker">
+                    <div class="m-liquid" id="m-liquid"></div>
+                    <div class="precipitate" id="precip"></div>
+                    <div class="fire" id="fire"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const reagents = [
+            { id: 'HCl', name: 'HCl', color: 'rgba(200,200,200,0.3)', desc: 'Кислота' },
+            { id: 'NaOH', name: 'NaOH', color: 'rgba(200,200,200,0.3)', desc: 'Щелочь' },
+            { id: 'AgNO3', name: 'AgNO₃', color: 'rgba(200,200,200,0.3)', desc: 'Нитрат серебра' },
+            { id: 'NaCl', name: 'NaCl', color: 'rgba(200,200,200,0.3)', desc: 'Соль' },
+            { id: 'CuSO4', name: 'CuSO₄', color: 'rgba(56,189,248,0.7)', desc: 'Сульфат меди' },
+            { id: 'Fe', name: 'Fe (стружка)', color: '#475569', desc: 'Железо', isSolid: true },
+            { id: 'Na', name: 'Na (кусок)', color: '#d1d5db', desc: 'Натрий', isSolid: true }
+        ];
+
+        // Define reaction engine
+        const reactions = [
+            { 
+                pair: ['HCl', 'NaOH'], 
+                eq: 'HCl + NaOH → NaCl + H₂O', 
+                type: 'Нейтрализация', 
+                desc: 'Классическая реакция обмена между сильной кислотой и щелочью. Образуется соль и вода. Выделяется тепло.',
+                resultColor: 'rgba(200,200,200,0.3)',
+                effect: 'heat'
+            },
+            { 
+                pair: ['AgNO3', 'NaCl'], 
+                eq: 'AgNO₃ + NaCl → AgCl↓ + NaNO₃', 
+                type: 'Осаждение', 
+                desc: 'Реакция обмена приводящая к образованию нерастворимого белого творожистого осадка хлорида серебра (AgCl).',
+                resultColor: 'rgba(255,255,255,0.8)',
+                effect: 'precipitate'
+            },
+            { 
+                pair: ['CuSO4', 'Fe'], 
+                eq: 'CuSO₄ + Fe → FeSO₄ + Cu↓', 
+                type: 'Замещение', 
+                desc: 'Железо более активно, чем медь. Оно вытесняет медь из раствора её соли. Синий цвет раствора пропадает, оседает красная медь.',
+                resultColor: 'rgba(163,230,53,0.3)', // FeSO4 is pale green
+                effect: 'rust'
+            },
+            { 
+                pair: ['Na', 'HCl'], 
+                eq: '2Na + 2HCl → 2NaCl + H₂↑', 
+                type: 'Замещение (Взрыв)', 
+                desc: 'ОЧЕНЬ ОПАСНО! Щелочной металл бурно реагирует с кислотой, выделяя огромное количество тепла и взрывоопасный водород.',
+                resultColor: 'rgba(200,200,200,0.3)',
+                effect: 'fire'
+            }
+        ];
+
+        let selected = [];
+        const mLiquid = document.getElementById('m-liquid');
+        const eqBox = document.getElementById('eqBox');
+
+        // Build shelf
+        const shelf = document.getElementById('shelf');
+        reagents.forEach(r => {
+            const el = document.createElement('div');
+            el.className = 'reagent';
+            el.id = 'r-' + r.id;
+            
+            if (r.isSolid) {
+                el.innerHTML = `<div style="font-size:30px; margin-bottom:5px;">🪨</div><div class="r-label">${r.name}</div>`;
+            } else {
+                el.innerHTML = `<div class="r-flask"><div class="r-liquid" style="background:${r.color};"></div></div><div class="r-label">${r.name}</div>`;
+            }
+            el.onclick = () => addReagent(r);
+            shelf.appendChild(el);
+        });
+
+        function addReagent(r) {
+            if (selected.length >= 2) return; // Beaker full
+
+            selected.push(r);
+            document.getElementById('r-' + r.id).classList.add('used');
+
+            // Visual drop animation
+            const drop = document.createElement('div');
+            drop.className = 'drop-anim';
+            drop.textContent = r.isSolid ? '🪨' : '💧';
+            document.getElementById('beakerCont').appendChild(drop);
+            setTimeout(()=>drop.remove(), 1000);
+
+            // Fill beaker logic
+            if (selected.length === 1) {
+                mLiquid.style.height = '40%';
+                if (!r.isSolid) mLiquid.style.background = r.color;
+                else mLiquid.style.background = 'transparent'; // solid just drops to bottom
+
+                eqBox.innerHTML = `${r.name} + ?`;
+            } 
+            else if (selected.length === 2) {
+                mLiquid.style.height = '80%';
+                if (!r.isSolid && selected[0].isSolid) mLiquid.style.background = r.color;
+                else if (!r.isSolid && !selected[0].isSolid) {
+                    // blend colors simple math not needed, wait for reaction
+                }
+                setTimeout(() => processReaction(), 800);
+            }
+        }
+
+        function processReaction() {
+            const id1 = selected[0].id;
+            const id2 = selected[1].id;
+            
+            // Find reaction
+            const rxInfo = reactions.find(rx => 
+                (rx.pair.includes(id1) && rx.pair.includes(id2))
+            );
+
+            const rBadge = document.getElementById('rType');
+            const rDesc = document.getElementById('rDesc');
+
+            if (rxInfo) {
+                eqBox.innerHTML = rxInfo.eq;
+                rBadge.style.display = 'inline-block';
+                rBadge.textContent = rxInfo.type;
+                rDesc.textContent = rxInfo.desc;
+
+                // Execute visual effects
+                mLiquid.style.background = rxInfo.resultColor;
+                
+                if (rxInfo.effect === 'precipitate') {
+                    const p = document.getElementById('precip');
+                    p.style.background = '#fff';
+                    p.style.opacity = '1';
+                    p.style.height = '20px';
+                }
+                else if (rxInfo.effect === 'heat') {
+                    // boil bubbles
+                    createBubbles();
+                }
+                else if (rxInfo.effect === 'rust') {
+                    const p = document.getElementById('precip');
+                    p.style.background = '#b45309'; // copper color
+                    p.style.opacity = '1';
+                    p.style.height = '15px';
+                }
+                else if (rxInfo.effect === 'fire') {
+                    document.getElementById('fire').style.opacity = '1';
+                    createBubbles();
+                    // flash screen
+                    const bd = document.querySelector('body');
+                    bd.style.background = '#ef4444';
+                    setTimeout(()=>bd.style.background = '', 200);
+                }
+
+                // Color header
+                document.querySelector('.header h1').style.color = '#4ade80';
+                document.querySelector('.header h1').style.textShadow = '0 0 15px rgba(74,222,128,0.5)';
+            } else {
+                // No reaction
+                eqBox.innerHTML = '<span style="color:#ef4444">Реакция не идет ❌</span>';
+                rBadge.style.display = 'none';
+                rDesc.textContent = 'Эти вещества не реагируют друг с другом в обычных условиях.';
+            }
+        }
+
+        let bubInt;
+        function createBubbles() {
+            bubInt = setInterval(() => {
+                const b = document.createElement('div');
+                b.className = 'bubble';
+                const size = Math.random() * 8 + 4;
+                b.style.width = size + 'px';
+                b.style.height = size + 'px';
+                b.style.left = (Math.random() * 80 + 10) + '%';
+                b.style.animation = 'dropIn 2s forwards reverse'; // float up
+                document.getElementById('beakerCont').appendChild(b);
+                setTimeout(()=>b.remove(), 2000);
+            }, 100);
+            setTimeout(()=>clearInterval(bubInt), 3000);
+        }
+
+        function resetLab() {
+            selected = [];
+            document.querySelectorAll('.reagent').forEach(el=>el.classList.remove('used'));
+            
+            mLiquid.style.height = '0%';
+            mLiquid.style.background = 'transparent';
+            
+            const p = document.getElementById('precip');
+            p.style.opacity = '0'; p.style.height = '0';
+            
+            document.getElementById('fire').style.opacity = '0';
+            clearInterval(bubInt);
+
+            eqBox.innerHTML = '<span style="color:#64748b; font-size:16px;">Добавьте реагенты</span>';
+            document.getElementById('rType').style.display = 'none';
+            document.getElementById('rDesc').textContent = 'Ожидание действий... Смешайте два разных химических вещества.';
+
+            document.querySelector('.header h1').style.color = '#a855f7';
+            document.querySelector('.header h1').style.textShadow = '0 0 15px rgba(168,85,247,0.5)';
+        }
+    </script>
+
+<!-- Global Language Switcher & Google Translate -->
+<div id="google_translate_element" style="display:none;"></div>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({pageLanguage: 'ru', includedLanguages: 'ru,en,kk', autoDisplay: false}, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script>
+(function() {
+    let currentLang = localStorage.getItem('vsh-lang') || 'kk';
+
+    // Synchronize cookie if needed
+    var gtrans = '/ru/' + currentLang;
+    if (currentLang === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) {
+            document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+        }
+    }
+
+    // Floating UI
+    const isIndex = location.pathname.endsWith('index.html') || location.pathname.endsWith('/') || location.pathname.endsWith('studio.html');
+    if (!document.querySelector('.floating-lang-switcher')) {
+        const style = document.createElement('style');
+        style.innerHTML = `
+            body { top: 0 !important; }
+            .skiptranslate { display: none !important; }
+            .floating-lang-switcher {
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                background: rgba(15, 23, 42, 0.9);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 20px;
+                padding: 10px;
+                display: flex;
+                gap: 10px;
+                z-index: 999999;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+                font-family: 'Roboto', sans-serif;
+            }
+            .floating-lang-btn {
+                background: transparent;
+                border: 1px solid rgba(255,255,255,0.2);
+                color: #94a3b8;
+                font-size: 14px;
+                font-weight: 600;
+                padding: 8px 15px;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: 0.3s;
+            }
+            .floating-lang-btn:hover {
+                color: #fff;
+                background: rgba(255,255,255,0.1);
+            }
+            .floating-lang-btn.active {
+                background: linear-gradient(135deg, #a855f7, #3b82f6);
+                color: #fff;
+                border-color: transparent;
+            }
+        `;
+        document.head.appendChild(style);
+
+        const switcher = document.createElement('div');
+        switcher.className = 'floating-lang-switcher notranslate';
+        switcher.innerHTML = `
+            <button class="floating-lang-btn " onclick="changeLangGlobal('ru')">RU</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('kk')">ҚАЗ</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('en')">EN</button>
+        `;
+        
+        // set active
+        const btns = switcher.querySelectorAll('.floating-lang-btn');
+        if (currentLang === 'ru') btns[0].classList.add('active');
+        else if (currentLang === 'kk') btns[1].classList.add('active');
+        else if (currentLang === 'en') btns[2].classList.add('active');
+
+        document.body.appendChild(switcher);
+    }
+})();
+
+function changeLangGlobal(lang) {
+    localStorage.setItem('vsh-lang', lang);
+    var gtrans = '/ru/' + lang;
+    if (lang === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+    }
+    location.reload();
+}
+</script>
+\n</body>
+</html>

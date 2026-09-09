@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Таблица Менделеева — Virtual Science Hub</title>
+    <meta name="description" content="Интерактивная таблица Менделеева с информацией об элементах">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body.page-tool {
+            background: #0b0d17;
+        }
+
+        .tool-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 2rem;
+            background: rgba(255, 255, 255, 0.04);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+        }
+
+        .tool-header h1 {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .tool-header p {
+            font-size: 0.8rem;
+            color: #a0a0a0;
+        }
+
+        .btn-back-home {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: #a0a0a0;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-back-home:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+        }
+
+        .pt-container {
+            padding: 1.5rem 1rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .pt-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.72rem;
+            color: #a0a0a0;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+
+        .pt-grid {
+            display: grid;
+            grid-template-columns: repeat(18, 1fr);
+            gap: 3px;
+        }
+
+        .el-cell {
+            aspect-ratio: 1;
+            border-radius: 6px;
+            padding: 3px;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(0.4rem, 0.8vw, 0.7rem);
+            border: 1px solid transparent;
+            position: relative;
+            min-width: 0;
+        }
+
+        .el-cell:hover {
+            transform: scale(1.15);
+            z-index: 10;
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+        }
+
+        .el-num {
+            font-size: 0.55em;
+            opacity: 0.7;
+            line-height: 1;
+        }
+
+        .el-sym {
+            font-size: 1.4em;
+            font-weight: 800;
+            line-height: 1.1;
+        }
+
+        .el-name-short {
+            font-size: 0.55em;
+            opacity: 0.75;
+            text-align: center;
+            line-height: 1;
+        }
+
+        .el-empty {
+            background: transparent;
+            border: none;
+            cursor: default;
+        }
+
+        .el-label {
+            background: transparent;
+            cursor: default;
+            font-size: 0.65em;
+            color: #555;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        /* Category colors */
+        .cat-alkali {
+            background: rgba(255, 85, 85, 0.25);
+            color: #ff8888;
+        }
+
+        .cat-alkaline {
+            background: rgba(255, 160, 60, 0.25);
+            color: #ffa03c;
+        }
+
+        .cat-lanthanide {
+            background: rgba(255, 210, 80, 0.2);
+            color: #ffd250;
+        }
+
+        .cat-actinide {
+            background: rgba(160, 100, 255, 0.2);
+            color: #a064ff;
+        }
+
+        .cat-transition {
+            background: rgba(255, 120, 180, 0.2);
+            color: #ff78b4;
+        }
+
+        .cat-post {
+            background: rgba(80, 220, 160, 0.2);
+            color: #50dca0;
+        }
+
+        .cat-metalloid {
+            background: rgba(80, 200, 255, 0.2);
+            color: #50c8ff;
+        }
+
+        .cat-nonmetal {
+            background: rgba(120, 200, 80, 0.2);
+            color: #78c850;
+        }
+
+        .cat-halogen {
+            background: rgba(0, 243, 255, 0.18);
+            color: #00f3ff;
+        }
+
+        .cat-noble {
+            background: rgba(188, 19, 254, 0.2);
+            color: #bc13fe;
+        }
+
+        /* Lanthanide/Actinide rows label */
+        .series-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6em;
+            color: #555;
+            writing-mode: horizontal-tb;
+            text-align: center;
+        }
+
+        /* Modal */
+        .el-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.15s ease;
+        }
+
+        .el-modal {
+            background: rgba(10, 15, 30, 0.95);
+            border: 2px solid #00f3ff;
+            border-radius: 24px;
+            padding: 2rem;
+            max-width: 420px;
+            width: 90%;
+            position: relative;
+            box-shadow: 0 0 50px rgba(0, 243, 255, 0.3), inset 0 0 20px rgba(0, 243, 255, 0.2);
+            animation: popIn 0.3s ease-out;
+            pointer-events: all;
+        }
+
+        .el-hologram {
+            position: relative; width: 150px; height: 150px; margin: 0 auto 20px;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .holo-core { font-size: 40px; font-weight: 900; color: #fff; text-shadow: 0 0 20px #00f3ff, 0 0 40px #00f3ff; z-index: 5;}
+        
+        .orbit { position: absolute; border: 1px dashed rgba(0,243,255,0.5); border-radius: 50%; top:50%; left:50%; transform: translate(-50%, -50%); }
+        .orbit::after { content:''; position: absolute; width:6px; height:6px; background:#00f3ff; border-radius:50%; top:-3px; left:50%; box-shadow: 0 0 10px #00f3ff; }
+        
+        .orbit-1 { width: 80px; height: 80px; animation: spin 4s linear infinite; }
+        .orbit-2 { width: 110px; height: 110px; animation: spin 6s linear infinite reverse; }
+        .orbit-3 { width: 140px; height: 140px; animation: spin 9s linear infinite; }
+        
+        @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.85);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .el-modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.07);
+            border: none;
+            color: #a0a0a0;
+            border-radius: 8px;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .el-modal-close:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+        }
+
+        .el-modal-top {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .el-modal-symbol {
+            font-size: 4rem;
+            font-weight: 800;
+            line-height: 1;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .el-modal-meta {
+            flex: 1;
+        }
+
+        .el-modal-meta h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .el-modal-meta .el-modal-num {
+            color: #a0a0a0;
+            font-size: 0.9rem;
+        }
+
+        .el-modal-meta .el-modal-mass {
+            font-size: 1rem;
+            color: #00f3ff;
+            margin-top: 4px;
+            font-weight: 600;
+        }
+
+        .el-props {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .el-prop {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 10px;
+            padding: 10px 12px;
+        }
+
+        .el-prop-label {
+            font-size: 0.72rem;
+            color: #777;
+            margin-bottom: 4px;
+        }
+
+        .el-prop-value {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .el-modal-cat {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .el-electron-config {
+            margin-top: 1rem;
+            padding: 10px 12px;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 10px;
+            font-size: 0.8rem;
+            color: #a0a0a0;
+            line-height: 1.6;
+        }
+
+        .el-electron-config strong {
+            color: #fff;
+        }
+
+        @media (max-width: 900px) {
+            .pt-grid {
+                grid-template-columns: repeat(18, minmax(0, 1fr));
+                gap: 2px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .el-name-short {
+                display: none;
+            }
+
+            .el-sym {
+                font-size: 1.2em;
+            }
+        }
+    </style>
+
+    <script id="early-lang-sync">
+        (function() {
+            let cl = localStorage.getItem('vsh-lang') || 'kk';
+            var gt = '/ru/' + cl;
+            if (cl === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+                document.cookie = "googtrans=" + gt + "; path=/";
+                if (location.hostname) {
+                    document.cookie = "googtrans=" + gt + "; domain=" + location.hostname + "; path=/";
+                    document.cookie = "googtrans=" + gt + "; domain=." + location.hostname + "; path=/";
+                }
+            }
+        })();
+    </script>
+</head>
+
+<body class="page-tool">
+
+    <header class="tool-header">
+        <a href="index.html" class="btn-back-home">← Главная</a>
+        <div>
+            <h1>🧪 Таблица Менделеева</h1>
+            <p>Кликни на элемент, чтобы узнать подробности</p>
+        </div>
+    </header>
+
+    <div class="pt-container">
+        <!-- Legend -->
+        <div class="pt-legend" id="ptLegend"></div>
+        <!-- Table -->
+        <div class="pt-grid" id="ptGrid"></div>
+    </div>
+
+    <!-- Modal -->
+    <!-- Modal Hologram -->
+    <div class="el-modal-overlay" id="elModal" style="display:none" onclick="closeModal(event)">
+        <div class="el-modal" id="elModalContent">
+            <button class="el-modal-close" onclick="closeModalDirect()">✕</button>
+            
+            <div class="el-hologram">
+                <div class="holo-core" id="holoCore">H</div>
+                <div class="orbit orbit-1"></div>
+                <div class="orbit orbit-2"></div>
+                <div class="orbit orbit-3"></div>
+            </div>
+
+            <div class="el-modal-top" style="justify-content:center; text-align:center;">
+                <div class="el-modal-meta">
+                    <h2 id="mName" style="color:#00f3ff; text-shadow:0 0 10px #00f3ff;">Водород</h2>
+                    <div class="el-modal-num" id="mNum">Атомный номер: 1</div>
+                    <div class="el-modal-mass" id="mMass">1.008 а.е.м.</div>
+                    <div class="el-modal-cat" id="mCat">Неметалл</div>
+                </div>
+            </div>
+
+            <div class="el-props">
+                <div class="el-prop">
+                    <div class="el-prop-label">Группа</div>
+                    <div class="el-prop-value" id="mGroup">—</div>
+                </div>
+                <div class="el-prop">
+                    <div class="el-prop-label">Период</div>
+                    <div class="el-prop-value" id="mPeriod">—</div>
+                </div>
+                <div class="el-prop">
+                    <div class="el-prop-label">Агр. состояние</div>
+                    <div class="el-prop-value" id="mState">—</div>
+                </div>
+                <div class="el-prop">
+                    <div class="el-prop-label">Т° плавления</div>
+                    <div class="el-prop-value" id="mMelt">—</div>
+                </div>
+                <div class="el-prop">
+                    <div class="el-prop-label">Т° кипения</div>
+                    <div class="el-prop-value" id="mBoil">—</div>
+                </div>
+                <div class="el-prop">
+                    <div class="el-prop-label">Плотность</div>
+                    <div class="el-prop-value" id="mDens">—</div>
+                </div>
+            </div>
+            <div class="el-electron-config" id="mConfig" style="text-align:center;">
+                <strong>Электронная конфигурация:</strong><br>
+                <span id="mConfigVal" style="color:#00f3ff; font-family:monospace; font-size:16px;"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ── Element data ──────────────────────────────────────────────────
+        const CATS = {
+            alkali: { name: 'Щелочные металлы', cls: 'cat-alkali' },
+            alkaline: { name: 'Щёлочноземельные', cls: 'cat-alkaline' },
+            lanthanide: { name: 'Лантаноиды', cls: 'cat-lanthanide' },
+            actinide: { name: 'Актиноиды', cls: 'cat-actinide' },
+            transition: { name: 'Переходные металлы', cls: 'cat-transition' },
+            post: { name: 'Постпереходные', cls: 'cat-post' },
+            metalloid: { name: 'Металлоиды', cls: 'cat-metalloid' },
+            nonmetal: { name: 'Неметаллы', cls: 'cat-nonmetal' },
+            halogen: { name: 'Галогены', cls: 'cat-halogen' },
+            noble: { name: 'Благородные газы', cls: 'cat-noble' },
+        };
+
+        const ELEMENTS = [
+            //  Z     sym   name              r    c  mass       cat          state    melt      boil     dens       config
+            [1, 'H', 'Водород', 1, 1, 1.008, 'nonmetal', 'Газ', -259.1, -252.9, 0.0000899, '1s¹'],
+            [2, 'He', 'Гелий', 1, 18, 4.003, 'noble', 'Газ', -272.2, -268.9, 0.0001785, '1s²'],
+            [3, 'Li', 'Литий', 2, 1, 6.94, 'alkali', 'Твёрдое', 180.5, 1342, 0.534, '[He] 2s¹'],
+            [4, 'Be', 'Бериллий', 2, 2, 9.012, 'alkaline', 'Твёрдое', 1287, 2470, 1.85, '[He] 2s²'],
+            [5, 'B', 'Бор', 2, 13, 10.81, 'metalloid', 'Твёрдое', 2075, 4000, 2.37, '[He] 2s² 2p¹'],
+            [6, 'C', 'Углерод', 2, 14, 12.011, 'nonmetal', 'Твёрдое', 3550, 4830, 2.267, '[He] 2s² 2p²'],
+            [7, 'N', 'Азот', 2, 15, 14.007, 'nonmetal', 'Газ', -210.0, -195.8, 0.001251, '[He] 2s² 2p³'],
+            [8, 'O', 'Кислород', 2, 16, 15.999, 'nonmetal', 'Газ', -218.3, -182.9, 0.001429, '[He] 2s² 2p⁴'],
+            [9, 'F', 'Фтор', 2, 17, 18.998, 'halogen', 'Газ', -219.6, -188.1, 0.001696, '[He] 2s² 2p⁵'],
+            [10, 'Ne', 'Неон', 2, 18, 20.18, 'noble', 'Газ', -248.6, -246.1, 0.0009, '[He] 2s² 2p⁶'],
+            [11, 'Na', 'Натрий', 3, 1, 22.99, 'alkali', 'Твёрдое', 97.7, 882.9, 0.97, '[Ne] 3s¹'],
+            [12, 'Mg', 'Магний', 3, 2, 24.305, 'alkaline', 'Твёрдое', 650, 1090, 1.74, '[Ne] 3s²'],
+            [13, 'Al', 'Алюминий', 3, 13, 26.982, 'post', 'Твёрдое', 660.3, 2467, 2.70, '[Ne] 3s² 3p¹'],
+            [14, 'Si', 'Кремний', 3, 14, 28.086, 'metalloid', 'Твёрдое', 1414, 3265, 2.329, '[Ne] 3s² 3p²'],
+            [15, 'P', 'Фосфор', 3, 15, 30.974, 'nonmetal', 'Твёрдое', 44.2, 280.5, 1.823, '[Ne] 3s² 3p³'],
+            [16, 'S', 'Сера', 3, 16, 32.06, 'nonmetal', 'Твёрдое', 113.0, 444.6, 2.067, '[Ne] 3s² 3p⁴'],
+            [17, 'Cl', 'Хлор', 3, 17, 35.45, 'halogen', 'Газ', -101.5, -34.05, 0.003214, '[Ne] 3s² 3p⁵'],
+            [18, 'Ar', 'Аргон', 3, 18, 39.948, 'noble', 'Газ', -189.3, -185.9, 0.001784, '[Ne] 3s² 3p⁶'],
+            [19, 'K', 'Калий', 4, 1, 39.098, 'alkali', 'Твёрдое', 63.5, 759, 0.89, '[Ar] 4s¹'],
+            [20, 'Ca', 'Кальций', 4, 2, 40.078, 'alkaline', 'Твёрдое', 842, 1484, 1.55, '[Ar] 4s²'],
+            [21, 'Sc', 'Скандий', 4, 3, 44.956, 'transition', 'Твёрдое', 1541, 2836, 2.99, '[Ar] 3d¹ 4s²'],
+            [22, 'Ti', 'Титан', 4, 4, 47.867, 'transition', 'Твёрдое', 1668, 3287, 4.51, '[Ar] 3d² 4s²'],
+            [23, 'V', 'Ванадий', 4, 5, 50.942, 'transition', 'Твёрдое', 1910, 3407, 6.0, '[Ar] 3d³ 4s²'],
+            [24, 'Cr', 'Хром', 4, 6, 51.996, 'transition', 'Твёрдое', 1907, 2671, 7.15, '[Ar] 3d⁵ 4s¹'],
+            [25, 'Mn', 'Марганец', 4, 7, 54.938, 'transition', 'Твёрдое', 1246, 2061, 7.44, '[Ar] 3d⁵ 4s²'],
+            [26, 'Fe', 'Железо', 4, 8, 55.845, 'transition', 'Твёрдое', 1538, 2862, 7.87, '[Ar] 3d⁶ 4s²'],
+            [27, 'Co', 'Кобальт', 4, 9, 58.933, 'transition', 'Твёрдое', 1495, 2927, 8.9, '[Ar] 3d⁷ 4s²'],
+            [28, 'Ni', 'Никель', 4, 10, 58.693, 'transition', 'Твёрдое', 1455, 2913, 8.908, '[Ar] 3d⁸ 4s²'],
+            [29, 'Cu', 'Медь', 4, 11, 63.546, 'transition', 'Твёрдое', 1085, 2562, 8.96, '[Ar] 3d¹⁰ 4s¹'],
+            [30, 'Zn', 'Цинк', 4, 12, 65.38, 'transition', 'Твёрдое', 419.5, 907, 7.13, '[Ar] 3d¹⁰ 4s²'],
+            [31, 'Ga', 'Галлий', 4, 13, 69.723, 'post', 'Твёрдое', 29.8, 2204, 5.91, '[Ar] 3d¹⁰ 4s² 4p¹'],
+            [32, 'Ge', 'Германий', 4, 14, 72.63, 'metalloid', 'Твёрдое', 938.3, 2833, 5.323, '[Ar] 3d¹⁰ 4s² 4p²'],
+            [33, 'As', 'Мышьяк', 4, 15, 74.922, 'metalloid', 'Твёрдое', 817, 614, 5.73, '[Ar] 3d¹⁰ 4s² 4p³'],
+            [34, 'Se', 'Селен', 4, 16, 78.971, 'nonmetal', 'Твёрдое', 221, 685, 4.819, '[Ar] 3d¹⁰ 4s² 4p⁴'],
+            [35, 'Br', 'Бром', 4, 17, 79.904, 'halogen', 'Жидкое', -7.3, 58.8, 3.12, '[Ar] 3d¹⁰ 4s² 4p⁵'],
+            [36, 'Kr', 'Криптон', 4, 18, 83.798, 'noble', 'Газ', -157.4, -153.4, 0.003733, '[Ar] 3d¹⁰ 4s² 4p⁶'],
+            [37, 'Rb', 'Рубидий', 5, 1, 85.468, 'alkali', 'Твёрдое', 39.3, 688, 1.532, '[Kr] 5s¹'],
+            [38, 'Sr', 'Стронций', 5, 2, 87.62, 'alkaline', 'Твёрдое', 777, 1382, 2.64, '[Kr] 5s²'],
+            [39, 'Y', 'Иттрий', 5, 3, 88.906, 'transition', 'Твёрдое', 1522, 3345, 4.47, '[Kr] 4d¹ 5s²'],
+            [40, 'Zr', 'Цирконий', 5, 4, 91.224, 'transition', 'Твёрдое', 1855, 4409, 6.52, '[Kr] 4d² 5s²'],
+            [41, 'Nb', 'Ниобий', 5, 5, 92.906, 'transition', 'Твёрдое', 2477, 4744, 8.57, '[Kr] 4d⁴ 5s¹'],
+            [42, 'Mo', 'Молибден', 5, 6, 95.95, 'transition', 'Твёрдое', 2623, 4639, 10.28, '[Kr] 4d⁵ 5s¹'],
+            [43, 'Tc', 'Технеций', 5, 7, 97, 'transition', 'Твёрдое', 2157, 4265, 11.5, '[Kr] 4d⁵ 5s²'],
+            [44, 'Ru', 'Рутений', 5, 8, 101.07, 'transition', 'Твёрдое', 2334, 4150, 12.45, '[Kr] 4d⁷ 5s¹'],
+            [45, 'Rh', 'Родий', 5, 9, 102.91, 'transition', 'Твёрдое', 1964, 3695, 12.41, '[Kr] 4d⁸ 5s¹'],
+            [46, 'Pd', 'Палладий', 5, 10, 106.42, 'transition', 'Твёрдое', 1554.9, 2963, 12.02, '[Kr] 4d¹⁰'],
+            [47, 'Ag', 'Серебро', 5, 11, 107.87, 'transition', 'Твёрдое', 961.8, 2162, 10.49, '[Kr] 4d¹⁰ 5s¹'],
+            [48, 'Cd', 'Кадмий', 5, 12, 112.41, 'transition', 'Твёрдое', 321.1, 767, 8.65, '[Kr] 4d¹⁰ 5s²'],
+            [49, 'In', 'Индий', 5, 13, 114.82, 'post', 'Твёрдое', 156.6, 2072, 7.31, '[Kr] 4d¹⁰ 5s² 5p¹'],
+            [50, 'Sn', 'Олово', 5, 14, 118.71, 'post', 'Твёрдое', 231.9, 2602, 7.29, '[Kr] 4d¹⁰ 5s² 5p²'],
+            [51, 'Sb', 'Сурьма', 5, 15, 121.76, 'metalloid', 'Твёрдое', 630.6, 1587, 6.68, '[Kr] 4d¹⁰ 5s² 5p³'],
+            [52, 'Te', 'Теллур', 5, 16, 127.6, 'metalloid', 'Твёрдое', 449.5, 988, 6.232, '[Kr] 4d¹⁰ 5s² 5p⁴'],
+            [53, 'I', 'Йод', 5, 17, 126.9, 'halogen', 'Твёрдое', 113.7, 184.4, 4.93, '[Kr] 4d¹⁰ 5s² 5p⁵'],
+            [54, 'Xe', 'Ксенон', 5, 18, 131.29, 'noble', 'Газ', -111.8, -108.1, 0.005894, '[Kr] 4d¹⁰ 5s² 5p⁶'],
+            [55, 'Cs', 'Цезий', 6, 1, 132.91, 'alkali', 'Твёрдое', 28.4, 671, 1.879, '[Xe] 6s¹'],
+            [56, 'Ba', 'Барий', 6, 2, 137.33, 'alkaline', 'Твёрдое', 727, 1897, 3.51, '[Xe] 6s²'],
+            [57, 'La', 'Лантан', 6, 3, 138.91, 'lanthanide', 'Твёрдое', 920, 3464, 6.16, '[Xe] 5d¹ 6s²'],
+            [58, 'Ce', 'Церий', 'La', 4, 140.12, 'lanthanide', 'Твёрдое', 795, 3443, 6.77, '[Xe] 4f¹ 5d¹ 6s²'],
+            [59, 'Pr', 'Празеодим', 'La', 5, 140.91, 'lanthanide', 'Твёрдое', 935, 3520, 6.77, '[Xe] 4f³ 6s²'],
+            [60, 'Nd', 'Неодим', 'La', 6, 144.24, 'lanthanide', 'Твёрдое', 1021, 3074, 7.01, '[Xe] 4f⁴ 6s²'],
+            [61, 'Pm', 'Прометий', 'La', 7, 145, 'lanthanide', 'Твёрдое', 1042, 3000, 7.26, '[Xe] 4f⁵ 6s²'],
+            [62, 'Sm', 'Самарий', 'La', 8, 150.36, 'lanthanide', 'Твёрдое', 1074, 1794, 7.52, '[Xe] 4f⁶ 6s²'],
+            [63, 'Eu', 'Европий', 'La', 9, 151.96, 'lanthanide', 'Твёрдое', 822, 1529, 5.24, '[Xe] 4f⁷ 6s²'],
+            [64, 'Gd', 'Гадолиний', 'La', 10, 157.25, 'lanthanide', 'Твёрдое', 1313, 3273, 7.90, '[Xe] 4f⁷ 5d¹ 6s²'],
+            [65, 'Tb', 'Тербий', 'La', 11, 158.93, 'lanthanide', 'Твёрдое', 1356, 3230, 8.23, '[Xe] 4f⁹ 6s²'],
+            [66, 'Dy', 'Диспрозий', 'La', 12, 162.5, 'lanthanide', 'Твёрдое', 1412, 2567, 8.55, '[Xe] 4f¹⁰ 6s²'],
+            [67, 'Ho', 'Гольмий', 'La', 13, 164.93, 'lanthanide', 'Твёрдое', 1474, 2700, 8.80, '[Xe] 4f¹¹ 6s²'],
+            [68, 'Er', 'Эрбий', 'La', 14, 167.26, 'lanthanide', 'Твёрдое', 1529, 2868, 9.07, '[Xe] 4f¹² 6s²'],
+            [69, 'Tm', 'Тулий', 'La', 15, 168.93, 'lanthanide', 'Твёрдое', 1545, 1950, 9.32, '[Xe] 4f¹³ 6s²'],
+            [70, 'Yb', 'Иттербий', 'La', 16, 173.05, 'lanthanide', 'Твёрдое', 824, 1196, 6.90, '[Xe] 4f¹⁴ 6s²'],
+            [71, 'Lu', 'Лютеций', 'La', 17, 174.97, 'lanthanide', 'Твёрдое', 1663, 3402, 9.84, '[Xe] 4f¹⁴ 5d¹ 6s²'],
+            [72, 'Hf', 'Гафний', 6, 4, 178.49, 'transition', 'Твёрдое', 2233, 4603, 13.31, '[Xe] 4f¹⁴ 5d² 6s²'],
+            [73, 'Ta', 'Тантал', 6, 5, 180.95, 'transition', 'Твёрдое', 3017, 5458, 16.65, '[Xe] 4f¹⁴ 5d³ 6s²'],
+            [74, 'W', 'Вольфрам', 6, 6, 183.84, 'transition', 'Твёрдое', 3422, 5555, 19.25, '[Xe] 4f¹⁴ 5d⁴ 6s²'],
+            [75, 'Re', 'Рений', 6, 7, 186.21, 'transition', 'Твёрдое', 3186, 5596, 21.02, '[Xe] 4f¹⁴ 5d⁵ 6s²'],
+            [76, 'Os', 'Осмий', 6, 8, 190.23, 'transition', 'Твёрдое', 3033, 5012, 22.59, '[Xe] 4f¹⁴ 5d⁶ 6s²'],
+            [77, 'Ir', 'Иридий', 6, 9, 192.22, 'transition', 'Твёрдое', 2446, 4428, 22.56, '[Xe] 4f¹⁴ 5d⁷ 6s²'],
+            [78, 'Pt', 'Платина', 6, 10, 195.08, 'transition', 'Твёрдое', 1768, 3825, 21.45, '[Xe] 4f¹⁴ 5d⁹ 6s¹'],
+            [79, 'Au', 'Золото', 6, 11, 196.97, 'transition', 'Твёрдое', 1064, 2856, 19.30, '[Xe] 4f¹⁴ 5d¹⁰ 6s¹'],
+            [80, 'Hg', 'Ртуть', 6, 12, 200.59, 'transition', 'Жидкое', -38.8, 357, 13.53, '[Xe] 4f¹⁴ 5d¹⁰ 6s²'],
+            [81, 'Tl', 'Таллий', 6, 13, 204.38, 'post', 'Твёрдое', 304, 1473, 11.85, '[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p¹'],
+            [82, 'Pb', 'Свинец', 6, 14, 207.2, 'post', 'Твёрдое', 327.4, 1749, 11.34, '[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p²'],
+            [83, 'Bi', 'Висмут', 6, 15, 208.98, 'post', 'Твёрдое', 271.4, 1564, 9.78, '[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p³'],
+            [84, 'Po', 'Полоний', 6, 16, 209, 'post', 'Твёрдое', 254, 962, 9.32, '[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁴'],
+            [85, 'At', 'Астат', 6, 17, 210, 'halogen', 'Твёрдое', 302, 337,    '—', '[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁵'],
+            [86, 'Rn', 'Радон', 6, 18, 222, 'noble', 'Газ', -71, -62, 0.00973, '[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁶'],
+            [87, 'Fr', 'Франций', 7, 1, 223, 'alkali', 'Твёрдое', 27, 677,    '—', '[Rn] 7s¹'],
+            [88, 'Ra', 'Радий', 7, 2, 226, 'alkaline', 'Твёрдое', 700, 1737, 5.5, '[Rn] 7s²'],
+            [89, 'Ac', 'Актиний', 7, 3, 227, 'actinide', 'Твёрдое', 1050, 3200, 10.07, '[Rn] 6d¹ 7s²'],
+            [90, 'Th', 'Торий', 'Ac', 4, 232.04, 'actinide', 'Твёрдое', 1842, 4788, 11.72, '[Rn] 6d² 7s²'],
+            [91, 'Pa', 'Протактиний', 'Ac', 5, 231.04, 'actinide', 'Твёрдое', 1572, 4000, 15.37, '[Rn] 5f² 6d¹ 7s²'],
+            [92, 'U', 'Уран', 'Ac', 6, 238.03, 'actinide', 'Твёрдое', 1135, 4131, 19.05, '[Rn] 5f³ 6d¹ 7s²'],
+            [93, 'Np', 'Нептуний', 'Ac', 7, 237, 'actinide', 'Твёрдое', 644, 4000, 20.45, '[Rn] 5f⁴ 6d¹ 7s²'],
+            [94, 'Pu', 'Плутоний', 'Ac', 8, 244, 'actinide', 'Твёрдое', 640, 3228, 19.77, '[Rn] 5f⁶ 7s²'],
+            [95, 'Am', 'Америций', 'Ac', 9, 243, 'actinide', 'Твёрдое', 1176, 2011, 13.69, '[Rn] 5f⁷ 7s²'],
+            [96, 'Cm', 'Кюрий', 'Ac', 10, 247, 'actinide', 'Твёрдое', 1345, 3110, 13.51, '[Rn] 5f⁷ 6d¹ 7s²'],
+            [97, 'Bk', 'Берклий', 'Ac', 11, 247, 'actinide', 'Твёрдое', 986,    '—', 14.78, '[Rn] 5f⁹ 7s²'],
+            [98, 'Cf', 'Калифорний', 'Ac', 12, 251, 'actinide', 'Твёрдое', 900,    '—', 15.1, '[Rn] 5f¹⁰ 7s²'],
+            [99, 'Es', 'Эйнштейний', 'Ac', 13, 252, 'actinide', 'Твёрдое', 860,    '—',       '—', '[Rn] 5f¹¹ 7s²'],
+            [100, 'Fm', 'Фермий', 'Ac', 14, 257, 'actinide', 'Твёрдое', 1527,    '—',       '—', '[Rn] 5f¹² 7s²'],
+            [101, 'Md', 'Менделевий', 'Ac', 15, 258, 'actinide', 'Твёрдое', 827,    '—',       '—', '[Rn] 5f¹³ 7s²'],
+            [102, 'No', 'Нобелий', 'Ac', 16, 259, 'actinide', 'Твёрдое', 827,    '—',       '—', '[Rn] 5f¹⁴ 7s²'],
+            [103, 'Lr', 'Лоуренсий', 'Ac', 17, 262, 'actinide', 'Твёрдое', 1627,    '—',       '—', '[Rn] 5f¹⁴ 7p¹'],
+            [104, 'Rf', 'Резерфордий', 7, 4, 267, 'transition', 'Твёрдое', 2100, 5500, 23.2, '[Rn] 5f¹⁴ 6d² 7s²'],
+            [105, 'Db', 'Дубний', 7, 5, 268, 'transition', 'Твёрдое', '—',      '—', 29.3, '[Rn] 5f¹⁴ 6d³ 7s²'],
+            [106, 'Sg', 'Сиборгий', 7, 6, 271, 'transition', 'Твёрдое', '—',      '—', 35.0, '[Rn] 5f¹⁴ 6d⁴ 7s²'],
+            [107, 'Bh', 'Бор', 7, 7, 272, 'transition', 'Твёрдое', '—',      '—', 37.1, '[Rn] 5f¹⁴ 6d⁵ 7s²'],
+            [108, 'Hs', 'Хассий', 7, 8, 270, 'transition', 'Твёрдое', '—',      '—', 40.7, '[Rn] 5f¹⁴ 6d⁶ 7s²'],
+            [109, 'Mt', 'Мейтнерий', 7, 9, 276, 'transition', 'Твёрдое', '—',      '—', 37.4, '[Rn] 5f¹⁴ 6d⁷ 7s²'],
+            [110, 'Ds', 'Дармштадтий', 7, 10, 281, 'transition', 'Твёрдое', '—',      '—', 34.8, '[Rn] 5f¹⁴ 6d⁸ 7s²'],
+            [111, 'Rg', 'Рентгений', 7, 11, 280, 'transition', 'Твёрдое', '—',      '—', 28.7, '[Rn] 5f¹⁴ 6d⁹ 7s²'],
+            [112, 'Cn', 'Коперниций', 7, 12, 285, 'transition', 'Жидкое', '—',      '—', 23.7, '[Rn] 5f¹⁴ 6d¹⁰ 7s²'],
+            [113, 'Nh', 'Нихоний', 7, 13, 284, 'post', 'Твёрдое', '—',      '—', 16, '[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p¹'],
+            [114, 'Fl', 'Флеровий', 7, 14, 289, 'post', 'Газ',     '—',      '—', 14, '[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p²'],
+            [115, 'Mc', 'Московий', 7, 15, 288, 'post', 'Твёрдое', '—',      '—', 13.5, '[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p³'],
+            [116, 'Lv', 'Ливерморий', 7, 16, 293, 'post', 'Твёрдое', '—',      '—', 12.9, '[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁴'],
+            [117, 'Ts', 'Теннессин', 7, 17, 294, 'halogen', 'Твёрдое', '—',      '—', 7.2, '[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁵'],
+            [118, 'Og', 'Оганесон', 7, 18, 294, 'noble', 'Газ',     '—',      '—', 5.0, '[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁶'],
+        ];
+
+        // Build grid (18 columns × 9 rows for main + 2 rows for f-block)
+        function buildTable() {
+            const grid = document.getElementById('ptGrid');
+
+            // Init 9-row grid with 18 columns
+            const cells = {};
+            const ROWS = 9, COLS = 18;
+
+            for (const el of ELEMENTS) {
+                const [Z, sym, name, row, col, mass, cat, state, melt, boil, dens, cfg] = el;
+                let r = row, c = col;
+                if (r === 'La') { r = 8; c = c + 3; }   // lanthanides row index 8
+                if (r === 'Ac') { r = 9; c = c + 3; }   // actinides row index 9
+                cells[`${r},${c}`] = el;
+            }
+
+            let html = '';
+
+            // Main rows 1–7
+            for (let r = 1; r <= 7; r++) {
+                for (let c = 1; c <= 18; c++) {
+                    const key = `${r},${c}`;
+                    if (cells[key]) {
+                        const el = cells[key];
+                        html += elCell(el);
+                    } else if (r === 6 && c === 3) {
+                        html += `<div class="el-cell el-label" style="font-size:0.5em;line-height:1.2;color:#666;">57–71<br>Ln</div>`;
+                    } else if (r === 7 && c === 3) {
+                        html += `<div class="el-cell el-label" style="font-size:0.5em;line-height:1.2;color:#666;">89–103<br>An</div>`;
+                    } else {
+                        html += `<div class="el-cell el-empty"></div>`;
+                    }
+                }
+            }
+
+            // Spacer row
+            html += `<div style="grid-column:1/-1;height:12px"></div>`;
+
+            // Lanthanide row (f-block)
+            for (let c = 1; c <= 18; c++) {
+                const key = `8,${c}`;
+                if (cells[key]) {
+                    html += elCell(cells[key]);
+                } else if (c === 1) {
+                    html += `<div class="el-cell el-empty"></div>`;
+                } else if (c === 2) {
+                    html += `<div class="el-cell el-label">Ln</div>`;
+                } else if (c >= 3) {
+                    html += `<div class="el-cell el-empty"></div>`;
+                }
+            }
+
+            // Actinide row
+            for (let c = 1; c <= 18; c++) {
+                const key = `9,${c}`;
+                if (cells[key]) {
+                    html += elCell(cells[key]);
+                } else if (c === 1) {
+                    html += `<div class="el-cell el-empty"></div>`;
+                } else if (c === 2) {
+                    html += `<div class="el-cell el-label">An</div>`;
+                } else if (c >= 3) {
+                    html += `<div class="el-cell el-empty"></div>`;
+                }
+            }
+
+            grid.innerHTML = html;
+        }
+
+        function elCell(el) {
+            const [Z, sym, name, row, col, mass, cat] = el;
+            const cls = (CATS[cat] || { cls: '' }).cls;
+            return `<div class="el-cell ${cls}" onclick="showModal(${Z})" title="${name}">
+        <span class="el-num">${Z}</span>
+        <span class="el-sym">${sym}</span>
+        <span class="el-name-short">${name.length > 8 ? name.slice(0, 7) + '…' : name}</span>
+    </div>`;
+        }
+
+        function buildLegend() {
+            const el = document.getElementById('ptLegend');
+            el.innerHTML = Object.entries(CATS).map(([k, v]) =>
+                `<div class="legend-item">
+            <div class="legend-dot ${v.cls}" style="background:var(--dot-bg)"></div>
+            <span>${v.name}</span>
+        </div>`
+            ).join('');
+            // apply category colors to legend dots
+            document.querySelectorAll('.legend-item').forEach((item, i) => {
+                const catCls = Object.values(CATS)[i].cls;
+                item.querySelector('.legend-dot').className = `legend-dot ${catCls}`;
+                item.querySelector('.legend-dot').style.opacity = '1';
+            });
+        }
+
+        function showModal(Z) {
+            const el = ELEMENTS.find(e => e[0] === Z);
+            if (!el) return;
+            const [z, sym, name, row, col, mass, cat, state, melt, boil, dens, cfg] = el;
+
+            const catInfo = CATS[cat] || {};
+            const fmt = v => (v === '—' || v == null) ? '—' : v;
+
+            document.getElementById('holoCore').textContent = sym;
+            document.getElementById('mName').textContent = name;
+            document.getElementById('mNum').textContent = `Атомный номер: ${z}`;
+            document.getElementById('mMass').textContent = `${mass} а.е.м.`;
+            const catEl = document.getElementById('mCat');
+            catEl.textContent = catInfo.name || cat;
+            catEl.className = `el-modal-cat ${catInfo.cls || ''}`;
+            catEl.style.background = '';
+
+            document.getElementById('mGroup').textContent = typeof col === 'number' ? col : '—';
+            document.getElementById('mPeriod').textContent = typeof row === 'number' ? row : '—';
+            document.getElementById('mState').textContent = fmt(state);
+            document.getElementById('mMelt').textContent = fmt(melt) + (melt !== '—' && melt != null ? ' °C' : '');
+            document.getElementById('mBoil').textContent = fmt(boil) + (boil !== '—' && boil != null ? ' °C' : '');
+            document.getElementById('mDens').textContent = fmt(dens) + (dens && dens !== '—' ? ' г/см³' : '');
+            document.getElementById('mConfigVal').textContent = cfg;
+
+            document.getElementById('elModal').style.display = 'flex';
+        }
+
+        function closeModal(e) {
+            if (e.target === document.getElementById('elModal')) closeModalDirect();
+        }
+        function closeModalDirect() {
+            document.getElementById('elModal').style.display = 'none';
+        }
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalDirect(); });
+
+        buildTable();
+        buildLegend();
+    </script>
+
+<!-- Global Language Switcher & Google Translate -->
+<div id="google_translate_element" style="display:none;"></div>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({pageLanguage: 'ru', includedLanguages: 'ru,en,kk', autoDisplay: false}, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script>
+(function() {
+    let currentLang = localStorage.getItem('vsh-lang') || 'kk';
+
+    // Synchronize cookie if needed
+    var gtrans = '/ru/' + currentLang;
+    if (currentLang === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) {
+            document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+        }
+    }
+
+    // Floating UI
+    const isIndex = location.pathname.endsWith('index.html') || location.pathname.endsWith('/') || location.pathname.endsWith('studio.html');
+    if (!document.querySelector('.floating-lang-switcher')) {
+        const style = document.createElement('style');
+        style.innerHTML = `
+            body { top: 0 !important; }
+            .skiptranslate { display: none !important; }
+            .floating-lang-switcher {
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                background: rgba(15, 23, 42, 0.9);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 20px;
+                padding: 10px;
+                display: flex;
+                gap: 10px;
+                z-index: 999999;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+                font-family: 'Roboto', sans-serif;
+            }
+            .floating-lang-btn {
+                background: transparent;
+                border: 1px solid rgba(255,255,255,0.2);
+                color: #94a3b8;
+                font-size: 14px;
+                font-weight: 600;
+                padding: 8px 15px;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: 0.3s;
+            }
+            .floating-lang-btn:hover {
+                color: #fff;
+                background: rgba(255,255,255,0.1);
+            }
+            .floating-lang-btn.active {
+                background: linear-gradient(135deg, #a855f7, #3b82f6);
+                color: #fff;
+                border-color: transparent;
+            }
+        `;
+        document.head.appendChild(style);
+
+        const switcher = document.createElement('div');
+        switcher.className = 'floating-lang-switcher notranslate';
+        switcher.innerHTML = `
+            <button class="floating-lang-btn " onclick="changeLangGlobal('ru')">RU</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('kk')">ҚАЗ</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('en')">EN</button>
+        `;
+        
+        // set active
+        const btns = switcher.querySelectorAll('.floating-lang-btn');
+        if (currentLang === 'ru') btns[0].classList.add('active');
+        else if (currentLang === 'kk') btns[1].classList.add('active');
+        else if (currentLang === 'en') btns[2].classList.add('active');
+
+        document.body.appendChild(switcher);
+    }
+})();
+
+function changeLangGlobal(lang) {
+    localStorage.setItem('vsh-lang', lang);
+    var gtrans = '/ru/' + lang;
+    if (lang === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+    }
+    location.reload();
+}
+</script>
+\n</body>
+
+</html>

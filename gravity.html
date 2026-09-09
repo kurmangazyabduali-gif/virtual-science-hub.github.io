@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лаборатория: Гравитация</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <!-- Fake icon placeholder if needed, using emojis mostly -->
+
+    <script id="early-lang-sync">
+        (function() {
+            let cl = localStorage.getItem('vsh-lang') || 'kk';
+            var gt = '/ru/' + cl;
+            if (cl === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+                document.cookie = "googtrans=" + gt + "; path=/";
+                if (location.hostname) {
+                    document.cookie = "googtrans=" + gt + "; domain=" + location.hostname + "; path=/";
+                    document.cookie = "googtrans=" + gt + "; domain=." + location.hostname + "; path=/";
+                }
+            }
+        })();
+    </script>
+</head>
+
+<body class="lab-gravity">
+    <div class="app-container">
+        <!-- Header -->
+        <header class="glass-header">
+            <div class="header-left">
+                <a href="index.html" class="btn-back" title="В главное меню">⬅</a>
+                <h1>Gravity <span class="accent">Sandbox</span></h1>
+            </div>
+            <div class="stats">
+                <div class="stat-item">Объектов: <span id="obj-count">0</span></div>
+                <div class="stat-item">FPS: <span id="fps-counter">60</span></div>
+            </div>
+        </header>
+
+        <!-- Main Simulation Area -->
+        <main class="simulation-container">
+            <canvas id="sim-canvas"></canvas>
+
+            <div id="victory-modal" class="victory-modal">
+                <h2>Победа! 🏀</h2>
+                <p>Мяч в корзине!</p>
+                <button id="btn-next-level" class="btn primary" style="margin-top: 1rem;">Следующий Уровень ➡</button>
+            </div>
+
+            <!-- Floating Controls -->
+            <aside class="controls-panel glass-panel">
+                <div class="control-group header-group">
+                    <h2>Режим Мыши</h2>
+                    <div class="toggle-group" id="mouse-mode-group">
+                        <button class="btn toggle-btn active" data-mode="create" title="Создание">🖱️</button>
+                        <button class="btn toggle-btn" data-mode="attract" title="Магнит">🧲</button>
+                        <button class="btn toggle-btn" data-mode="repel" title="Отталкивание">💥</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h2>Материал</h2>
+                    <select id="material-select" class="custom-select">
+                        <option value="standard">🔵 Стандарт</option>
+                        <option value="lead">⚫ Свинец (Тяжелый)</option>
+                        <option value="bouncy">🟣 Попрыгун (Упругий)</option>
+                        <option value="bubble">⚪ Пузырь (Легкий)</option>
+                    </select>
+                </div>
+
+                <div class="control-group checkbox-group">
+                    <label for="sound-toggle">Звуковые эффекты 🔊</label>
+                    <input type="checkbox" id="sound-toggle">
+                </div>
+
+                <hr class="divider">
+
+                <div id="level-indicator" class="level-indicator">Уровень 1</div>
+                <button id="btn-challenge" class="btn primary"
+                    style="width: 100%; margin-bottom: 10px; background: linear-gradient(45deg, #ff0055, #ff9900);">🎯
+                    Режим Испытаний (Баскетбол)</button>
+
+                <h2>Пресеты (Планеты)</h2>
+                <div class="presets-grid">
+                    <button class="btn preset-btn" data-g="9.8" data-label="Земля">🌍 Земля</button>
+                    <button class="btn preset-btn" data-g="1.6" data-label="Луна">🌑 Луна</button>
+                    <button class="btn preset-btn" data-g="3.7" data-label="Марс">🔴 Марс</button>
+                    <button class="btn preset-btn" data-g="24.8" data-label="Юпитер">🪐 Юпитер</button>
+                    <button class="btn preset-btn" data-g="0" data-label="Космос">🌌 Космос</button>
+                </div>
+
+                <hr class="divider">
+
+                <h2>Параметры</h2>
+
+                <div class="control-group">
+                    <label for="gravity">Гравитация (g)</label>
+                    <input type="range" id="gravity" min="-5" max="20" step="0.5" value="9.8">
+                    <span class="value-display" id="gravity-val">9.8 м/с²</span>
+                </div>
+
+                <div class="control-group">
+                    <label for="elasticity">Упругость</label>
+                    <input type="range" id="elasticity" min="0.1" max="1.5" step="0.1" value="0.7">
+                    <span class="value-display" id="elasticity-val">0.7</span>
+                </div>
+
+                <div class="control-group">
+                    <label for="friction">Трение воздуха</label>
+                    <input type="range" id="friction" min="0.900" max="1.000" step="0.001" value="0.990">
+                    <span class="value-display" id="friction-val">0.990</span>
+                </div>
+
+                <hr class="divider">
+
+                <h2>Энергия Системы</h2>
+                <canvas id="energy-chart" width="250" height="60" class="energy-chart"></canvas>
+
+                <div class="instruction">
+                    <p>🖱️ ЛКМ: Действие</p>
+                    <p>✋ ПКМ + Тянуть: Бросок</p>
+                </div>
+
+                <div class="buttons-grid" style="margin-top: 10px;">
+                    <button id="btn-clear" class="btn danger">Очистить</button>
+                    <button id="btn-pause" class="btn primary">Пауза</button>
+                </div>
+            </aside>
+        </main>
+    </div>
+    <script src="gravity.js"></script>
+
+<!-- Global Language Switcher & Google Translate -->
+<div id="google_translate_element" style="display:none;"></div>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({pageLanguage: 'ru', includedLanguages: 'ru,en,kk', autoDisplay: false}, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script>
+(function() {
+    let currentLang = localStorage.getItem('vsh-lang') || 'kk';
+
+    // Synchronize cookie if needed
+    var gtrans = '/ru/' + currentLang;
+    if (currentLang === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) {
+            document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+        }
+    }
+
+    // Floating UI
+    const isIndex = location.pathname.endsWith('index.html') || location.pathname.endsWith('/') || location.pathname.endsWith('studio.html');
+    if (!document.querySelector('.floating-lang-switcher')) {
+        const style = document.createElement('style');
+        style.innerHTML = `
+            body { top: 0 !important; }
+            .skiptranslate { display: none !important; }
+            .floating-lang-switcher {
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                background: rgba(15, 23, 42, 0.9);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 20px;
+                padding: 10px;
+                display: flex;
+                gap: 10px;
+                z-index: 999999;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+                font-family: 'Roboto', sans-serif;
+            }
+            .floating-lang-btn {
+                background: transparent;
+                border: 1px solid rgba(255,255,255,0.2);
+                color: #94a3b8;
+                font-size: 14px;
+                font-weight: 600;
+                padding: 8px 15px;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: 0.3s;
+            }
+            .floating-lang-btn:hover {
+                color: #fff;
+                background: rgba(255,255,255,0.1);
+            }
+            .floating-lang-btn.active {
+                background: linear-gradient(135deg, #a855f7, #3b82f6);
+                color: #fff;
+                border-color: transparent;
+            }
+        `;
+        document.head.appendChild(style);
+
+        const switcher = document.createElement('div');
+        switcher.className = 'floating-lang-switcher notranslate';
+        switcher.innerHTML = `
+            <button class="floating-lang-btn " onclick="changeLangGlobal('ru')">RU</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('kk')">ҚАЗ</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('en')">EN</button>
+        `;
+        
+        // set active
+        const btns = switcher.querySelectorAll('.floating-lang-btn');
+        if (currentLang === 'ru') btns[0].classList.add('active');
+        else if (currentLang === 'kk') btns[1].classList.add('active');
+        else if (currentLang === 'en') btns[2].classList.add('active');
+
+        document.body.appendChild(switcher);
+    }
+})();
+
+function changeLangGlobal(lang) {
+    localStorage.setItem('vsh-lang', lang);
+    var gtrans = '/ru/' + lang;
+    if (lang === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+    }
+    location.reload();
+}
+</script>
+\n</body>
+
+</html>

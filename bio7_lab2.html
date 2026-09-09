@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Зертхана №2 — Жүйелеу</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Jura:wght@400;600;700&family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;overflow:hidden;background:#010b14;color:#fff;font-family:'Inter',sans-serif;}
+canvas{position:fixed;inset:0;pointer-events:none;}
+#bgc{z-index:0;}#fxc{z-index:999;}
+
+nav{position:fixed;top:0;left:0;right:0;height:56px;z-index:600;display:flex;justify-content:space-between;align-items:center;padding:0 24px;background:rgba(1,8,20,.96);border-bottom:1px solid rgba(56,189,248,.1);backdrop-filter:blur(20px);}
+nav a{display:flex;align-items:center;gap:8px;text-decoration:none;color:#38bdf8;font-family:'Orbitron';font-size:.68rem;letter-spacing:1px;border:1px solid rgba(56,189,248,.3);border-radius:8px;padding:6px 14px;background:rgba(56,189,248,.05);transition:.2s;}
+nav a:hover{background:rgba(56,189,248,.14);box-shadow:0 0 16px rgba(56,189,248,.3);}
+
+/* ─── MAIN LAYOUT ─── */
+.app{position:relative;z-index:1;width:100%;height:100vh;padding-top:56px;display:grid;grid-template-columns:320px 1fr 300px;gap:0;}
+
+/* ─── LEFT: Organism Card ─── */
+.org-panel{padding:16px 14px;border-right:1px solid rgba(56,189,248,.1);background:rgba(2,8,20,.88);display:flex;flex-direction:column;gap:12px;overflow:hidden;}
+.section-lbl{font-family:'Orbitron';font-size:.58rem;letter-spacing:2px;color:rgba(56,189,248,.5);padding-bottom:6px;border-bottom:1px solid rgba(56,189,248,.08);}
+
+.org-card{
+  border-radius:14px;padding:20px;
+  background:radial-gradient(circle at 30% 20%,rgba(56,189,248,.06),rgba(0,0,0,.4));
+  border:1px solid rgba(56,189,248,.15);
+  display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;
+  position:relative;overflow:hidden;flex-shrink:0;
+}
+.org-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);}
+.org-avatar{font-size:4.5rem;filter:drop-shadow(0 0 20px var(--c,#38bdf8));animation:floatOrg 3s ease-in-out infinite;}
+@keyframes floatOrg{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+.org-name{font-family:'Orbitron';font-size:1rem;color:#fff;letter-spacing:.5px;}
+.org-latin{font-family:'Jura';font-size:.72rem;color:rgba(56,189,248,.6);font-style:italic;}
+
+/* Clue cards */
+.clues{display:flex;flex-direction:column;gap:8px;flex:1;overflow:hidden;}
+.clue{
+  border-radius:10px;padding:11px 14px;
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);
+  display:flex;gap:10px;align-items:flex-start;
+  font-family:'Jura';font-size:.78rem;color:#94a3b8;line-height:1.5;
+}
+.clue i{color:var(--c,#38bdf8);flex-shrink:0;margin-top:2px;width:14px;}
+
+/* Progress bar bottom */
+.org-progress{display:flex;flex-direction:column;gap:6px;}
+.org-dots{display:flex;gap:6px;justify-content:center;}
+.org-dot{width:28px;height:6px;border-radius:3px;background:rgba(255,255,255,.08);transition:.4s;}
+.org-dot.done{background:var(--dot-c,#10b981);}
+.org-dot.active{background:rgba(56,189,248,.5);animation:dotPulse .8s ease-in-out infinite;}
+@keyframes dotPulse{0%,100%{opacity:.5;}50%{opacity:1;}}
+
+/* ─── CENTER: Quiz ─── */
+.quiz-panel{display:flex;flex-direction:column;padding:20px 30px;gap:16px;overflow:hidden;}
+
+/* Question block */
+.question-block{
+  border-radius:16px;padding:24px 28px;
+  background:rgba(3,12,28,.9);border:1px solid rgba(56,189,248,.15);
+  box-shadow:0 20px 60px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.05);
+  flex-shrink:0;position:relative;overflow:hidden;
+}
+.question-block::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--qc,#38bdf8),transparent);}
+.q-step{font-family:'Orbitron';font-size:.62rem;color:rgba(56,189,248,.5);letter-spacing:2px;margin-bottom:10px;}
+.q-text{font-family:'Jura';font-size:1.15rem;color:#e2e8f0;line-height:1.6;font-weight:600;}
+.q-rank{color:var(--qc,#38bdf8);font-family:'Orbitron';}
+
+/* Answer buttons */
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex-shrink:0;}
+.ans-btn{
+  border-radius:12px;padding:16px 20px;cursor:pointer;
+  background:rgba(10,20,45,.8);border:1px solid rgba(56,189,248,.2);
+  font-family:'Jura';font-size:.92rem;color:#cbd5e1;
+  transition:.25s cubic-bezier(.175,.885,.32,1.275);
+  display:flex;align-items:center;gap:12px;text-align:left;
+  position:relative;overflow:hidden;
+}
+.ans-btn::before{content:'';position:absolute;inset:0;background:rgba(56,189,248,.05);opacity:0;transition:.2s;}
+.ans-btn:hover:not(.disabled){transform:translateY(-3px) scale(1.02);border-color:rgba(56,189,248,.5);box-shadow:0 8px 30px rgba(56,189,248,.15);}
+.ans-btn:hover:not(.disabled)::before{opacity:1;}
+.ans-emoji{font-size:1.6rem;flex-shrink:0;}
+.ans-text{flex:1;}
+.ans-name{font-weight:600;color:#e2e8f0;font-size:.88rem;margin-bottom:3px;}
+.ans-desc{font-size:.72rem;color:#475569;line-height:1.4;}
+
+/* Answer states */
+.ans-btn.correct{background:rgba(16,185,129,.12);border-color:#10b981;box-shadow:0 0 30px rgba(16,185,129,.3);animation:correctPop .4s cubic-bezier(.175,.885,.32,1.275);}
+@keyframes correctPop{0%{transform:scale(1);}50%{transform:scale(1.06);}100%{transform:scale(1);}}
+.ans-btn.wrong{background:rgba(239,68,68,.1);border-color:#ef4444;box-shadow:0 0 20px rgba(239,68,68,.2);animation:wrongShake .4s ease;}
+@keyframes wrongShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-8px);}75%{transform:translateX(8px);}}
+.ans-btn.dim{opacity:.3;pointer-events:none;}
+.ans-btn.disabled{pointer-events:none;}
+
+/* Explanation bubble */
+.explain{
+  border-radius:12px;padding:16px 20px;
+  background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.25);
+  font-family:'Jura';font-size:.84rem;color:#94a3b8;line-height:1.65;
+  display:none;border-left:3px solid #10b981;
+}
+.explain.show{display:block;animation:fadeUp .35s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.explain strong{color:#10b981;}
+
+/* Next button */
+.next-btn{
+  border-radius:12px;padding:14px;cursor:pointer;
+  background:rgba(56,189,248,.1);border:2px solid rgba(56,189,248,.4);
+  font-family:'Orbitron';font-size:.8rem;color:#38bdf8;letter-spacing:1px;
+  transition:.3s;display:none;align-items:center;justify-content:center;gap:10px;
+  box-shadow:0 0 20px rgba(56,189,248,.1);
+}
+.next-btn.show{display:flex;animation:fadeUp .3s ease;}
+.next-btn:hover{background:rgba(56,189,248,.2);box-shadow:0 0 40px rgba(56,189,248,.3);transform:translateY(-2px);}
+
+/* Overall progress */
+.overall-prog{display:flex;align-items:center;gap:14px;background:rgba(3,12,28,.8);border:1px solid rgba(56,189,248,.1);border-radius:10px;padding:12px 18px;flex-shrink:0;}
+.prog-bar-outer{flex:1;height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;}
+.prog-bar-inner{height:100%;background:linear-gradient(90deg,#0ea5e9,#10b981);border-radius:3px;transition:width .6s ease;box-shadow:0 0 10px rgba(16,185,129,.4);}
+.prog-label{font-family:'Orbitron';font-size:.65rem;color:#38bdf8;white-space:nowrap;}
+
+/* ─── RIGHT: Taxonomy Tree Building ─── */
+.tree-panel{padding:16px 14px;border-left:1px solid rgba(56,189,248,.1);background:rgba(2,8,20,.88);display:flex;flex-direction:column;gap:10px;overflow-y:auto;}
+
+.tree-entry{
+  border-radius:10px;padding:12px 14px;
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);
+  display:flex;gap:10px;align-items:center;
+  transition:.5s;position:relative;overflow:hidden;
+}
+.tree-entry.filled{border-color:var(--ec,rgba(16,185,129,.4));background:var(--ebg,rgba(16,185,129,.06));}
+.tree-entry.filled::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--ec,#10b981);box-shadow:0 0 8px var(--ec,#10b981);}
+.te-icon{width:40px;height:40px;border-radius:8px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;transition:.4s;}
+.te-rank{font-family:'Orbitron';font-size:.58rem;color:rgba(56,189,248,.5);letter-spacing:1px;margin-bottom:3px;}
+.te-val{font-family:'Jura';font-size:.8rem;color:#475569;transition:.4s;}
+.tree-entry.filled .te-val{color:#e2e8f0;}
+.tree-connector{width:3px;height:16px;background:rgba(56,189,248,.1);margin-left:18px;border-radius:2px;transition:.4s;}
+.tree-connector.lit{background:rgba(16,185,129,.4);box-shadow:0 0 6px rgba(16,185,129,.3);}
+
+/* ─── INTRO OVERLAY ─── */
+#intro{position:fixed;inset:0;z-index:3000;background:rgba(1,4,9,.98);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center;}
+.intro-card{width:min(700px,90vw);padding:50px 60px;text-align:center;background:rgba(5,12,28,.95);border:1px solid rgba(56,189,248,.25);border-radius:20px;box-shadow:0 0 80px rgba(56,189,248,.1);}
+.intro-title{font-family:'Orbitron';font-size:1.8rem;color:#38bdf8;margin-bottom:12px;text-shadow:0 0 30px rgba(56,189,248,.5);}
+.intro-sub{font-family:'Jura';font-size:1rem;color:#94a3b8;line-height:1.8;margin-bottom:30px;}
+.intro-steps{display:flex;gap:20px;justify-content:center;margin-bottom:34px;flex-wrap:wrap;}
+.intro-step{border-radius:12px;padding:16px 20px;background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.15);text-align:center;flex:1;min-width:140px;}
+.intro-step-num{font-family:'Orbitron';font-size:1.6rem;color:#38bdf8;margin-bottom:8px;}
+.intro-step-txt{font-family:'Jura';font-size:.82rem;color:#64748b;line-height:1.5;}
+.intro-btn{display:inline-flex;align-items:center;gap:10px;padding:16px 44px;background:#38bdf8;color:#000;font-family:'Orbitron';font-size:.85rem;letter-spacing:1px;border:none;border-radius:10px;cursor:pointer;transition:.3s;box-shadow:0 0 40px rgba(56,189,248,.4);}
+.intro-btn:hover{transform:translateY(-3px);box-shadow:0 0 60px rgba(56,189,248,.6);}
+
+/* ─── END MODAL ─── */
+#end-modal{position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;background:rgba(1,4,9,.97);backdrop-filter:blur(28px);opacity:0;pointer-events:none;transition:.6s;}
+#end-modal.show{opacity:1;pointer-events:auto;}
+.end-card{width:min(760px,90vw);padding:50px 60px;text-align:center;background:rgba(5,12,28,.98);border:1px solid rgba(16,185,129,.3);border-radius:20px;box-shadow:0 0 100px rgba(16,185,129,.15),0 40px 80px rgba(0,0,0,.9);transform:scale(.88);transition:.65s cubic-bezier(.175,.885,.32,1.275);}
+#end-modal.show .end-card{transform:scale(1);}
+.end-emoji{font-size:4rem;margin-bottom:16px;display:block;}
+.end-title{font-family:'Orbitron';font-size:2rem;color:#10b981;margin-bottom:20px;text-shadow:0 0 40px rgba(16,185,129,.7);}
+.end-body{font-family:'Jura';font-size:1rem;color:#94a3b8;line-height:1.9;margin-bottom:36px;}
+.end-score{font-family:'Orbitron';font-size:3rem;color:#fbbf24;text-shadow:0 0 30px rgba(251,191,36,.6);margin:16px 0;}
+.end-btn{display:inline-block;text-decoration:none;border:2px solid #38bdf8;color:#38bdf8;font-family:'Orbitron';font-size:.82rem;letter-spacing:2px;padding:13px 36px;border-radius:8px;transition:.3s;background:rgba(56,189,248,.05);}
+.end-btn:hover{background:#38bdf8;color:#000;box-shadow:0 0 50px #38bdf8;transform:translateY(-3px);}
+
+/* Toast */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(8px);z-index:700;display:none;align-items:center;gap:10px;padding:12px 22px;border-radius:10px;font-family:'Jura';font-size:.85rem;backdrop-filter:blur(18px);opacity:0;transition:.3s;max-width:500px;}
+#toast.show{display:flex;opacity:1;transform:translateX(-50%) translateY(0);}
+#toast.ok{border:1px solid rgba(16,185,129,.5);background:rgba(16,185,129,.1);box-shadow:0 8px 30px rgba(16,185,129,.2);}
+#toast.info{border:1px solid rgba(56,189,248,.5);background:rgba(56,189,248,.1);box-shadow:0 8px 30px rgba(56,189,248,.2);}
+</style>
+</head>
+<body>
+
+<canvas id="bgc"></canvas>
+<canvas id="fxc"></canvas>
+
+<!-- INTRO -->
+<div id="intro">
+  <div class="intro-card">
+    <div style="font-size:3rem;margin-bottom:16px;">🌿🦁🍄🦅🐸</div>
+    <div class="intro-title">ТІРІ АҒЗАЛАРДЫ ЖҮЙЕЛЕУ</div>
+    <div class="intro-sub">
+      Биологияда барлық тірі ағзалар <strong style="color:#38bdf8;">5 деңгей</strong> бойынша жіктеледі.<br>
+      Сіздің міндетіңіз — 5 ағзаны дұрыс жүйелеу.
+    </div>
+    <div class="intro-steps">
+      <div class="intro-step">
+        <div class="intro-step-num">1</div>
+        <div class="intro-step-txt">Сол жақта ағзаның сипаттамасын оқыңыз</div>
+      </div>
+      <div class="intro-step">
+        <div class="intro-step-num">2</div>
+        <div class="intro-step-txt">Ортада сұраққа дұрыс жауапты таңдаңыз</div>
+      </div>
+      <div class="intro-step">
+        <div class="intro-step-num">3</div>
+        <div class="intro-step-txt">Оң жақта жүйелеу ағашы автоматты толтырылады</div>
+      </div>
+    </div>
+    <button class="intro-btn" onclick="startGame()"><i class="fa-solid fa-play"></i> БАСТАУ</button>
+  </div>
+</div>
+
+<nav>
+  <a href="biology7.html"><i class="fa-solid fa-chevron-left"></i> Мәзір</a>
+  <span style="font-family:'Orbitron';font-size:.85rem;color:#38bdf8;letter-spacing:1px;">ЗЕРТХАНА №2 — ЖҮЙЕЛЕУ</span>
+  <span id="nav-score" style="font-family:'Orbitron';font-size:.8rem;color:#fbbf24;">⭐ 0 ұпай</span>
+</nav>
+
+<div class="app">
+
+  <!-- LEFT -->
+  <div class="org-panel">
+    <div class="section-lbl"><i class="fa-solid fa-flask" style="margin-right:6px;"></i>ЗЕРТТЕУ ОБЪЕКТІСІ</div>
+    <div class="org-card" id="org-card">
+      <div class="org-avatar" id="org-emoji">🌿</div>
+      <div class="org-name" id="org-name">—</div>
+      <div class="org-latin" id="org-latin">—</div>
+    </div>
+    <div class="clues" id="clues-list"></div>
+    <div class="org-progress">
+      <div style="font-family:'Jura';font-size:.72rem;color:#334155;text-align:center;">Ағза <span id="org-counter">1 / 5</span></div>
+      <div class="org-dots" id="org-dots"></div>
+    </div>
+  </div>
+
+  <!-- CENTER -->
+  <div class="quiz-panel">
+    <div class="overall-prog">
+      <div class="prog-label" id="prog-label">0 / 25 сұрақ</div>
+      <div class="prog-bar-outer"><div class="prog-bar-inner" id="prog-bar" style="width:0%"></div></div>
+      <div style="font-family:'Orbitron';font-size:.65rem;color:#fbbf24;" id="score-disp">⭐ 0</div>
+    </div>
+
+    <div class="question-block" id="q-block">
+      <div class="q-step" id="q-step">СҰРАҚ 1 / 5</div>
+      <div class="q-text" id="q-text">Күтіңіз…</div>
+    </div>
+
+    <div class="answers" id="answers"></div>
+
+    <div class="explain" id="explain"></div>
+
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()">
+      <i class="fa-solid fa-arrow-right"></i>
+      <span id="next-label">Келесі сұрақ</span>
+    </button>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="tree-panel">
+    <div class="section-lbl"><i class="fa-solid fa-sitemap" style="margin-right:6px;"></i>ЖҮЙЕЛЕУ АҒАШЫ</div>
+    <div id="tree-entries"></div>
+  </div>
+
+</div>
+
+<div id="end-modal">
+  <div class="end-card">
+    <span class="end-emoji">🏆</span>
+    <div class="end-title">ЖҮЙЕЛЕУ АЯҚТАЛДЫ!</div>
+    <div class="end-score" id="end-score">0 ұпай</div>
+    <div class="end-body" id="end-body"></div>
+    <a href="biology7.html" class="end-btn">← МӘЗІРГЕ ОРАЛУ</a>
+  </div>
+</div>
+
+<div id="toast"><i class="fa-solid fa-check-circle"></i><span id="toast-txt"></span></div>
+
+<script>
+// ═══════════════ DATA ═══════════════
+const ORGANISMS = [
+  {
+    emoji:'🌻', name:'Күнбағыс', latin:'Helianthus annuus', color:'#fbbf24',
+    clues:[
+      {icon:'fa-sun',txt:'Фотосинтез арқылы күн энергиясынан қоректік зат өндіреді'},
+      {icon:'fa-leaf',txt:'Хлоропластта хлорофилл бар — жасыл пигмент'},
+      {icon:'fa-seedling',txt:'Тұқымы жеміс ішінде орналасқан'},
+      {icon:'fa-circle-dot',txt:'Гүлінен 2000-нан астам тұқым пайда болады'},
+    ],
+    levels:[
+      {rank:'Патшалық',correct:'Өсімдіктер',wrong:['Жануарлар','Саңырауқұлақтар','Бактериялар'],why:'Фотосинтез жасайды, хлоропласты бар — бұл Өсімдіктер патшалығының белгісі.'},
+      {rank:'Бөлім',correct:'Жабық тұқымдылар',wrong:['Ашық тұқымдылар','Папоротниктер','Балдырлар'],why:'Тұқымы жеміс ішінде жабық орналасқан — Жабық тұқымдылар бөліміне жатады.'},
+      {rank:'Класс',correct:'Қосжарнақтылар',wrong:['Бірдеологиялықтар','Хвойлар','Мүктер'],why:'Тұқымы өнгенде 2 семядоля (жарнақ) шығады — Қосжарнақтылар классы.'},
+      {rank:'Отряд',correct:'Asterales',wrong:['Rosales','Fabales','Lamiales'],why:'Күнбағыс Asterales отрядына, Asteraceae тұқымдасына жатады.'},
+      {rank:'Түр (Species)',correct:'Helianthus annuus',wrong:['Helianthus tuberosus','Rosa canina','Taraxacum officinale'],why:'Ғылыми атауы Helianthus (Күн гүлі) annuus (бір жылдық) — бинарлы номенклатура.'},
+    ]
+  },
+  {
+    emoji:'🦁', name:'Арыстан', latin:'Panthera leo', color:'#f97316',
+    clues:[
+      {icon:'fa-drumstick-bite',txt:'Ет жейді — Жыртқыш. Ауысты екінші консумент'},
+      {icon:'fa-paw',txt:'Балаларын ана сүтімен қоректендіреді (4-6 ай)'},
+      {icon:'fa-thermometer-half',txt:'Жылы қанды — дене температурасы тұрақты (38-39°C)'},
+      {icon:'fa-dna',txt:'Омыртқалы жан, бас сүйегі дамыған'},
+    ],
+    levels:[
+      {rank:'Патшалық',correct:'Жануарлар',wrong:['Өсімдіктер','Саңырауқұлақтар','Бактериялар'],why:'Дайын органикалық затпен қоректенеді, қозғала алады — Жануарлар патшалығы.'},
+      {rank:'Бөлім',correct:'Хордалылар',wrong:['Буынаяқтылар','Жалпақ құрттар','Моллюскалар'],why:'Омыртқасы (позвоночник) бар — Хордалылар бөліміне жатады.'},
+      {rank:'Класс',correct:'Сүтқоректілер',wrong:['Бауырымен жорғалаушылар','Құстар','Балықтар'],why:'Балаларын сүтпен қоректендіреді, жылы қанды, терісінде жүн бар — Сүтқоректілер.'},
+      {rank:'Отряд',correct:'Carnivora',wrong:['Primates','Rodentia','Artiodactyla'],why:'Ет жейтін жұлдызды тістері (клыктар) бар — Carnivora (Жыртқыштар) отряды.'},
+      {rank:'Түр (Species)',correct:'Panthera leo',wrong:['Panthera tigris','Acinonyx jubatus','Puma concolor'],why:'Leo — арыстан. Panthera туысына барлық үлкен мысықтар жатады.'},
+    ]
+  },
+  {
+    emoji:'🦅', name:'Бүркіт', latin:'Aquila chrysaetos', color:'#818cf8',
+    clues:[
+      {icon:'fa-feather',txt:'Денесі қауырсынмен жабылған — жылу сақтайды'},
+      {icon:'fa-egg',txt:'Жұмыртқа салады, балапандарын ұяда өсіреді'},
+      {icon:'fa-wind',txt:'Алдыңғы аяқтары қанатқа айналған'},
+      {icon:'fa-eye',txt:'Өткір көзі бар: 1 км қашықтықтан жемді көреді'},
+    ],
+    levels:[
+      {rank:'Патшалық',correct:'Жануарлар',wrong:['Өсімдіктер','Саңырауқұлақтар','Протистер'],why:'Жануар ретінде дайын органикалық затпен (ет) қоректенеді.'},
+      {rank:'Бөлім',correct:'Хордалылар',wrong:['Буынаяқтылар','Мүктер','Теңіз жұлдыздары'],why:'Омыртқасы бар — Хордалылар бөліміне жатады.'},
+      {rank:'Класс',correct:'Құстар',wrong:['Сүтқоректілер','Бауырымен жорғалаушылар','Қосмекенділер'],why:'Қауырсын, жұмыртқа, қанат — Құстар (Aves) класының белгілері.'},
+      {rank:'Отряд',correct:'Accipitriformes',wrong:['Passeriformes','Galliformes','Columbiformes'],why:'Жыртқыш құстар отряды — ілмекті тұмсық, өткір тырнақтар.'},
+      {rank:'Түр (Species)',correct:'Aquila chrysaetos',wrong:['Haliaeetus albicilla','Falco peregrinus','Buteo buteo'],why:'Chrysaetos — «алтын бүркіт» деген мағына береді (гректен).'},
+    ]
+  },
+  {
+    emoji:'🐸', name:'Бақа', latin:'Rana temporaria', color:'#10b981',
+    clues:[
+      {icon:'fa-water',txt:'Суда да, жерде де тіршілік ете алады'},
+      {icon:'fa-snowflake',txt:'Суық қанды — температура қоршаған ортаға байланысты'},
+      {icon:'fa-egg',txt:'Суда жұмыртқа салады, дернәсілден (тырша) жетіледі'},
+      {icon:'fa-lungs',txt:'Жасы жеткенде өкпемен тыныс алады'},
+    ],
+    levels:[
+      {rank:'Патшалық',correct:'Жануарлар',wrong:['Өсімдіктер','Саңырауқұлақтар','Бактериялар'],why:'Жануар: қозғалады, дайын органикалық затпен қоректенеді.'},
+      {rank:'Бөлім',correct:'Хордалылар',wrong:['Буынаяқтылар','Жалпақ құрттар','Иглокожие'],why:'Омыртқасы бар — Хордалылар.'},
+      {rank:'Класс',correct:'Қосмекенділер',wrong:['Балықтар','Бауырымен жорғалаушылар','Теңіз тасбақалары'],why:'Суда да жерде де тіршілік етеді. Суық қанды, суда жұмыртқалайды — Қосмекенділер.'},
+      {rank:'Отряд',correct:'Anura',wrong:['Urodela','Gymnophiona','Caudata'],why:'Ересек бақаның құйрығы жоқ — Anura отряды (грек: «an» — жоқ, «ura» — құйрық).'},
+      {rank:'Түр (Species)',correct:'Rana temporaria',wrong:['Bufo bufo','Hyla arborea','Bombina bombina'],why:'Rana — бақа туысы, temporaria — «маусымдық» (жыл мезгілімен белсенділік).'},
+    ]
+  },
+  {
+    emoji:'🍄', name:'Саңырауқұлақ', latin:'Agaricus bisporus', color:'#c084fc',
+    clues:[
+      {icon:'fa-xmark',txt:'Хлорофилл жоқ — фотосинтез жасай алмайды'},
+      {icon:'fa-wind',txt:'Споралар арқылы көбейеді — ауамен таралады'},
+      {icon:'fa-utensils',txt:'Дайын органикалық затты сіңіреді (гетеротроф)'},
+      {icon:'fa-person-dots-from-line',txt:'Жасуша қабырғасы хитиннен тұрады (жануарлардай)'},
+    ],
+    levels:[
+      {rank:'Патшалық',correct:'Саңырауқұлақтар',wrong:['Өсімдіктер','Жануарлар','Бактериялар'],why:'Хлорофилл жоқ, жасуша қабырғасы хитиннен — жеке Саңырауқұлақтар патшалығы.'},
+      {rank:'Бөлім',correct:'Basidiomycota',wrong:['Ascomycota','Zygomycota','Chytridiomycota'],why:'Споралары базидиумда пайда болады — Basidiomycota бөлімі (шляпалы саңырауқұлақтар).'},
+      {rank:'Класс',correct:'Agaricomycetes',wrong:['Tremellomycetes','Ustilaginomycetes','Dacrymycetes'],why:'Шляпалы саңырауқұлақтардың ең үлкен класы — Agaricomycetes.'},
+      {rank:'Отряд',correct:'Agaricales',wrong:['Boletales','Polyporales','Russulales'],why:'Agaricales отряды — пластинкалылар. Шляпаның астында пластинкалар бар.'},
+      {rank:'Түр (Species)',correct:'Agaricus bisporus',wrong:['Amanita muscaria','Boletus edulis','Cantharellus cibarius'],why:'Bisporus — «2 споралы» деген мағына. Бұл — мәдени саңырауқұлақ (шампиньон).'},
+    ]
+  },
+];
+
+const RANK_COLORS=['#38bdf8','#10b981','#a78bfa','#f97316','#fbbf24'];
+
+// ═══════════════ STATE ═══════════════
+let orgIdx=0, levelIdx=0, score=0, totalQ=0, correctStreak=0, answered=false;
+
+// ═══════════════ AUDIO ═══════════════
+let snd;
+function initA(){if(!snd){snd=new(window.AudioContext||window.webkitAudioContext)();}if(snd.state==='suspended')snd.resume();}
+function tone(f1,f2,d,t='sine',v=.22){if(!snd)return;const o=snd.createOscillator(),g=snd.createGain();o.connect(g);g.connect(snd.destination);o.type=t;o.frequency.setValueAtTime(f1,snd.currentTime);o.frequency.exponentialRampToValueAtTime(f2,snd.currentTime+d);g.gain.setValueAtTime(v,snd.currentTime);g.gain.exponentialRampToValueAtTime(.001,snd.currentTime+d);o.start();o.stop(snd.currentTime+d+.05);}
+const A={pick:()=>tone(900,1300,.1),ok:()=>{tone(440,880,.22,'triangle',.2);setTimeout(()=>tone(880,1320,.18,'triangle',.15),150);},err:()=>tone(170,60,.35,'sawtooth',.38),done:()=>{[440,550,660,880].forEach((f,i)=>setTimeout(()=>tone(f,f*1.5,.25,'triangle',.18),i*100));}};
+
+// ═══════════════ PARTICLES ═══════════════
+const fxc=document.getElementById('fxc'),fctx=fxc.getContext('2d');
+const px=[];
+function rfx(){fxc.width=innerWidth;fxc.height=innerHeight;}rfx();addEventListener('resize',rfx);
+function spawnPx(x,y,c,n=24){for(let i=0;i<n;i++)px.push({x,y,c,s:Math.random()*5+2,vx:(Math.random()-.5)*14,vy:(Math.random()-1.4)*12,g:.55,l:1,d:.018+Math.random()*.028});}
+(function loop(){fctx.clearRect(0,0,fxc.width,fxc.height);for(let i=px.length-1;i>=0;i--){const p=px[i];p.x+=p.vx;p.y+=p.vy;p.vy+=p.g;p.l-=p.d;if(p.l<=0){px.splice(i,1);continue;}fctx.globalAlpha=p.l;fctx.fillStyle=p.c;fctx.beginPath();fctx.arc(p.x,p.y,p.s/2,0,Math.PI*2);fctx.fill();}fctx.globalAlpha=1;requestAnimationFrame(loop);})();
+
+// ═══════════════ STAR BG ═══════════════
+(function(){const c=document.getElementById('bgc'),ctx=c.getContext('2d'),stars=Array.from({length:160},()=>({x:Math.random(),y:Math.random(),r:Math.random()*1.1+.3,t:Math.random()*Math.PI*2,s:Math.random()*.02+.006}));function rs(){c.width=innerWidth;c.height=innerHeight;}rs();addEventListener('resize',rs);(function draw(){ctx.fillStyle='#010b14';ctx.fillRect(0,0,c.width,c.height);const g=ctx.createRadialGradient(c.width*.5,0,0,c.width*.5,0,c.height*.7);g.addColorStop(0,'rgba(10,30,60,.35)');g.addColorStop(1,'transparent');ctx.fillStyle=g;ctx.fillRect(0,0,c.width,c.height);stars.forEach(s=>{s.t+=s.s;ctx.beginPath();ctx.arc(s.x*c.width,s.y*c.height,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,255,${.15+.85*Math.abs(Math.sin(s.t))})`;ctx.fill();});requestAnimationFrame(draw);})();})();
+
+// ═══════════════ BUILD RIGHT TREE ═══════════════
+function buildTree(){
+  const el=document.getElementById('tree-entries');el.innerHTML='';
+  const org=ORGANISMS[orgIdx];
+  org.levels.forEach((lv,i)=>{
+    if(i>0){const c=document.createElement('div');c.className='tree-connector';c.id='conn-'+i;el.appendChild(c);}
+    const d=document.createElement('div');d.className='tree-entry';d.id='te-'+i;
+    d.innerHTML=`<div class="te-icon" id="ti-${i}">?</div><div><div class="te-rank">${lv.rank}</div><div class="te-val" id="tv-${i}">—</div></div>`;
+    el.appendChild(d);
+  });
+}
+
+// ═══════════════ SHOW ORGANISM ═══════════════
+function showOrganism(){
+  const org=ORGANISMS[orgIdx];
+  document.getElementById('org-card').style.setProperty('--c',org.color);
+  document.getElementById('org-emoji').textContent=org.emoji;
+  document.getElementById('org-name').textContent=org.name;
+  document.getElementById('org-latin').textContent=org.latin;
+  document.getElementById('org-counter').textContent=(orgIdx+1)+' / '+ORGANISMS.length;
+
+  // Clues
+  const cl=document.getElementById('clues-list');cl.innerHTML='';
+  org.clues.forEach(cl2=>{
+    const d=document.createElement('div');d.className='clue';
+    d.innerHTML=`<i class="fa-solid ${cl2.icon}"></i>${cl2.txt}`;
+    cl.appendChild(d);
+  });
+
+  // Dots
+  const dots=document.getElementById('org-dots');dots.innerHTML='';
+  ORGANISMS.forEach((_,i)=>{
+    const dot=document.createElement('div');dot.className='org-dot';
+    dot.style.setProperty('--dot-c',ORGANISMS[i].color);
+    if(i<orgIdx)dot.classList.add('done');
+    else if(i===orgIdx)dot.classList.add('active');
+    dots.appendChild(dot);
+  });
+
+  buildTree();
+  levelIdx=0;
+  showQuestion();
+}
+
+// ═══════════════ SHOW QUESTION ═══════════════
+function showQuestion(){
+  const org=ORGANISMS[orgIdx];
+  const lv=org.levels[levelIdx];
+  answered=false;
+
+  // Question block color
+  document.getElementById('q-block').style.setProperty('--qc',RANK_COLORS[levelIdx]);
+  document.getElementById('q-step').textContent=`СҰРАҚ ${levelIdx+1} / 5 — ${org.name}`;
+  document.getElementById('q-text').innerHTML=`<span class="q-rank" style="color:${RANK_COLORS[levelIdx]}">${lv.rank}</span> деңгейінде ${org.emoji} <b>${org.name}</b> қай топқа жатады?`;
+
+  // Shuffle answers
+  const opts=[{text:lv.correct,correct:true},...lv.wrong.map(w=>({text:w,correct:false}))];
+  shuffle(opts);
+
+  const ans=document.getElementById('answers');ans.innerHTML='';
+  opts.forEach(opt=>{
+    const btn=document.createElement('button');btn.className='ans-btn';
+    btn.innerHTML=`<div class="ans-text"><div class="ans-name">${opt.text}</div></div>`;
+    btn.addEventListener('click',()=>checkAnswer(btn,opt.correct,lv));
+    ans.appendChild(btn);
+  });
+
+  document.getElementById('explain').classList.remove('show');
+  document.getElementById('explain').innerHTML='';
+  const nb=document.getElementById('next-btn');nb.classList.remove('show');
+}
+
+// ═══════════════ CHECK ANSWER ═══════════════
+function checkAnswer(btn,isCorrect,lv){
+  if(answered)return;
+  answered=true;initA();
+  const allBtns=document.querySelectorAll('.ans-btn');
+
+  if(isCorrect){
+    btn.classList.add('correct');allBtns.forEach(b=>{if(b!==btn)b.classList.add('dim');});
+    A.ok();score+=10;correctStreak++;totalQ++;
+    const r=btn.getBoundingClientRect();
+    spawnPx(r.left+r.width/2,r.top+r.height/2,RANK_COLORS[levelIdx],30);
+    fillTreeLevel(levelIdx,lv.correct);
+    updateStats();
+    document.getElementById('explain').innerHTML=`<strong>✅ Дұрыс!</strong> ${lv.why}`;
+  } else {
+    btn.classList.add('wrong');
+    allBtns.forEach(b=>{if(b.querySelector('.ans-name')?.textContent===lv.correct)b.classList.add('correct');else if(b!==btn)b.classList.add('dim');});
+    A.err();correctStreak=0;totalQ++;
+    updateStats();
+    document.getElementById('explain').innerHTML=`<strong>❌ Қате.</strong> Дұрыс жауап: <strong style="color:#10b981">${lv.correct}</strong><br>${lv.why}`;
+  }
+
+  document.getElementById('explain').classList.add('show');
+  allBtns.forEach(b=>b.classList.add('disabled'));
+
+  const nb=document.getElementById('next-btn');nb.classList.add('show');
+  const isLastLevel=levelIdx===4;
+  const isLastOrg=orgIdx===4;
+  document.getElementById('next-label').textContent=isLastLevel?(isLastOrg?'Нәтижені көру':'Келесі ағза'):('Келесі сұрақ');
+}
+
+// ═══════════════ FILL TREE ═══════════════
+function fillTreeLevel(idx,val){
+  const entry=document.getElementById('te-'+idx);
+  const icon=document.getElementById('ti-'+idx);
+  const valEl=document.getElementById('tv-'+idx);
+  if(!entry)return;
+  const org=ORGANISMS[orgIdx];
+  entry.classList.add('filled');
+  entry.style.setProperty('--ec',RANK_COLORS[idx]);
+  entry.style.setProperty('--ebg',RANK_COLORS[idx]+'12');
+  icon.textContent=org.emoji;
+  valEl.textContent=val;
+  if(idx>0){const conn=document.getElementById('conn-'+idx);if(conn)conn.classList.add('lit');}
+}
+
+// ═══════════════ NEXT QUESTION ═══════════════
+function nextQuestion(){
+  initA();
+  if(levelIdx<4){levelIdx++;showQuestion();}
+  else{
+    orgIdx++;
+    if(orgIdx<5){showOrganism();}
+    else{showEnd();}
+  }
+}
+
+function updateStats(){
+  const total=ORGANISMS.length*5;
+  const pct=(totalQ/total)*100;
+  document.getElementById('prog-bar').style.width=pct+'%';
+  document.getElementById('prog-label').textContent=totalQ+' / '+total+' сұрақ';
+  document.getElementById('score-disp').textContent='⭐ '+score;
+  document.getElementById('nav-score').textContent='⭐ '+score+' ұпай';
+}
+
+function showEnd(){
+  A.done();
+  const maxScore=ORGANISMS.length*5*10;
+  const pct=Math.round((score/maxScore)*100);
+  document.getElementById('end-score').textContent=score+' / '+maxScore+' ұпай ('+pct+'%)';
+  document.getElementById('end-body').innerHTML=`
+    Сіз барлық 5 ағзаны 5 деңгейлік жүйе бойынша жіктеп болдыңыз!<br><br>
+    <b>🌻 Күнбағыс</b> — Өсімдіктер → Жабық тұқымдылар → Қосжарнақтылар<br>
+    <b>🦁 Арыстан</b> — Жануарлар → Хордалылар → Сүтқоректілер<br>
+    <b>🦅 Бүркіт</b> — Жануарлар → Хордалылар → Құстар<br>
+    <b>🐸 Бақа</b> — Жануарлар → Хордалылар → Қосмекенділер<br>
+    <b>🍄 Саңырауқұлақ</b> — Саңырауқұлақтар → Basidiomycota<br><br>
+    Бұл жүйелеуді <b>Карл Линней (1758)</b> ұсынды.`;
+  document.getElementById('end-modal').classList.add('show');
+}
+
+function startGame(){
+  document.getElementById('intro').style.display='none';
+  initA();
+  showOrganism();
+}
+
+function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}}
+</script>
+</body>
+</html>

@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Эксперимент: Фотосинтез Элодеи — Virtual Science Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Roboto', sans-serif; }
+        body { 
+            background: linear-gradient(180deg, #111827 0%, #030712 100%); 
+            color: #fff; min-height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+        }
+
+        .header { text-align: center; padding: 15px; background: rgba(0,0,0,0.5); z-index: 10; border-bottom: 1px solid #1f2937; }
+        .header h1 { font-size: 32px; color: #4ade80; }
+        .header p { color: #9ca3af; font-size: 15px; }
+
+        .lab-container { flex: 1; display: flex; position: relative; }
+
+        /* Left Controls */
+        .controls {
+            width: 320px; background: rgba(31,41,55,0.8); padding: 25px;
+            display: flex; flex-direction: column; gap: 25px; border-right: 1px solid #374151; z-index: 10; overflow-y: auto;
+        }
+        .ctrl-group { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; border: 1px solid #374151; }
+        .ctrl-group h3 { font-size: 16px; color: #9ca3af; margin-bottom: 15px; display: flex; justify-content: space-between; }
+        
+        .color-btns { display: flex; gap: 10px; }
+        .color-btn { flex: 1; padding: 10px 0; border: 2px solid transparent; border-radius: 8px; cursor: pointer; transition: 0.2s; font-weight: bold; }
+        .color-btn[data-color="white"] { background: #f8fafc; color: #000; }
+        .color-btn[data-color="blue"] { background: #3b82f6; color: #fff; }
+        .color-btn[data-color="green"] { background: #22c55e; color: #fff; }
+        .color-btn[data-color="red"] { background: #ef4444; color: #fff; }
+        .color-btn.active { border-color: #fbbf24; transform: scale(1.05); box-shadow: 0 0 10px #fbbf24; }
+
+        input[type=range] { width: 100%; accent-color: #fbbf24; cursor: pointer; }
+        
+        .btn-add {
+            background: rgba(255,255,255,0.1); border: 1px dashed #cbd5e1; color: white; padding: 12px;
+            border-radius: 8px; width: 100%; cursor: pointer; font-family: inherit; transition: 0.2s;
+        }
+        .btn-add:hover { background: rgba(255,255,255,0.2); }
+
+        .dashboard { margin-top: auto; background: #064e3b; border: 1px solid #047857; padding: 15px; border-radius: 12px; text-align: center; }
+        .dashboard-val { font-size: 40px; color: #4ade80; font-weight: 900; }
+        .dashboard-lbl { color: #a7f3d0; font-size: 14px; text-transform: uppercase; }
+
+        /* Scene Area */
+        .scene {
+            flex: 1; position: relative; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 50px;
+        }
+
+        /* The Lamp */
+        .lamp-assembly { position: absolute; top: 50px; left: 100px; transition: left 0.3s; display: flex; flex-direction: column; align-items: center; }
+        .lamp-body { width: 60px; height: 80px; background: #475569; border-radius: 30px 30px 0 0; position: relative; }
+        .lamp-bulb { width: 40px; height: 20px; background: #fff; position: absolute; bottom: 0; left: 10px; border-radius: 0 0 20px 20px; box-shadow: 0 10px 30px rgba(255,255,255,0.8); transition: background 0.3s, box-shadow 0.3s; }
+        .lamp-beam { position: absolute; top: 100px; width: 200px; height: 600px; background: linear-gradient(to bottom, rgba(255,255,255,0.4), transparent); clip-path: polygon(25% 0%, 75% 0%, 100% 100%, 0% 100%); transition: background 0.3s; pointer-events: none; z-index: 1; }
+
+        /* The Beaker */
+        .beaker {
+            width: 250px; height: 350px; border: 4px solid rgba(255,255,255,0.3); border-top: none;
+            border-radius: 0 0 20px 20px; position: relative; background: rgba(56,189,248,0.1);
+            box-shadow: inset 0 0 20px rgba(56,189,248,0.2), 0 10px 20px rgba(0,0,0,0.5); z-index: 5; display: flex; justify-content: center;
+        }
+        .water-level { position: absolute; bottom: 0; width: 100%; height: 90%; background: rgba(56,189,248,0.25); border-radius: 0 0 16px 16px; border-top: 2px solid rgba(56,189,248,0.6); }
+        
+        /* The Plant (Elodea) */
+        .elodea { position: absolute; bottom: 10px; width: 40px; height: 280px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .el-stem { position: absolute; width: 6px; height: 100%; background: #15803d; bottom: 0; }
+        .el-leaf { width: 30px; height: 10px; background: #22c55e; border-radius: 50% 10% 50% 10%; position: absolute; }
+        
+        .bubble { position: absolute; background: rgba(255,255,255,0.8); border: 1px solid #fff; border-radius: 50%; animation: floatUp linear forwards; z-index: 6; }
+
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0.2; transform: translateY(-350px); } }
+
+        .btn-back { position: absolute; top: 20px; left: 20px; background: rgba(255,255,255,0.1); color: white; text-decoration: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; z-index: 100; transition: 0.2s; }
+        .btn-back:hover { background: rgba(255,255,255,0.2); }
+        
+        .info-card { position: absolute; top: 100px; right: 30px; width: 300px; background: rgba(15,23,42,0.9); padding: 20px; border-radius: 12px; border: 1px solid #374151; font-size: 14px; color: #cbd5e1; line-height: 1.5; z-index: 10; }
+        .info-card h4 { color: #fbbf24; margin-bottom: 10px; font-size: 16px; }
+
+        /* Bicarbonate powder effect */
+        .powder { position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%; opacity: 0; animation: powderFall 2s forwards; z-index: 6;}
+        @keyframes powderFall { 0% { opacity:1; transform:translateY(0); } 100% { opacity:0; transform:translateY(200px); } }
+    </style>
+
+    <script id="early-lang-sync">
+        (function() {
+            let cl = localStorage.getItem('vsh-lang') || 'kk';
+            var gt = '/ru/' + cl;
+            if (cl === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+                document.cookie = "googtrans=" + gt + "; path=/";
+                if (location.hostname) {
+                    document.cookie = "googtrans=" + gt + "; domain=" + location.hostname + "; path=/";
+                    document.cookie = "googtrans=" + gt + "; domain=." + location.hostname + "; path=/";
+                }
+            }
+        })();
+    </script>
+</head>
+<body>
+
+    <a href="index.html" class="btn-back">⬅ В меню</a>
+
+    <div class="header">
+        <h1>🌱 Практикум: Фотосинтез Элодеи</h1>
+        <p>Измерьте интенсивность фотосинтеза по количеству пузырьков кислорода.</p>
+    </div>
+
+    <div class="lab-container">
+        
+        <div class="controls">
+            <div class="ctrl-group">
+                <h3>Расстояние Лампы: <span id="distVal">50 см</span></h3>
+                <input type="range" id="distSlider" min="10" max="100" value="50">
+            </div>
+
+            <div class="ctrl-group">
+                <h3>Спектр Света (Фильтр)</h3>
+                <div class="color-btns">
+                    <button class="color-btn active" data-color="white" style="color:black;">Белый</button>
+                    <button class="color-btn" data-color="blue">Синий</button>
+                    <button class="color-btn" data-color="green">Зел.</button>
+                    <button class="color-btn" data-color="red">Красный</button>
+                </div>
+            </div>
+
+            <div class="ctrl-group">
+                <h3>Углекислый газ (CO₂)</h3>
+                <p style="font-size:12px; margin-bottom:10px; color:#9ca3af;">Добавьте соду (NaHCO₃) для обогащения воды углекислым газом.</p>
+                <button class="btn-add" onclick="addCO2()">➕ Добавить Соду (+CO₂)</button>
+                <div style="margin-top:10px; font-size:13px; color:#4ade80;">Уровень CO₂: <span id="co2Lvl">Нормальный</span></div>
+            </div>
+
+            <div class="dashboard">
+                <div class="dashboard-lbl">Пузырьков O₂ / мин</div>
+                <div class="dashboard-val" id="bubbleRate">0</div>
+            </div>
+        </div>
+
+        <div class="scene">
+            <div class="lamp-assembly" id="lamp">
+                <div class="lamp-body"><div class="lamp-bulb" id="bulb"></div></div>
+                <div class="lamp-beam" id="beam"></div>
+            </div>
+
+            <div class="info-card">
+                <h4>📝 Ход Опыта</h4>
+                <p>1. В колбу с водой помещена ветка водного растения — Элодея.</p>
+                <p>2. При освещении растение выделяет кислород (O₂) в виде пузырьков.</p>
+                <p>3. <b>Задача:</b> Проверьте, как яркость и цвет света (длина волны) влияют на скорость фотосинтеза. Почему зеленый свет дает наименьший результат?</p>
+            </div>
+
+            <div class="beaker" id="beaker">
+                <div class="water-level"></div>
+                <div class="elodea" id="plant">
+                    <div class="el-stem"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const colorData = {
+            'white': { hex: '#ffffff', eff: 1.0 },
+            'blue': { hex: '#3b82f6', eff: 0.9 },
+            'red': { hex: '#ef4444', eff: 0.85 },
+            'green': { hex: '#22c55e', eff: 0.1 }
+        };
+
+        let activeColor = 'white';
+        let co2Level = 1.0;
+        let rateBPM = 0;
+        let bubbleInterval;
+
+        const distSlider = document.getElementById('distSlider');
+        const lamp = document.getElementById('lamp');
+        const bulb = document.getElementById('bulb');
+        const beam = document.getElementById('beam');
+        const plant = document.getElementById('plant');
+        const beaker = document.getElementById('beaker');
+
+        // Draw leaves on the plant
+        for(let i=0; i<15; i++) {
+            const l = document.createElement('div');
+            l.className = 'el-leaf';
+            l.style.bottom = (i * 18 + 10) + 'px';
+            l.style.left = (i%2===0) ? '0px' : '10px';
+            l.style.transform = (i%2===0) ? 'rotate(-20deg)' : 'rotate(20deg) scaleX(-1)';
+            plant.appendChild(l);
+        }
+
+        document.querySelectorAll('.color-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                activeColor = btn.dataset.color;
+                updateSimulation();
+            });
+        });
+
+        distSlider.addEventListener('input', updateSimulation);
+
+        function addCO2() {
+            co2Level = 2.0;
+            document.getElementById('co2Lvl').textContent = 'Высокий (Обогащено)';
+            document.getElementById('co2Lvl').style.color = '#fbbf24';
+            
+            for(let i=0; i<20; i++){
+                setTimeout(() => {
+                    const p = document.createElement('div');
+                    p.className = 'powder';
+                    p.style.left = (Math.random()*200 + 20) + 'px';
+                    p.style.top = '10px';
+                    beaker.appendChild(p);
+                    setTimeout(()=>p.remove(), 2000);
+                }, i * 50);
+            }
+            updateSimulation();
+            
+            setTimeout(() => {
+                co2Level = 1.0;
+                document.getElementById('co2Lvl').textContent = 'Нормальный';
+                document.getElementById('co2Lvl').style.color = '#4ade80';
+                updateSimulation();
+            }, 30000);
+        }
+
+        function updateSimulation() {
+            const dist = parseInt(distSlider.value);
+            document.getElementById('distVal').textContent = dist + ' см';
+            
+            const baseLeft = window.innerWidth / 2 - 125;
+            lamp.style.left = (baseLeft - dist * 4) + 'px';
+
+            const cObj = colorData[activeColor];
+            bulb.style.backgroundColor = cObj.hex;
+            bulb.style.boxShadow = `0 10px 40px ${cObj.hex}`;
+            
+            const hexToRgba = (hex, a) => {
+                const r = parseInt(hex.slice(1,3), 16);
+                const g = parseInt(hex.slice(3,5), 16);
+                const b = parseInt(hex.slice(5,7), 16);
+                return `rgba(${r},${g},${b},${a})`;
+            };
+            beam.style.background = `linear-gradient(to bottom, ${hexToRgba(cObj.hex, 0.4)}, transparent)`;
+
+            const maxRate = 120;
+            let brightness = 1 - ((dist - 10) / 150);
+            if (brightness < 0) brightness = 0;
+
+            rateBPM = Math.floor(maxRate * brightness * cObj.eff * co2Level);
+            document.getElementById('bubbleRate').textContent = rateBPM;
+
+            manageBubbles();
+        }
+
+        function manageBubbles() {
+            clearInterval(bubbleInterval);
+            if (rateBPM > 0) {
+                const intervalMs = Math.max(50, 60000 / rateBPM);
+                bubbleInterval = setInterval(spawnBubble, intervalMs);
+            }
+        }
+
+        function spawnBubble() {
+            const b = document.createElement('div');
+            b.className = 'bubble';
+            const size = Math.random() * 5 + 4;
+            b.style.width = size + 'px';
+            b.style.height = size + 'px';
+            b.style.left = (Math.random() * 20 + 115) + 'px';
+            b.style.bottom = (Math.random() * 200 + 10) + 'px';
+            b.style.animationDuration = (Math.random() * 1 + 2) + 's';
+            beaker.appendChild(b);
+            setTimeout(() => b.remove(), 3000);
+        }
+
+        setTimeout(updateSimulation, 500);
+        window.addEventListener('resize', updateSimulation);
+    </script>
+
+<!-- Global Language Switcher & Google Translate -->
+<div id="google_translate_element" style="display:none;"></div>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({pageLanguage: 'ru', includedLanguages: 'ru,en,kk', autoDisplay: false}, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script>
+(function() {
+    let currentLang = localStorage.getItem('vsh-lang') || 'kk';
+
+    // Synchronize cookie if needed
+    var gtrans = '/ru/' + currentLang;
+    if (currentLang === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) {
+            document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+        }
+    }
+
+    // Floating UI
+    const isIndex = location.pathname.endsWith('index.html') || location.pathname.endsWith('/') || location.pathname.endsWith('studio.html');
+    if (!document.querySelector('.floating-lang-switcher')) {
+        const style = document.createElement('style');
+        style.innerHTML = `
+            body { top: 0 !important; }
+            .skiptranslate { display: none !important; }
+            .floating-lang-switcher {
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                background: rgba(15, 23, 42, 0.9);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 20px;
+                padding: 10px;
+                display: flex;
+                gap: 10px;
+                z-index: 999999;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+                font-family: 'Roboto', sans-serif;
+            }
+            .floating-lang-btn {
+                background: transparent;
+                border: 1px solid rgba(255,255,255,0.2);
+                color: #94a3b8;
+                font-size: 14px;
+                font-weight: 600;
+                padding: 8px 15px;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: 0.3s;
+            }
+            .floating-lang-btn:hover {
+                color: #fff;
+                background: rgba(255,255,255,0.1);
+            }
+            .floating-lang-btn.active {
+                background: linear-gradient(135deg, #a855f7, #3b82f6);
+                color: #fff;
+                border-color: transparent;
+            }
+        `;
+        document.head.appendChild(style);
+
+        const switcher = document.createElement('div');
+        switcher.className = 'floating-lang-switcher notranslate';
+        switcher.innerHTML = `
+            <button class="floating-lang-btn " onclick="changeLangGlobal('ru')">RU</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('kk')">ҚАЗ</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('en')">EN</button>
+        `;
+        
+        // set active
+        const btns = switcher.querySelectorAll('.floating-lang-btn');
+        if (currentLang === 'ru') btns[0].classList.add('active');
+        else if (currentLang === 'kk') btns[1].classList.add('active');
+        else if (currentLang === 'en') btns[2].classList.add('active');
+
+        document.body.appendChild(switcher);
+    }
+})();
+
+function changeLangGlobal(lang) {
+    localStorage.setItem('vsh-lang', lang);
+    var gtrans = '/ru/' + lang;
+    if (lang === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+    }
+    location.reload();
+}
+</script>
+\n</body>
+</html>

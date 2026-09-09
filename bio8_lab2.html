@@ -1,0 +1,319 @@
+<!DOCTYPE html><html lang="kk"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Зертхана №2 — Антибиотик сынағы</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>*{box-sizing:border-box;margin:0;padding:0}body{background:#020c1b;color:#fff;font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+nav{height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:rgba(0,0,0,.5);border-bottom:1px solid rgba(167,139,250,.2);flex-shrink:0}
+nav a{color:#a78bfa;text-decoration:none;font-size:.8rem;font-family:'Orbitron',sans-serif}#snav{font-family:'Orbitron',sans-serif;font-size:.8rem;color:#fbbf24}
+.main{flex:1;display:grid;grid-template-columns:240px 1fr 280px;overflow:hidden}
+.pn{background:rgba(5,15,35,.9);padding:14px;display:flex;flex-direction:column;gap:10px;overflow-y:auto}
+.pl{border-right:1px solid rgba(167,139,250,.1)}.pr{border-left:1px solid rgba(167,139,250,.1)}
+.plbl{font-family:'Orbitron',sans-serif;font-size:.56rem;letter-spacing:2px;color:rgba(167,139,250,.5);border-bottom:1px solid rgba(167,139,250,.08);padding-bottom:6px}
+.pat-card{border-radius:10px;padding:12px;background:rgba(167,139,250,.05);border:1px solid rgba(167,139,250,.2);font-size:.8rem;color:#94a3b8;line-height:1.6}
+.pat-card strong{color:#a78bfa}.pat-name{font-family:'Orbitron',sans-serif;font-size:.7rem;color:#a78bfa;margin-bottom:6px}
+.gram-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:6px;font-size:.72rem;margin-top:6px}
+.gram-pos{background:rgba(124,58,237,.2);color:#a78bfa;border:1px solid rgba(124,58,237,.4)}
+.gram-neg{background:rgba(225,29,72,.15);color:#f43f5e;border:1px solid rgba(225,29,72,.3)}
+.disk-tray{display:flex;flex-direction:column;gap:6px}
+.disk-item{padding:10px 12px;border-radius:9px;border:2px solid var(--dc);background:color-mix(in srgb,var(--dc) 8%,transparent);cursor:grab;display:flex;align-items:center;gap:8px;font-size:.8rem;color:#cbd5e1;transition:.2s;user-select:none}
+.disk-item:hover{background:color-mix(in srgb,var(--dc) 18%,transparent);transform:translateX(3px)}
+.disk-item.used{opacity:.3;pointer-events:none;border-style:dashed}
+.disk-dot{width:14px;height:14px;border-radius:50%;background:var(--dc);flex-shrink:0}
+.center{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px}
+.pat-prog{font-family:'Orbitron',sans-serif;font-size:.7rem;color:#64748b}
+.plate-wrap{position:relative;width:280px;height:280px}
+#plate{width:280px;height:280px;border-radius:50%;border:3px solid rgba(167,139,250,.3);background:radial-gradient(circle,rgba(20,40,10,.9),rgba(5,20,5,.95));cursor:crosshair;display:block}
+.incubate-btn{padding:11px 28px;border-radius:10px;border:2px solid rgba(167,139,250,.4);background:rgba(167,139,250,.1);color:#a78bfa;font-family:'Orbitron',sans-serif;font-size:.72rem;cursor:pointer;transition:.3s}
+.incubate-btn:hover{background:rgba(167,139,250,.2);transform:translateY(-2px)}
+.incubate-btn:disabled{opacity:.3;pointer-events:none}
+.info-box{width:280px;border-radius:9px;padding:10px;background:rgba(0,0,0,.3);border:1px solid rgba(167,139,250,.12);font-size:.76rem;color:#94a3b8;line-height:1.5;min-height:54px}
+.rx-section{border-radius:10px;padding:12px;background:rgba(167,139,250,.05);border:1px solid rgba(167,139,250,.15)}
+.rx-lbl{font-family:'Orbitron',sans-serif;font-size:.58rem;color:rgba(167,139,250,.5);letter-spacing:1px;margin-bottom:8px}
+.rx-btns{display:flex;flex-direction:column;gap:6px}
+.rxb{padding:10px 12px;border-radius:9px;border:1px solid rgba(167,139,250,.2);background:rgba(167,139,250,.04);cursor:pointer;font-size:.8rem;color:#cbd5e1;transition:.2s;display:flex;align-items:center;gap:8px}
+.rxb:hover{background:rgba(167,139,250,.12);border-color:rgba(167,139,250,.4)}.rxb.ok{background:rgba(52,211,153,.12);border-color:#34d399;color:#34d399;pointer-events:none}.rxb.bad{background:rgba(239,68,68,.1);border-color:#ef4444;color:#ef4444;pointer-events:none}
+.vrd{border-radius:9px;padding:10px;font-size:.78rem;line-height:1.5;display:none;margin-top:8px}.vrd.show{display:block}
+.vrd.ok{background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.3);color:#94a3b8}.vrd.ok strong{color:#34d399}.vrd.bad{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.3);color:#94a3b8}.vrd.bad strong{color:#ef4444}
+.nbtn{padding:10px;border-radius:9px;cursor:pointer;background:rgba(167,139,250,.1);border:2px solid rgba(167,139,250,.4);font-family:'Orbitron',sans-serif;font-size:.7rem;color:#a78bfa;transition:.3s;display:none;text-align:center;margin-top:6px}.nbtn.show{display:block}.nbtn:hover{background:rgba(167,139,250,.2)}
+.ov{position:fixed;inset:0;z-index:100;background:rgba(1,5,15,.97);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center}
+.card{width:min(560px,90vw);padding:38px 46px;text-align:center;background:rgba(5,15,35,.96);border:1px solid rgba(167,139,250,.25);border-radius:18px}
+.card h2{font-family:'Orbitron',sans-serif;font-size:1.3rem;color:#a78bfa;margin-bottom:12px}.card p{color:#94a3b8;font-size:.88rem;line-height:1.8;margin-bottom:22px}
+.cbtn{display:inline-flex;align-items:center;gap:8px;padding:12px 34px;background:#a78bfa;color:#000;font-family:'Orbitron',sans-serif;font-size:.76rem;border:none;border-radius:8px;cursor:pointer;transition:.3s}.cbtn:hover{transform:translateY(-3px);box-shadow:0 0 40px rgba(167,139,250,.5)}
+.sbig{font-family:'Orbitron',sans-serif;font-size:2.2rem;color:#fbbf24;margin:10px 0}
+.elink{display:inline-block;text-decoration:none;border:2px solid #a78bfa;color:#a78bfa;font-family:'Orbitron',sans-serif;font-size:.7rem;letter-spacing:2px;padding:10px 24px;border-radius:8px;transition:.3s;margin-top:8px}.elink:hover{background:#a78bfa;color:#000}</style>
+<!-- MODERN UI UPGRADE -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* Base Overrides */
+* { font-family: 'Roboto', sans-serif !important; }
+body { background: #020617 !important; color: #f8fafc !important; }
+
+/* Top Nav */
+nav { height: 60px !important; padding: 0 30px !important; background: rgba(15,23,42,0.95) !important; border-bottom: 2px solid #1e293b !important; box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important; }
+nav a { background: rgba(56,189,248,0.1) !important; border: 1px solid rgba(56,189,248,0.3) !important; color: #38bdf8 !important; padding: 8px 16px !important; border-radius: 8px !important; font-weight: bold !important; font-size: 14px !important; }
+nav a:hover { background: rgba(56,189,248,0.2) !important; transform: translateX(-2px) !important; }
+nav span { font-size: 16px !important; font-weight: 800 !important; letter-spacing: 1px !important; color: #f8fafc !important; }
+#snav { background: rgba(250,204,21,0.1) !important; color: #facc15 !important; padding: 6px 12px !important; border-radius: 8px !important; border: 1px solid rgba(250,204,21,0.3) !important; }
+
+/* Layout */
+.main { grid-template-columns: 320px 1fr 350px !important; background: radial-gradient(circle at 50% 50%, #1e293b 0%, #020617 100%) !important; }
+.pn { background: rgba(15,23,42,0.95) !important; padding: 25px !important; gap: 15px !important; box-shadow: 0 0 20px rgba(0,0,0,0.5) !important; overflow-y: auto !important; }
+.pl { border-right: 2px solid #1e293b !important; }
+.pr { border-left: 2px solid #1e293b !important; }
+.plbl { font-weight: 800 !important; font-size: 14px !important; letter-spacing: 1px !important; color: #a78bfa !important; border-bottom: 1px solid #1e293b !important; padding-bottom: 10px !important; text-transform: uppercase !important; margin-bottom: 10px !important; }
+
+/* Cards & Buttons */
+.dbt, .iopt, .sbt, .rxb, .disk-item, .i-btn { border-radius: 10px !important; padding: 12px 15px !important; border: 1px solid #334155 !important; background: #0f172a !important; font-size: 14px !important; font-weight: 500 !important; color: #e2e8f0 !important; transition: 0.2s !important; box-shadow: 0 4px 6px rgba(0,0,0,0.3) !important; }
+.dbt:hover, .iopt:hover, .sbt:hover, .rxb:hover, .disk-item:hover, .i-btn:hover { border-color: #a78bfa !important; background: #1e293b !important; transform: translateX(5px) !important; }
+.active, .ok { border-color: #34d399 !important; background: rgba(52,211,153,0.1) !important; color: #34d399 !important; box-shadow: inset 0 0 10px rgba(52,211,153,0.2) !important; }
+.bad { border-color: #ef4444 !important; background: rgba(239,68,68,0.1) !important; color: #ef4444 !important; }
+
+/* Text Logs & Info */
+.clog, .info-box, .evc, .vrd, .pat-card, .rx-section, .srcsec { border-radius: 12px !important; padding: 15px !important; background: rgba(255,255,255,0.03) !important; border: 1px solid rgba(255,255,255,0.05) !important; font-size: 14px !important; color: #cbd5e1 !important; line-height: 1.6 !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2) !important; margin-bottom: 10px !important; }
+
+/* Overlays & Big Modals */
+.card { width: min(600px, 90vw) !important; padding: 40px 50px !important; background: rgba(15,23,42,0.95) !important; border: 2px solid #a78bfa !important; border-radius: 20px !important; box-shadow: 0 20px 50px rgba(0,0,0,0.7) !important; backdrop-filter: blur(10px) !important; }
+.card h2 { font-size: 28px !important; color: #fff !important; margin-bottom: 15px !important; font-weight: 800 !important; }
+.card p { color: #94a3b8 !important; font-size: 16px !important; }
+.cbtn { padding: 15px 40px !important; background: #a78bfa !important; color: #000 !important; font-size: 16px !important; font-weight: bold !important; border-radius: 12px !important; border: none !important; box-shadow: 0 10px 20px rgba(0,0,0,0.4) !important; text-transform: uppercase !important; letter-spacing: 1px !important; cursor: pointer; transition: 0.3s; }
+.cbtn:hover { transform: translateY(-3px) scale(1.05) !important; box-shadow: 0 15px 30px rgba(0,0,0,0.6) !important; background: #fff !important; }
+.elink { background: transparent !important; color: #a78bfa !important; border: 2px solid #a78bfa !important; padding: 10px 20px !important; border-radius: 10px !important; font-size: 14px !important; text-decoration: none !important; font-weight: bold !important; transition: 0.3s !important; display: inline-block; }
+.elink:hover { background: #a78bfa !important; color: #020617 !important; }
+
+/* Specific fixes */
+.sev { padding: 4px 8px !important; border-radius: 6px !important; font-size: 12px !important; font-weight: bold !important; }
+.sh { background: rgba(239,68,68,0.2) !important; color: #fca5a5 !important; border: 1px solid rgba(239,68,68,0.3) !important; }
+.sm { background: rgba(250,204,21,0.2) !important; color: #fde047 !important; border: 1px solid rgba(250,204,21,0.3) !important; }
+.sl { background: rgba(52,211,153,0.2) !important; color: #86efac !important; border: 1px solid rgba(52,211,153,0.3) !important; }
+
+/* Scrollbars */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+::-webkit-scrollbar-thumb { background: #a78bfa; border-radius: 4px; }
+</style>
+</head><body>
+<div class="ov" id="intro"><div class="card"><div style="font-size:2.2rem;margin-bottom:12px">🦠💊🧫</div><h2>АНТИБИОТИК СЫНАҒЫ</h2>
+<p>Пациенттің инфекциясын емдеу керек!<br>Антибиотик дискілерін чашкаға орналастырып,<br><strong style="color:#a78bfa">ингибиция аймақтарын</strong> бақылап, дұрыс антибиотикті таңдаңыз.</p>
+<button class="cbtn" onclick="start()">▶ ЗЕРТХАНАҒА КІРУ</button></div></div>
+<div class="ov" id="end-sc" style="display:none"><div class="card"><div style="font-size:2.2rem;margin-bottom:12px">🏆</div><h2>ЗЕРТТЕУ АЯҚТАЛДЫ!</h2><div class="sbig" id="fscore">Аяқталды!</div><p id="fbody" style="margin-bottom:18px"></p><a href="biology8.html" class="elink">← МӘЗІРГЕ ОРАЛУ</a></div></div>
+<nav><a href="biology8.html">← Мәзір</a><span style="font-family:'Orbitron';font-size:.85rem;color:#a78bfa">🦠 ЗЕРТХАНА №2 — АНТИБИОТИК</span><span id="snav">🟢 Белсенді</span></nav>
+<div class="main">
+<div class="pn pl"><div class="plbl">👤 ПАЦИЕНТ</div><div id="pat-info"></div>
+<div class="plbl" style="margin-top:8px">💊 ДИСКІЛЕР (басып орналастыр)</div>
+<div class="disk-tray" id="disk-tray"></div></div>
+<div class="center">
+<div class="pat-prog" id="prog">Пациент 1 / 3</div>
+<div class="plate-wrap"><canvas id="plate" width="280" height="280"></canvas></div>
+<button class="incubate-btn" id="inc-btn" onclick="incubate()" disabled>🧫 Инкубация (37°C, 24 сағ)</button>
+<div class="info-box" id="info-box">Антибиотик дискілерін чашкаға орналастырыңыз...</div>
+</div>
+<div class="pn pr"><div class="plbl">💊 АНТИБИОТИК ТАҒАЙЫНДАҢЫЗ</div>
+<div class="rx-section"><div class="rx-lbl">ДҰРЫС АНТИБИОТИКТІ ТАҢДАҢЫЗ:</div>
+<div class="rx-btns" id="rx-btns"></div>
+<div class="vrd" id="vrd"></div>
+<div class="nbtn" id="nbtn" onclick="nextPat()">Келесі пациент →</div></div></div>
+</div>
+<script>
+const DISKS=[
+{id:'peni',name:'Пенициллин',color:'#60a5fa',r:20},
+{id:'amp',name:'Ампициллин',color:'#34d399',r:22},
+{id:'cipro',name:'Ципрофлоксацин',color:'#f59e0b',r:24},
+{id:'metro',name:'Метронидазол',color:'#f87171',r:14},
+{id:'strep',name:'Стрептомицин',color:'#e879f9',r:18},
+];
+const PATIENTS=[
+{name:'Пациент 1 — Серікбол, 34 ж.',bacteria:'Staphylococcus aureus (Грам+)',gram:'pos',gramLabel:'Грам+ 💜',symptoms:'Тері абсцессі, іріңдеу. Температура 38.5°C.',answer:'amp',effective:['peni','amp','strep'],why:'Грам+ бактерия → Пенициллин/Ампициллин тиімді. Ампициллин кең спектрлі, тіндерге жақсы енеді.'},
+{name:'Пациент 2 — Айгүл, 28 ж.',bacteria:'Escherichia coli (Грам−)',gram:'neg',gramLabel:'Грам− 🩷',symptoms:'Несеп жолы инфекциясы. Ауырсыну, қызу.',answer:'cipro',effective:['cipro','metro'],why:'Грам− бактерия → Фторхинолондар (Ципрофлоксацин) тиімді. Пенициллин Грам−-ке әсер етпейді!'},
+{name:'Пациент 3 — Данияр, 45 ж.',bacteria:'Streptococcus pneumoniae (Грам+)',gram:'pos',gramLabel:'Грам+ 💜',symptoms:'Пневмония. Жөтел, тыныс қиналу, 39.2°C.',answer:'peni',effective:['peni','amp'],why:'Стрептококк Грам+ → Пенициллин бірінші таңдау. Тыныс жолына жақсы жетеді.'},
+];
+let pi=0,placed=[],incubated=false,answered=false,score=0;
+const canvas=document.getElementById('plate');
+const ctx=canvas.getContext('2d');
+function start(){document.getElementById('intro').style.display='none';loadPat();}
+function loadPat(){
+const p=PATIENTS[pi];placed=[];incubated=false;answered=false;
+document.getElementById('prog').textContent='Пациент '+(pi+1)+' / '+PATIENTS.length;
+document.getElementById('inc-btn').disabled=true;
+document.getElementById('vrd').className='vrd';document.getElementById('nbtn').className='nbtn';
+document.getElementById('info-box').textContent='Антибиотик дискілерін чашкаға орналастырыңыз...';
+document.getElementById('pat-info').innerHTML=`<div class="pat-card"><div class="pat-name">${p.name}</div><div>${p.symptoms}</div><div>${p.bacteria}</div><div class="gram-badge gram-${p.gram}">${p.gramLabel}</div></div>`;
+buildDisks();buildRx();drawPlate();
+}
+function buildDisks(){
+const tray=document.getElementById('disk-tray');tray.innerHTML='';
+DISKS.forEach(d=>{
+const el=document.createElement('div');el.className='disk-item';el.id='di-'+d.id;
+el.style.setProperty('--dc',d.color);
+el.innerHTML=`<div class="disk-dot"></div>${d.name}`;
+el.onclick=()=>placeOnPlate(d);tray.appendChild(el);
+});
+}
+function buildRx(){
+const el=document.getElementById('rx-btns');el.innerHTML='';
+DISKS.forEach(d=>{
+const b=document.createElement('div');b.className='rxb';b.dataset.id=d.id;
+b.style.setProperty('--dc',d.color);
+b.innerHTML=`<div class="disk-dot" style="background:${d.color}"></div>${d.name}`;
+b.onclick=()=>prescribe(d.id,b);el.appendChild(b);
+});
+}
+function placeOnPlate(d){
+if(incubated||placed.find(p=>p.id===d.id))return;
+const cx=50+Math.random()*180,cy=50+Math.random()*180;
+placed.push({...d,cx,cy});
+document.getElementById('di-'+d.id).classList.add('used');
+drawPlate();
+document.getElementById('info-box').textContent=`💊 ${d.name} чашкаға орналастырылды. Барлық дискілерді қойыңыз да инкубация жасаңыз.`;
+if(placed.length>=2)document.getElementById('inc-btn').disabled=false;
+}
+function drawPlate(showZones=false){
+ctx.clearRect(0,0,280,280);
+ctx.beginPath();ctx.arc(140,140,135,0,Math.PI*2);ctx.fillStyle='rgba(20,40,10,.9)';ctx.fill();ctx.strokeStyle='rgba(167,139,250,.3)';ctx.lineWidth=3;ctx.stroke();
+if(showZones){
+const p=PATIENTS[pi];
+placed.forEach(d=>{
+const effective=p.effective.includes(d.id);
+const zoneR=effective?d.r:8;
+ctx.beginPath();ctx.arc(d.cx,d.cy,zoneR,0,Math.PI*2);
+ctx.fillStyle=effective?`${d.color}30`:'rgba(100,100,100,.15)';ctx.fill();
+ctx.strokeStyle=effective?d.color:'#475569';ctx.lineWidth=1.5;ctx.stroke();
+ctx.beginPath();ctx.arc(d.cx,d.cy,5,0,Math.PI*2);ctx.fillStyle=d.color;ctx.fill();
+ctx.fillStyle='rgba(255,255,255,.8)';ctx.font='8px Inter';ctx.textAlign='center';
+ctx.fillText(effective?`${d.r}mm`:'R',d.cx,d.cy-8);
+});
+} else {
+placed.forEach(d=>{
+ctx.beginPath();ctx.arc(d.cx,d.cy,5,0,Math.PI*2);ctx.fillStyle=d.color;ctx.fill();
+ctx.fillStyle='rgba(255,255,255,.6)';ctx.font='8px Inter';ctx.textAlign='center';ctx.fillText('◆',d.cx,d.cy+3);
+});
+}
+}
+function incubate(){
+if(incubated)return;incubated=true;
+document.getElementById('inc-btn').disabled=true;
+document.getElementById('info-box').textContent='⏳ 37°C, 24 сағат инкубация... Ингибиция аймақтарын бақылаңыз!';
+setTimeout(()=>{drawPlate(true);document.getElementById('info-box').textContent='✅ Ингибиция аймақтары пайда болды! Тиімді антибиотикте ҮЛКЕН аймақ. Антибиотик тағайындаңыз →';},1000);
+}
+function prescribe(id,btn){
+if(!incubated||answered)return;answered=true;
+const p=PATIENTS[pi];const ok=(id===p.answer);
+document.querySelectorAll('.rxb').forEach(b=>b.style.pointerEvents='none');
+btn.classList.add(ok?'ok':'bad');
+if(!ok)document.querySelectorAll('.rxb').forEach(b=>{if(b.dataset.id===p.answer)b.classList.add('ok');});
+if(ok){score+=10;document.getElementById('snav').textContent='🟢 Жалғасуда';}
+const v=document.getElementById('vrd');
+v.className=`vrd ${ok?'ok':'bad'} show`;
+v.innerHTML=ok?`<strong>✅ Дұрыс!</strong><br>${p.why}`:`<strong>❌ Қате.</strong><br>${p.why}`;
+const nb=document.getElementById('nbtn');nb.className='nbtn show';
+nb.textContent=pi<PATIENTS.length-1?'Келесі пациент →':'Нәтижені көру';
+}
+function nextPat(){
+pi++;if(pi<PATIENTS.length)loadPat();
+else{document.getElementById('fscore').textContent='Тәжірибе сәтті аяқталды!';
+document.getElementById('fbody').innerHTML=`💜 <b>Грам+</b> → Пенициллин, Ампициллин<br>🩷 <b>Грам−</b> → Ципрофлоксацин, аминогликозидтер<br>📏 <b>Ингибиция аймағы</b> ≥20мм → тиімді<br>❌ <b>Резистентті</b> → аймақ кішкентай/жоқ`;
+document.getElementById('end-sc').style.display='flex';}
+}
+</script>
+<!-- Global Language Switcher & Google Translate -->
+<div id="google_translate_element" style="display:none;"></div>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({pageLanguage: 'kk', includedLanguages: 'ru,en,kk', autoDisplay: false}, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script>
+(function() {
+    let currentLang = localStorage.getItem('vsh-lang') || 'kk';
+
+    // Synchronize cookie if needed
+    var gtrans = '/kk/' + currentLang;
+    if (currentLang === 'kk') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+    }
+
+    // Floating UI
+    if (!document.querySelector('.floating-lang-switcher')) {
+        const style = document.createElement('style');
+        style.innerHTML = `
+            body { top: 0 !important; }
+            .skiptranslate { display: none !important; }
+            .floating-lang-switcher {
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                background: rgba(15, 23, 42, 0.9);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 20px;
+                padding: 10px;
+                display: flex;
+                gap: 10px;
+                z-index: 999999;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+                font-family: 'Roboto', sans-serif;
+            }
+            .floating-lang-btn {
+                background: transparent;
+                border: 1px solid rgba(255,255,255,0.2);
+                color: #94a3b8;
+                font-size: 14px;
+                font-weight: 600;
+                padding: 8px 15px;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: 0.3s;
+            }
+            .floating-lang-btn:hover {
+                color: #fff;
+                background: rgba(255,255,255,0.1);
+            }
+            .floating-lang-btn.active {
+                background: linear-gradient(135deg, #a855f7, #3b82f6);
+                color: #fff;
+                border-color: transparent;
+            }
+        `;
+        document.head.appendChild(style);
+
+        const switcher = document.createElement('div');
+        switcher.className = 'floating-lang-switcher notranslate';
+        switcher.innerHTML = `
+            <button class="floating-lang-btn " onclick="changeLangGlobal('ru')">RU</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('kk')">ҚАЗ</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('en')">EN</button>
+        `;
+        
+        // set active
+        const btns = switcher.querySelectorAll('.floating-lang-btn');
+        if (currentLang === 'ru') btns[0].classList.add('active');
+        else if (currentLang === 'kk') btns[1].classList.add('active');
+        else if (currentLang === 'en') btns[2].classList.add('active');
+
+        document.body.appendChild(switcher);
+    }
+})();
+
+function changeLangGlobal(lang) {
+    localStorage.setItem('vsh-lang', lang);
+    var gtrans = '/kk/' + lang;
+    if (lang === 'kk') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+    }
+    location.reload();
+}
+</script>
+
+</body></html>

@@ -1,0 +1,331 @@
+<!DOCTYPE html><html lang="kk"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Зертхана №8 — CRISPR Редактор</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>*{box-sizing:border-box;margin:0;padding:0}body{background:#020c1b;color:#fff;font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+nav{height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:rgba(0,0,0,.5);border-bottom:1px solid rgba(232,121,249,.2);flex-shrink:0}
+nav a{color:#e879f9;text-decoration:none;font-size:.8rem;font-family:'Orbitron',sans-serif}#snav{font-family:'Orbitron',sans-serif;font-size:.8rem;color:#fbbf24}
+.main{flex:1;display:grid;grid-template-columns:240px 1fr 270px;overflow:hidden}
+.pn{background:rgba(5,15,35,.9);padding:14px;display:flex;flex-direction:column;gap:9px;overflow-y:auto}
+.pl{border-right:1px solid rgba(232,121,249,.1)}.pr{border-left:1px solid rgba(232,121,249,.1)}
+.plbl{font-family:'Orbitron',sans-serif;font-size:.56rem;letter-spacing:2px;color:rgba(232,121,249,.5);border-bottom:1px solid rgba(232,121,249,.08);padding-bottom:6px}
+.dis-card{border-radius:9px;padding:10px;border:1px solid rgba(232,121,249,.2);background:rgba(232,121,249,.04);cursor:pointer;transition:.3s;font-size:.8rem;color:#64748b}
+.dis-card:hover{border-color:rgba(232,121,249,.4);color:#e2e8f0}.dis-card.active{border-color:#e879f9;color:#e879f9;background:rgba(232,121,249,.1)}.dis-card.solved{border-color:rgba(52,211,153,.3);color:#34d399;cursor:default}
+.dis-name{font-family:'Orbitron',sans-serif;font-size:.65rem;margin-bottom:4px}
+.dis-sym{font-size:.74rem;color:#64748b;line-height:1.4}
+.dis-card.active .dis-sym,.dis-card.solved .dis-sym{color:#94a3b8}
+.center{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px}
+.dna-viewer{width:100%;max-width:500px}
+.dna-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.dna-title{font-family:'Orbitron',sans-serif;font-size:.7rem;color:#e879f9}
+.dna-step{font-family:'Orbitron',sans-serif;font-size:.62rem;color:#475569}
+.dna-seq{display:flex;flex-wrap:wrap;gap:3px;padding:12px;background:rgba(0,0,0,.4);border-radius:10px;border:1px solid rgba(232,121,249,.15);min-height:52px;align-items:center}
+.base{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:5px;font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:700;cursor:default;transition:.3s}
+.base.normal{background:var(--bc)22;color:var(--bc);border:1px solid var(--bc)44}
+.base.mutant{background:rgba(239,68,68,.25);color:#ef4444;border:2px solid #ef4444;animation:pulse 1s ease infinite;cursor:pointer}
+.base.selected{background:rgba(232,121,249,.3);border:2px solid #e879f9;transform:scale(1.1)}
+.base.cut{background:rgba(0,0,0,.4);border:2px dashed rgba(232,121,249,.4);color:transparent;cursor:pointer}
+.base.fixed{background:rgba(52,211,153,.2);color:#34d399;border:2px solid #34d399;animation:none;cursor:default}
+@keyframes pulse{0%,100%{opacity:.7}50%{opacity:1;transform:scale(1.05)}}
+.palette{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;padding:10px;background:rgba(0,0,0,.3);border-radius:10px;border:1px solid rgba(232,121,249,.12)}
+.pal-base{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:7px;cursor:pointer;font-family:'Orbitron',sans-serif;font-size:.78rem;font-weight:700;border:2px solid var(--bc);color:var(--bc);background:var(--bc)22;transition:.2s}
+.pal-base:hover{transform:scale(1.12);background:var(--bc)44}
+.ins-box{width:100%;max-width:500px;border-radius:9px;padding:10px;background:rgba(0,0,0,.3);border:1px solid rgba(232,121,249,.12);font-size:.76rem;color:#94a3b8;line-height:1.5;min-height:52px}
+.step-indicator{display:flex;gap:8px;align-items:center}
+.si{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-size:.62rem;border:2px solid rgba(232,121,249,.2);color:#475569;transition:.3s}
+.si.active{border-color:#e879f9;color:#e879f9;background:rgba(232,121,249,.1)}.si.done{border-color:#34d399;color:#34d399;background:rgba(52,211,153,.1)}
+.si-line{height:2px;width:20px;background:rgba(232,121,249,.15);border-radius:1px}
+.dis-info{border-radius:9px;padding:10px;background:rgba(232,121,249,.04);border:1px solid rgba(232,121,249,.12);font-size:.76rem;color:#94a3b8;line-height:1.6;flex:1}
+.dis-info strong{color:#e879f9}
+.result-box{border-radius:9px;padding:10px;font-size:.78rem;line-height:1.5;display:none}
+.result-box.show{display:block}.result-box.ok{background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.3);color:#94a3b8}.result-box.ok strong{color:#34d399}
+.nbtn{padding:10px;border-radius:9px;cursor:pointer;background:rgba(232,121,249,.1);border:2px solid rgba(232,121,249,.4);font-family:'Orbitron',sans-serif;font-size:.7rem;color:#e879f9;transition:.3s;display:none;text-align:center;margin-top:6px}.nbtn.show{display:block}.nbtn:hover{background:rgba(232,121,249,.2)}
+.ov{position:fixed;inset:0;z-index:100;background:rgba(1,5,15,.97);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center}
+.card{width:min(560px,90vw);padding:38px 46px;text-align:center;background:rgba(5,15,35,.96);border:1px solid rgba(232,121,249,.25);border-radius:18px}
+.card h2{font-family:'Orbitron',sans-serif;font-size:1.3rem;color:#e879f9;margin-bottom:12px}.card p{color:#94a3b8;font-size:.88rem;line-height:1.8;margin-bottom:22px}
+.cbtn{display:inline-flex;align-items:center;gap:8px;padding:12px 34px;background:#e879f9;color:#000;font-family:'Orbitron',sans-serif;font-size:.76rem;border:none;border-radius:8px;cursor:pointer;transition:.3s}.cbtn:hover{transform:translateY(-3px);box-shadow:0 0 40px rgba(232,121,249,.5)}
+.sbig{font-family:'Orbitron',sans-serif;font-size:2.2rem;color:#fbbf24;margin:10px 0}
+.elink{display:inline-block;text-decoration:none;border:2px solid #e879f9;color:#e879f9;font-family:'Orbitron',sans-serif;font-size:.7rem;letter-spacing:2px;padding:10px 24px;border-radius:8px;transition:.3s;margin-top:8px}.elink:hover{background:#e879f9;color:#000}</style>
+<!-- MODERN UI UPGRADE -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* Base Overrides */
+* { font-family: 'Roboto', sans-serif !important; }
+body { background: #020617 !important; color: #f8fafc !important; }
+
+/* Top Nav */
+nav { height: 60px !important; padding: 0 30px !important; background: rgba(15,23,42,0.95) !important; border-bottom: 2px solid #1e293b !important; box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important; }
+nav a { background: rgba(56,189,248,0.1) !important; border: 1px solid rgba(56,189,248,0.3) !important; color: #38bdf8 !important; padding: 8px 16px !important; border-radius: 8px !important; font-weight: bold !important; font-size: 14px !important; }
+nav a:hover { background: rgba(56,189,248,0.2) !important; transform: translateX(-2px) !important; }
+nav span { font-size: 16px !important; font-weight: 800 !important; letter-spacing: 1px !important; color: #f8fafc !important; }
+#snav { background: rgba(250,204,21,0.1) !important; color: #facc15 !important; padding: 6px 12px !important; border-radius: 8px !important; border: 1px solid rgba(250,204,21,0.3) !important; }
+
+/* Layout */
+.main { grid-template-columns: 320px 1fr 350px !important; background: radial-gradient(circle at 50% 50%, #1e293b 0%, #020617 100%) !important; }
+.pn { background: rgba(15,23,42,0.95) !important; padding: 25px !important; gap: 15px !important; box-shadow: 0 0 20px rgba(0,0,0,0.5) !important; overflow-y: auto !important; }
+.pl { border-right: 2px solid #1e293b !important; }
+.pr { border-left: 2px solid #1e293b !important; }
+.plbl { font-weight: 800 !important; font-size: 14px !important; letter-spacing: 1px !important; color: #e879f9 !important; border-bottom: 1px solid #1e293b !important; padding-bottom: 10px !important; text-transform: uppercase !important; margin-bottom: 10px !important; }
+
+/* Cards & Buttons */
+.dbt, .iopt, .sbt, .rxb, .disk-item, .i-btn { border-radius: 10px !important; padding: 12px 15px !important; border: 1px solid #334155 !important; background: #0f172a !important; font-size: 14px !important; font-weight: 500 !important; color: #e2e8f0 !important; transition: 0.2s !important; box-shadow: 0 4px 6px rgba(0,0,0,0.3) !important; }
+.dbt:hover, .iopt:hover, .sbt:hover, .rxb:hover, .disk-item:hover, .i-btn:hover { border-color: #e879f9 !important; background: #1e293b !important; transform: translateX(5px) !important; }
+.active, .ok { border-color: #34d399 !important; background: rgba(52,211,153,0.1) !important; color: #34d399 !important; box-shadow: inset 0 0 10px rgba(52,211,153,0.2) !important; }
+.bad { border-color: #ef4444 !important; background: rgba(239,68,68,0.1) !important; color: #ef4444 !important; }
+
+/* Text Logs & Info */
+.clog, .info-box, .evc, .vrd, .pat-card, .rx-section, .srcsec { border-radius: 12px !important; padding: 15px !important; background: rgba(255,255,255,0.03) !important; border: 1px solid rgba(255,255,255,0.05) !important; font-size: 14px !important; color: #cbd5e1 !important; line-height: 1.6 !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2) !important; margin-bottom: 10px !important; }
+
+/* Overlays & Big Modals */
+.card { width: min(600px, 90vw) !important; padding: 40px 50px !important; background: rgba(15,23,42,0.95) !important; border: 2px solid #e879f9 !important; border-radius: 20px !important; box-shadow: 0 20px 50px rgba(0,0,0,0.7) !important; backdrop-filter: blur(10px) !important; }
+.card h2 { font-size: 28px !important; color: #fff !important; margin-bottom: 15px !important; font-weight: 800 !important; }
+.card p { color: #94a3b8 !important; font-size: 16px !important; }
+.cbtn { padding: 15px 40px !important; background: #e879f9 !important; color: #000 !important; font-size: 16px !important; font-weight: bold !important; border-radius: 12px !important; border: none !important; box-shadow: 0 10px 20px rgba(0,0,0,0.4) !important; text-transform: uppercase !important; letter-spacing: 1px !important; cursor: pointer; transition: 0.3s; }
+.cbtn:hover { transform: translateY(-3px) scale(1.05) !important; box-shadow: 0 15px 30px rgba(0,0,0,0.6) !important; background: #fff !important; }
+.elink { background: transparent !important; color: #e879f9 !important; border: 2px solid #e879f9 !important; padding: 10px 20px !important; border-radius: 10px !important; font-size: 14px !important; text-decoration: none !important; font-weight: bold !important; transition: 0.3s !important; display: inline-block; }
+.elink:hover { background: #e879f9 !important; color: #020617 !important; }
+
+/* Specific fixes */
+.sev { padding: 4px 8px !important; border-radius: 6px !important; font-size: 12px !important; font-weight: bold !important; }
+.sh { background: rgba(239,68,68,0.2) !important; color: #fca5a5 !important; border: 1px solid rgba(239,68,68,0.3) !important; }
+.sm { background: rgba(250,204,21,0.2) !important; color: #fde047 !important; border: 1px solid rgba(250,204,21,0.3) !important; }
+.sl { background: rgba(52,211,153,0.2) !important; color: #86efac !important; border: 1px solid rgba(52,211,153,0.3) !important; }
+
+/* Scrollbars */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+::-webkit-scrollbar-thumb { background: #e879f9; border-radius: 4px; }
+</style>
+</head><body>
+<div class="ov" id="intro"><div class="card"><div style="font-size:2.2rem;margin-bottom:12px">🧬✂️💜</div><h2>CRISPR РЕДАКТОР</h2>
+<p>Генетикалық аурулардың мутациясын <strong style="color:#e879f9">CRISPR технологиясымен</strong> түзетіңіз!<br>Мутантты нуклеотидті тауып, кесіп, дұрыс нуклеотидпен алмастырыңыз.</p>
+<button class="cbtn" onclick="start()">✂️ ЗЕРТХАНАҒА КІРУ</button></div></div>
+<div class="ov" id="end-sc" style="display:none"><div class="card"><div style="font-size:2.2rem;margin-bottom:12px">🏆</div><h2>ГЕНОМ ТҮЗЕТІЛДІ!</h2><div class="sbig" id="fscore">Аяқталды!</div><p id="fbody" style="margin-bottom:18px"></p><a href="biology8.html" class="elink">← МӘЗІРГЕ ОРАЛУ</a></div></div>
+<nav><a href="biology8.html">← Мәзір</a><span style="font-family:'Orbitron';font-size:.85rem;color:#e879f9">🧬 ЗЕРТХАНА №8 — CRISPR РЕДАКТОР</span><span id="snav">🟢 Белсенді</span></nav>
+<div class="main">
+<div class="pn pl"><div class="plbl">🦠 ГЕНЕТИКАЛЫҚ АУРУЛАР</div><div id="dis-list"></div></div>
+<div class="center">
+<div class="dna-viewer">
+<div class="dna-header"><div class="dna-title" id="dna-title">ДНҚ ТІЗБЕГІ</div><div class="dna-step" id="dna-step">1-қадам: Мутацияны табыңыз</div></div>
+<div class="dna-seq" id="dna-seq"></div>
+</div>
+<div class="step-indicator"><div class="si" id="si1">1</div><div class="si-line"></div><div class="si" id="si2">2</div><div class="si-line"></div><div class="si" id="si3">3</div></div>
+<div class="palette" id="palette" style="display:none"></div>
+<div class="ins-box" id="ins-box">Сол жақтан ауруды таңдаңыз, содан кейін қызыл мутантты нуклеотидті басыңыз...</div>
+</div>
+<div class="pn pr"><div class="plbl">ℹ️ АУРУ ТУРАЛЫ</div><div class="dis-info" id="dis-info">Ауруды таңдаңыз...</div>
+<div class="plbl" style="margin-top:8px">📊 НӘТИЖЕ</div>
+<div class="result-box" id="result-box"></div>
+<div class="nbtn" id="nbtn" onclick="nextDis()">Келесі ауру →</div></div>
+</div>
+<script>
+const BC={'A':'#f43f5e','T':'#38bdf8','G':'#a78bfa','C':'#34d399','U':'#fbbf24'};
+const DISEASES=[
+{name:'Оракшалы анемия',sym:'Эритроциттер оракшалы формада. Оттегін тасымалдай алмайды.',
+seq:'ATGGTGCACCTGACTCCTGAGGAGAAGTCTGCCGTTACT',mutIdx:17,mutFrom:'A',mutTo:'T',
+info:'HBB гені. 6-шы позицияда GAG→GTG мутациясы — Глу→Вал. Гемоглобин кристалданады.',
+why:'GAG (Глутамат) → GTG (Валин) мутациясы — 1-дан да аз нуклеотид ауысуы адамды мүгедек етеді.'},
+{name:'Муковисцидоз',sym:'Өкпе мен ас қорыту жүйесінде қалың шырыш жинақталады.',
+seq:'ATCGATCTTCAAAGCAAGTATGATGAGTTTTTCATCGATCG',mutIdx:14,mutFrom:'A',mutTo:'G',
+info:'CFTR гені. ΔF508 делеция — хлор арнасы жұмыс істемейді. Шырыш қоюланады.',
+why:'CFTR ақуызы хлор иондарын тасымалдайды. Мутация → шырыш жинақталуы → тіршілікке қауіп.'},
+{name:'Хантингтон ауруы',sym:'Жүйке жасушалары бірте-бірте жойылады. Жас өлім.',
+seq:'CAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAG',mutIdx:9,mutFrom:'C',mutTo:'T',
+info:'HTT гені. CAG тринуклеотид қайталануы 40+ рет болса — ауру дамиды.',
+why:'Полиглутамин тізбегі → белоктың жиналуы → нейрондар өледі. Доминантты тұқым қуалайды.'},
+{name:'Фенилкетонурия',sym:'Тирозин синтезделмейді. Ми дамуы бұзылады.',
+seq:'ATGGCTTCAGAAATGGCTTCAGAAATGGCTTCAGAAATG',mutIdx:11,mutFrom:'G',mutTo:'A',
+info:'PAH гені. Фенилаланин-гидроксилаза ферменті жетіспейді.',
+why:'Фенилаланин жинақталып нейротоксин береді. Ерте диагноз + арнайы диета → норма өмір!'},
+];
+let di=0,step=0,solved={},score=0,mutSelected=false,seqData=[];
+function start(){document.getElementById('intro').style.display='none';buildDisList();loadDis(0);}
+function buildDisList(){
+const el=document.getElementById('dis-list');el.innerHTML='';
+DISEASES.forEach((d,i)=>{
+const div=document.createElement('div');div.className='dis-card'+(i===0?' active':'');div.id='dc-'+i;
+div.innerHTML=`<div class="dis-name">${d.name}</div><div class="dis-sym">${d.sym}</div>`;
+div.onclick=()=>selectDis(i);el.appendChild(div);
+});
+}
+function selectDis(i){
+if(solved[i])return;
+document.querySelectorAll('.dis-card').forEach(d=>d.classList.remove('active'));
+document.getElementById('dc-'+i).classList.add('active');
+loadDis(i);
+}
+function loadDis(i){
+di=i;step=1;mutSelected=false;
+const d=DISEASES[i];
+document.getElementById('dna-title').textContent=d.name.toUpperCase();
+document.getElementById('dna-step').textContent='1-қадам: Мутацияны табыңыз';
+document.getElementById('dis-info').innerHTML=`<strong>${d.name}</strong><br>${d.info}<br><br><em style="color:#64748b">${d.why}</em>`;
+document.getElementById('palette').style.display='none';
+document.getElementById('result-box').className='result-box';document.getElementById('nbtn').className='nbtn';
+document.getElementById('ins-box').textContent='🔍 1-қадам: Қызыл мутантты нуклеотидті тауып, басыңыз (✂️ CRISPR кесу)';
+setStep(1);
+seqData=d.seq.split('');buildSeq(d);
+if(solved[i])showSolved(i);
+}
+function buildSeq(d){
+const el=document.getElementById('dna-seq');el.innerHTML='';
+d.seq.split('').forEach((b,i)=>{
+const span=document.createElement('span');span.className='base '+(i===d.mutIdx?'mutant':'normal');
+span.style.setProperty('--bc',BC[b]||'#888');span.textContent=b;span.id='b-'+i;
+if(i===d.mutIdx)span.onclick=()=>clickMutant(i,span,d);
+el.appendChild(span);
+});
+}
+function setStep(s){
+[1,2,3].forEach(n=>{document.getElementById('si'+n).className='si'+(n<s?' done':n===s?' active':'');});
+}
+function clickMutant(i,span,d){
+if(step!==1||solved[di])return;
+span.classList.remove('mutant');span.classList.add('cut');span.onclick=null;
+step=2;setStep(2);
+document.getElementById('dna-step').textContent='2-қадам: Дұрыс нуклеотидті таңдаңыз';
+document.getElementById('ins-box').textContent=`✂️ Кесілді! ${d.mutFrom} орнына дұрыс нуклеотидті таңдаңыз →`;
+buildPalette(i,d);
+}
+function buildPalette(mutIdx,d){
+const pal=document.getElementById('palette');pal.style.display='flex';pal.innerHTML='';
+['A','T','G','C'].forEach(b=>{
+const el=document.createElement('div');el.className='pal-base';el.style.setProperty('--bc',BC[b]);el.textContent=b;
+el.onclick=()=>insertBase(b,mutIdx,d);pal.appendChild(el);
+});
+}
+function insertBase(b,mutIdx,d){
+const ok=(b===d.mutTo);
+const span=document.getElementById('b-'+mutIdx);
+span.style.setProperty('--bc',BC[b]);span.textContent=b;
+span.className='base '+(ok?'fixed':'mutant');
+document.getElementById('palette').style.display='none';
+if(ok){
+step=3;setStep(3);solved[di]=true;score+=10;document.getElementById('snav').textContent='🟢 Жалғасуда';
+document.getElementById('dc-'+di).className='dis-card solved';
+document.getElementById('dna-step').textContent='3-қадам: ✅ Геном түзетілді!';
+document.getElementById('ins-box').innerHTML=`<strong style="color:#34d399">✅ Дұрыс нуклеотид!</strong> ${d.mutFrom}→${b} алмасу — мутация жойылды.`;
+const rb=document.getElementById('result-box');rb.className='result-box ok show';rb.innerHTML=`<strong>✅ CRISPR түзету сәтті!</strong><br>${d.why}`;
+const nb=document.getElementById('nbtn');nb.className='nbtn show';nb.textContent=Object.keys(solved).length<DISEASES.length?'Келесі ауру →':'Нәтижені көру';
+}else{
+span.className='base mutant';span.onclick=()=>clickMutant(mutIdx,span,d);
+document.getElementById('ins-box').textContent=`❌ Қате нуклеотид! Мутацияны қайта кесіп, дұрыс нуклеотидті таңдаңыз.`;
+step=1;setStep(1);
+}
+}
+function showSolved(i){
+const d=DISEASES[i];
+step=3;setStep(3);
+document.getElementById('dna-step').textContent='✅ Геном түзетілді!';
+const rb=document.getElementById('result-box');rb.className='result-box ok show';rb.innerHTML=`<strong>✅ CRISPR түзету аяқталды!</strong><br>${d.why}`;
+}
+function nextDis(){const next=DISEASES.findIndex((_,i)=>!solved[i]);if(next!==-1)selectDis(next);else showEnd();}
+function showEnd(){
+document.getElementById('fscore').textContent='Тәжірибе сәтті аяқталды!';
+document.getElementById('fbody').innerHTML=`🩸 <b>Оракшалы анемия</b> — HBB гені, GAG→GTG<br>💨 <b>Муковисцидоз</b> — CFTR гені<br>🧠 <b>Хантингтон</b> — CAG қайталануы<br>🍖 <b>Фенилкетонурия</b> — PAH гені, диета емдеу`;
+document.getElementById('end-sc').style.display='flex';
+}
+</script>
+<!-- Global Language Switcher & Google Translate -->
+<div id="google_translate_element" style="display:none;"></div>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({pageLanguage: 'kk', includedLanguages: 'ru,en,kk', autoDisplay: false}, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script>
+(function() {
+    let currentLang = localStorage.getItem('vsh-lang') || 'kk';
+
+    // Synchronize cookie if needed
+    var gtrans = '/kk/' + currentLang;
+    if (currentLang === 'kk') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+    }
+
+    // Floating UI
+    if (!document.querySelector('.floating-lang-switcher')) {
+        const style = document.createElement('style');
+        style.innerHTML = `
+            body { top: 0 !important; }
+            .skiptranslate { display: none !important; }
+            .floating-lang-switcher {
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                background: rgba(15, 23, 42, 0.9);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 20px;
+                padding: 10px;
+                display: flex;
+                gap: 10px;
+                z-index: 999999;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+                font-family: 'Roboto', sans-serif;
+            }
+            .floating-lang-btn {
+                background: transparent;
+                border: 1px solid rgba(255,255,255,0.2);
+                color: #94a3b8;
+                font-size: 14px;
+                font-weight: 600;
+                padding: 8px 15px;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: 0.3s;
+            }
+            .floating-lang-btn:hover {
+                color: #fff;
+                background: rgba(255,255,255,0.1);
+            }
+            .floating-lang-btn.active {
+                background: linear-gradient(135deg, #a855f7, #3b82f6);
+                color: #fff;
+                border-color: transparent;
+            }
+        `;
+        document.head.appendChild(style);
+
+        const switcher = document.createElement('div');
+        switcher.className = 'floating-lang-switcher notranslate';
+        switcher.innerHTML = `
+            <button class="floating-lang-btn " onclick="changeLangGlobal('ru')">RU</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('kk')">ҚАЗ</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('en')">EN</button>
+        `;
+        
+        // set active
+        const btns = switcher.querySelectorAll('.floating-lang-btn');
+        if (currentLang === 'ru') btns[0].classList.add('active');
+        else if (currentLang === 'kk') btns[1].classList.add('active');
+        else if (currentLang === 'en') btns[2].classList.add('active');
+
+        document.body.appendChild(switcher);
+    }
+})();
+
+function changeLangGlobal(lang) {
+    localStorage.setItem('vsh-lang', lang);
+    var gtrans = '/kk/' + lang;
+    if (lang === 'kk') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+    }
+    location.reload();
+}
+</script>
+
+</body></html>

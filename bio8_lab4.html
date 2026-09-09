@@ -1,0 +1,331 @@
+<!DOCTYPE html><html lang="kk"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Зертхана №4 — Марс фермасы</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>*{box-sizing:border-box;margin:0;padding:0}body{background:#020c1b;color:#fff;font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+nav{height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:rgba(0,0,0,.5);border-bottom:1px solid rgba(74,222,128,.2);flex-shrink:0}
+nav a{color:#4ade80;text-decoration:none;font-size:.8rem;font-family:'Orbitron',sans-serif}#snav{font-family:'Orbitron',sans-serif;font-size:.8rem;color:#fbbf24}
+.main{flex:1;display:grid;grid-template-columns:260px 1fr 280px;overflow:hidden}
+.pn{background:rgba(5,15,35,.9);padding:14px;display:flex;flex-direction:column;gap:10px;overflow-y:auto}
+.pl{border-right:1px solid rgba(74,222,128,.1)}.pr{border-left:1px solid rgba(74,222,128,.1)}
+.plbl{font-family:'Orbitron',sans-serif;font-size:.56rem;letter-spacing:2px;color:rgba(74,222,128,.5);border-bottom:1px solid rgba(74,222,128,.08);padding-bottom:6px}
+.ctrl{display:flex;flex-direction:column;gap:6px}.chead{display:flex;justify-content:space-between;align-items:center}.cname{font-size:.82rem;color:#94a3b8;display:flex;align-items:center;gap:5px}.cval{font-family:'Orbitron',sans-serif;font-size:.78rem;color:#4ade80}
+input[type=range]{width:100%;accent-color:#4ade80;cursor:pointer}
+.cdesc{font-size:.7rem;color:#334155;line-height:1.4}
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.res-card{border-radius:8px;padding:9px;background:rgba(0,0,0,.3);border:1px solid rgba(74,222,128,.12);text-align:center}
+.res-n{font-family:'Orbitron',sans-serif;font-size:1.1rem;color:#4ade80}.res-l{font-size:.66rem;color:#475569;margin-top:2px}
+.res-bar{height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;margin-top:4px}
+.res-fill{height:100%;border-radius:3px;transition:width .5s}
+.grow-btn{width:100%;padding:12px;border-radius:10px;cursor:pointer;background:rgba(74,222,128,.1);border:2px solid rgba(74,222,128,.4);font-family:'Orbitron',sans-serif;font-size:.72rem;color:#4ade80;letter-spacing:1px;transition:.3s}
+.grow-btn:hover{background:rgba(74,222,128,.2);transform:translateY(-2px)}.grow-btn:disabled{opacity:.3;pointer-events:none}
+.eq-bar{background:rgba(0,0,0,.3);border:1px solid rgba(74,222,128,.12);border-radius:8px;padding:9px;font-size:.72rem;font-family:'Orbitron',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px;flex-wrap:wrap}
+.ep{padding:3px 8px;border-radius:5px;font-size:.68rem}
+.center{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px}
+.scene{width:100%;max-width:380px;height:240px;border-radius:12px;overflow:hidden;background:linear-gradient(180deg,#1a0a00 0%,#0a1a0a 100%);border:1px solid rgba(74,222,128,.2);position:relative}
+#plant-canvas{width:100%;height:100%}
+.day-badge{background:rgba(0,0,0,.6);border:1px solid rgba(74,222,128,.3);border-radius:8px;padding:8px 18px;font-family:'Orbitron',sans-serif;font-size:.85rem;color:#4ade80;text-align:center}
+.status-log{width:100%;max-width:380px;border-radius:9px;padding:10px;background:rgba(0,0,0,.3);border:1px solid rgba(74,222,128,.12);font-size:.76rem;color:#94a3b8;line-height:1.6;min-height:50px}
+.hist-lbl{font-family:'Orbitron',sans-serif;font-size:.56rem;letter-spacing:2px;color:rgba(74,222,128,.5);border-bottom:1px solid rgba(74,222,128,.08);padding-bottom:5px}
+.day-row{display:flex;align-items:center;gap:6px;font-size:.74rem;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.day-num{font-family:'Orbitron',sans-serif;font-size:.62rem;color:#475569;width:40px}
+.food-bar-wrap{flex:1;height:6px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden}
+.food-bar-inner{height:100%;border-radius:3px;transition:width .4s}
+.food-num{font-family:'Orbitron',sans-serif;font-size:.6rem;width:36px;text-align:right}
+.ov{position:fixed;inset:0;z-index:100;background:rgba(1,5,15,.97);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center}
+.card{width:min(580px,90vw);padding:38px 46px;text-align:center;background:rgba(5,15,35,.96);border:1px solid rgba(74,222,128,.25);border-radius:18px}
+.card h2{font-family:'Orbitron',sans-serif;font-size:1.3rem;color:#4ade80;margin-bottom:12px}.card p{color:#94a3b8;font-size:.88rem;line-height:1.8;margin-bottom:22px}
+.cbtn{display:inline-flex;align-items:center;gap:8px;padding:12px 34px;background:#4ade80;color:#000;font-family:'Orbitron',sans-serif;font-size:.76rem;border:none;border-radius:8px;cursor:pointer;transition:.3s}.cbtn:hover{transform:translateY(-3px);box-shadow:0 0 40px rgba(74,222,128,.5)}
+.sbig{font-family:'Orbitron',sans-serif;font-size:2.2rem;color:#fbbf24;margin:10px 0}
+.elink{display:inline-block;text-decoration:none;border:2px solid #4ade80;color:#4ade80;font-family:'Orbitron',sans-serif;font-size:.7rem;letter-spacing:2px;padding:10px 24px;border-radius:8px;transition:.3s;margin-top:8px}.elink:hover{background:#4ade80;color:#000}</style>
+<!-- MODERN UI UPGRADE -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* Base Overrides */
+* { font-family: 'Roboto', sans-serif !important; }
+body { background: #020617 !important; color: #f8fafc !important; }
+
+/* Top Nav */
+nav { height: 60px !important; padding: 0 30px !important; background: rgba(15,23,42,0.95) !important; border-bottom: 2px solid #1e293b !important; box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important; }
+nav a { background: rgba(56,189,248,0.1) !important; border: 1px solid rgba(56,189,248,0.3) !important; color: #38bdf8 !important; padding: 8px 16px !important; border-radius: 8px !important; font-weight: bold !important; font-size: 14px !important; }
+nav a:hover { background: rgba(56,189,248,0.2) !important; transform: translateX(-2px) !important; }
+nav span { font-size: 16px !important; font-weight: 800 !important; letter-spacing: 1px !important; color: #f8fafc !important; }
+#snav { background: rgba(250,204,21,0.1) !important; color: #facc15 !important; padding: 6px 12px !important; border-radius: 8px !important; border: 1px solid rgba(250,204,21,0.3) !important; }
+
+/* Layout */
+.main { grid-template-columns: 320px 1fr 350px !important; background: radial-gradient(circle at 50% 50%, #1e293b 0%, #020617 100%) !important; }
+.pn { background: rgba(15,23,42,0.95) !important; padding: 25px !important; gap: 15px !important; box-shadow: 0 0 20px rgba(0,0,0,0.5) !important; overflow-y: auto !important; }
+.pl { border-right: 2px solid #1e293b !important; }
+.pr { border-left: 2px solid #1e293b !important; }
+.plbl { font-weight: 800 !important; font-size: 14px !important; letter-spacing: 1px !important; color: #4ade80 !important; border-bottom: 1px solid #1e293b !important; padding-bottom: 10px !important; text-transform: uppercase !important; margin-bottom: 10px !important; }
+
+/* Cards & Buttons */
+.dbt, .iopt, .sbt, .rxb, .disk-item, .i-btn { border-radius: 10px !important; padding: 12px 15px !important; border: 1px solid #334155 !important; background: #0f172a !important; font-size: 14px !important; font-weight: 500 !important; color: #e2e8f0 !important; transition: 0.2s !important; box-shadow: 0 4px 6px rgba(0,0,0,0.3) !important; }
+.dbt:hover, .iopt:hover, .sbt:hover, .rxb:hover, .disk-item:hover, .i-btn:hover { border-color: #4ade80 !important; background: #1e293b !important; transform: translateX(5px) !important; }
+.active, .ok { border-color: #34d399 !important; background: rgba(52,211,153,0.1) !important; color: #34d399 !important; box-shadow: inset 0 0 10px rgba(52,211,153,0.2) !important; }
+.bad { border-color: #ef4444 !important; background: rgba(239,68,68,0.1) !important; color: #ef4444 !important; }
+
+/* Text Logs & Info */
+.clog, .info-box, .evc, .vrd, .pat-card, .rx-section, .srcsec { border-radius: 12px !important; padding: 15px !important; background: rgba(255,255,255,0.03) !important; border: 1px solid rgba(255,255,255,0.05) !important; font-size: 14px !important; color: #cbd5e1 !important; line-height: 1.6 !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2) !important; margin-bottom: 10px !important; }
+
+/* Overlays & Big Modals */
+.card { width: min(600px, 90vw) !important; padding: 40px 50px !important; background: rgba(15,23,42,0.95) !important; border: 2px solid #4ade80 !important; border-radius: 20px !important; box-shadow: 0 20px 50px rgba(0,0,0,0.7) !important; backdrop-filter: blur(10px) !important; }
+.card h2 { font-size: 28px !important; color: #fff !important; margin-bottom: 15px !important; font-weight: 800 !important; }
+.card p { color: #94a3b8 !important; font-size: 16px !important; }
+.cbtn { padding: 15px 40px !important; background: #4ade80 !important; color: #000 !important; font-size: 16px !important; font-weight: bold !important; border-radius: 12px !important; border: none !important; box-shadow: 0 10px 20px rgba(0,0,0,0.4) !important; text-transform: uppercase !important; letter-spacing: 1px !important; cursor: pointer; transition: 0.3s; }
+.cbtn:hover { transform: translateY(-3px) scale(1.05) !important; box-shadow: 0 15px 30px rgba(0,0,0,0.6) !important; background: #fff !important; }
+.elink { background: transparent !important; color: #4ade80 !important; border: 2px solid #4ade80 !important; padding: 10px 20px !important; border-radius: 10px !important; font-size: 14px !important; text-decoration: none !important; font-weight: bold !important; transition: 0.3s !important; display: inline-block; }
+.elink:hover { background: #4ade80 !important; color: #020617 !important; }
+
+/* Specific fixes */
+.sev { padding: 4px 8px !important; border-radius: 6px !important; font-size: 12px !important; font-weight: bold !important; }
+.sh { background: rgba(239,68,68,0.2) !important; color: #fca5a5 !important; border: 1px solid rgba(239,68,68,0.3) !important; }
+.sm { background: rgba(250,204,21,0.2) !important; color: #fde047 !important; border: 1px solid rgba(250,204,21,0.3) !important; }
+.sl { background: rgba(52,211,153,0.2) !important; color: #86efac !important; border: 1px solid rgba(52,211,153,0.3) !important; }
+
+/* Scrollbars */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+::-webkit-scrollbar-thumb { background: #4ade80; border-radius: 4px; }
+</style>
+</head><body>
+<div class="ov" id="intro"><div class="card"><div style="font-size:2.2rem;margin-bottom:12px">🌿🚀🌍</div><h2>МАРС ФЕРМАСЫ</h2>
+<p>Сіз Марста ғарышкерсіз! Жемістер өсіру — тіршілік кепілі.<br>Жарық, CO₂, суды дұрыс реттеп <strong style="color:#4ade80">фотосинтезді оңтайландырыңыз</strong>.<br>10 күн өткізбей, бортты азықпен қамтамасыз етіңіз!</p>
+<button class="cbtn" onclick="start()">🚀 МИССИЯНЫ БАСТАУ</button></div></div>
+<div class="ov" id="end-sc" style="display:none"><div class="card"><div style="font-size:2.2rem;margin-bottom:12px" id="end-ico">🏆</div><h2 id="end-title">МИССИЯ АЯҚТАЛДЫ!</h2><div class="sbig" id="fscore">Аяқталды!</div><p id="fbody" style="margin-bottom:18px"></p><a href="biology8.html" class="elink">← МӘЗІРГЕ ОРАЛУ</a></div></div>
+<nav><a href="biology8.html">← Мәзір</a><span style="font-family:'Orbitron';font-size:.85rem;color:#4ade80">🌿 ЗЕРТХАНА №4 — МАРС ФЕРМАСЫ</span><span id="snav">🟢 Белсенді</span></nav>
+<div class="main">
+<div class="pn pl"><div class="plbl">⚙️ ПАРАМЕТРЛЕР</div>
+<div class="ctrl"><div class="chead"><span class="cname">☀️ Жарық</span><span class="cval" id="lv">50%</span></div><input type="range" id="light" min="0" max="100" value="50" oninput="update()"><div class="cdesc">Жоғары жарық → фотосинтез артады (белгілі шекке дейін)</div></div>
+<div class="ctrl"><div class="chead"><span class="cname">💨 CO₂</span><span class="cval" id="cv">50%</span></div><input type="range" id="co2" min="0" max="100" value="50" oninput="update()"><div class="cdesc">CO₂ — субстрат. Жетіспесе фотосинтез тоқтайды</div></div>
+<div class="ctrl"><div class="chead"><span class="cname">💧 Су</span><span class="cval" id="wv">50%</span></div><input type="range" id="water" min="0" max="100" value="50" oninput="update()"><div class="cdesc">Ыдырап сутекке айналады → АТФ өндіріледі</div></div>
+<div class="plbl" style="margin-top:4px">📦 РЕСУРСТАР</div>
+<div class="res-grid">
+<div class="res-card"><div class="res-n" id="co2-tank">80</div><div class="res-l">CO₂ Бак (ед)</div><div class="res-bar"><div class="res-fill" id="co2-fill" style="width:80%;background:#38bdf8"></div></div></div>
+<div class="res-card"><div class="res-n" id="water-tank">80</div><div class="res-l">Су Бак (ед)</div><div class="res-bar"><div class="res-fill" id="water-fill" style="width:80%;background:#6366f1"></div></div></div>
+<div class="res-card"><div class="res-n" id="food-store" style="color:#fbbf24">0</div><div class="res-l">Азық (ед)</div><div class="res-bar"><div class="res-fill" id="food-fill" style="width:0%;background:#fbbf24"></div></div></div>
+<div class="res-card"><div class="res-n" id="o2-out" style="color:#34d399">0</div><div class="res-l">O₂ шығары</div></div>
+</div>
+<div class="plbl" style="margin-top:4px">📊 БОЛЖАМ (бүгін)</div>
+<div class="res-card" style="text-align:left;padding:10px"><div style="font-size:.76rem;color:#94a3b8">Азық өнімі: <span id="pred-food" style="color:#4ade80;font-family:'Orbitron';font-size:.8rem">0</span> ед<br>Лимиттеуші: <span id="pred-lim" style="color:#fbbf24">—</span></div></div>
+<button class="grow-btn" id="grow-btn" onclick="growDay()">🌱 КҮН ӨСІРУ</button>
+</div>
+<div class="center">
+<div class="day-badge" id="day-badge">🚀 КҮН 1 / 10</div>
+<div id="event-banner" style="width:100%; max-width:380px; padding:10px; border-radius:10px; border:2px solid #34d399; background:rgba(52,211,153,0.1); font-size:0.8rem; font-weight:bold; color:#34d399; text-align:center; transition:0.3s;">Бәрі қалыпты. Оптималды параметрлерді таңдаңыз.</div>
+<div class="scene"><canvas id="plant-canvas"></canvas></div>
+<div class="eq-bar"><span class="ep" style="background:rgba(148,163,184,.1);color:#94a3b8">6CO₂</span><span style="color:#475569">+</span><span class="ep" style="background:rgba(56,189,248,.1);color:#38bdf8">6H₂O</span><span style="color:#475569">+</span><span class="ep" style="background:rgba(251,191,36,.1);color:#fbbf24" id="eq-l">☀️ Жарық</span><span style="color:#475569">→</span><span class="ep" style="background:rgba(74,222,128,.12);color:#4ade80" id="eq-g">C₆H₁₂O₆</span><span style="color:#475569">+</span><span class="ep" style="background:rgba(56,189,248,.1);color:#38bdf8">6O₂</span></div>
+<div class="status-log" id="slog">Параметрлерді реттеп «Күн өсіру» басыңыз...</div>
+</div>
+<div class="pn pr"><div class="hist-lbl">📋 КҮН ТАРИХЫ</div><div id="hist"></div></div>
+</div>
+<script>
+const NEED=3;
+let day=1,co2Tank=80,waterTank=80,foodStore=0,score=0,alive=true,history=[];
+let bubbles=[],plantGrowth=0;
+
+const EVENTS = [
+  {type: 'normal', msg: 'Бәрі қалыпты. Фотосинтезді бастаңыз.', lMod: 1, wMod: 1, cMod: 1, color: '#34d399'},
+  {type: 'dust', msg: '🌪️ Шаңды дауыл! Жарық панельдері шаңмен жабылды (-50% жарық).', lMod: 0.5, wMod: 1, cMod: 1, color: '#f59e0b'},
+  {type: 'leak', msg: '💧 Су құбырындағы ақау! Су шығыны 2 есе көп.', lMod: 1, wMod: 2, cMod: 1, color: '#ef4444'},
+  {type: 'solar', msg: '☀️ Күн жарқылы! Жарық энергиясы өте жоғары (+50%).', lMod: 1.5, wMod: 1, cMod: 1, color: '#38bdf8'},
+  {type: 'co2_rich', msg: '💨 Марс атмосферасынан CO₂ сүзгіленді! (Тиімділік +50%)', lMod: 1, wMod: 1, cMod: 1.5, color: '#a855f7'}
+];
+let dailyEvent = EVENTS[0];
+
+function triggerEvent() {
+    if (day === 1) dailyEvent = EVENTS[0];
+    else dailyEvent = EVENTS[Math.floor(Math.random() * EVENTS.length)];
+    
+    const el = document.getElementById('event-banner');
+    el.textContent = dailyEvent.msg;
+    el.style.color = dailyEvent.color;
+    el.style.borderColor = dailyEvent.color;
+    el.style.background = dailyEvent.color + '22'; // slight opacity hex
+}
+
+const pc=document.getElementById('plant-canvas');const pctx=pc.getContext('2d');
+function sz(){pc.width=pc.offsetWidth;pc.height=pc.offsetHeight;}
+function calcRate(){
+let l=+document.getElementById('light').value/100;
+let c=Math.min(1,co2Tank/80)*+document.getElementById('co2').value/100;
+let w=Math.min(1,waterTank/80)*+document.getElementById('water').value/100;
+
+// Apply event modifiers
+l = l * dailyEvent.lMod;
+c = c * dailyEvent.cMod;
+
+return Math.round(l*c*w*10*10)/10;
+}
+function update(){
+const l=+document.getElementById('light').value,c=+document.getElementById('co2').value,w=+document.getElementById('water').value;
+document.getElementById('lv').textContent=l+'%';
+document.getElementById('cv').textContent=c+'%';
+document.getElementById('wv').textContent=w+'%';
+const rate=calcRate();
+document.getElementById('pred-food').textContent=rate;
+document.getElementById('o2-out').textContent=Math.round(rate*.8);
+const lim=l<30?'Жарық':c<30||co2Tank<10?'CO₂':w<30||waterTank<10?'Су':'Оптималды';
+document.getElementById('pred-lim').textContent=lim;
+document.getElementById('pred-lim').style.color=lim==='Оптималды'?'#34d399':'#f59e0b';
+eq(rate);drawPlant(rate/10);
+}
+function eq(rate){const g=rate>0?rate*2:0;document.getElementById('eq-l').style.boxShadow=`0 0 ${g}px rgba(251,191,36,.6)`;document.getElementById('eq-g').style.boxShadow=`0 0 ${g}px rgba(74,222,128,.5)`;}
+function growDay(){
+if(!alive||day>10)return;
+const c=+document.getElementById('co2').value,w=+document.getElementById('water').value;
+let co2Used=Math.round(c*.6);
+let waterUsed=Math.round(w*.5);
+waterUsed = Math.round(waterUsed * dailyEvent.wMod); // Apply water leak event modifier
+co2Tank=Math.max(0,co2Tank-co2Used);waterTank=Math.max(0,waterTank-waterUsed);
+const rate=calcRate();
+const food=Math.round(rate);
+foodStore+=food;
+document.getElementById('co2-tank').textContent=co2Tank;document.getElementById('water-tank').textContent=waterTank;
+document.getElementById('co2-fill').style.width=(co2Tank/80*100)+'%';document.getElementById('water-fill').style.width=(waterTank/80*100)+'%';
+document.getElementById('food-store').textContent=foodStore;document.getElementById('food-fill').style.width=Math.min(100,foodStore/30*100)+'%';
+if(food>=NEED){score+=10;document.getElementById('snav').textContent='🟢 Жалғасуда';}
+history.push({day,food,ok:food>=NEED});
+addHistRow(day,food,food>=NEED);
+const msg=food>=NEED?`✅ Күн ${day}: ${food} ед азық өндірілді. Отряд тамақтанды!`:`❌ Күн ${day}: тек ${food} ед өнді (керек ${NEED}). Параметрлерді оңтайландырыңыз!`;
+document.getElementById('slog').textContent=msg;
+if(co2Tank<=0||waterTank<=0){alive=false;setTimeout(()=>showEnd(false),500);return;}
+day++;document.getElementById('day-badge').textContent=`🚀 КҮН ${day} / 10`;
+if(day>10) { setTimeout(()=>showEnd(true),500); return; }
+triggerEvent();
+update();
+}
+function addHistRow(d,food,ok){
+const el=document.getElementById('hist');
+const row=document.createElement('div');row.className='day-row';
+row.innerHTML=`<span class="day-num">Күн ${d}</span><div class="food-bar-wrap"><div class="food-bar-inner" style="width:${Math.min(100,food/10*100)}%;background:${ok?'#4ade80':'#ef4444'}"></div></div><span class="food-num" style="color:${ok?'#4ade80':'#ef4444'}">${food}ед</span>`;
+el.appendChild(row);
+}
+function drawPlant(growth){
+sz();const w=pc.width,h=pc.height;
+pctx.clearRect(0,0,w,h);
+const l=+document.getElementById('light').value/100;
+const sky=pctx.createLinearGradient(0,0,0,h);
+sky.addColorStop(0,`rgba(${Math.round(l*20+10)},${Math.round(l*30+5)},${Math.round(l*40+5)},.9)`);
+sky.addColorStop(1,'rgba(5,20,10,.95)');
+pctx.fillStyle=sky;pctx.fillRect(0,0,w,h*.7);
+pctx.fillStyle='rgba(60,30,10,.8)';pctx.fillRect(0,h*.7,w,h*.3);
+if(l>0.1){pctx.beginPath();pctx.arc(w*.82,h*.15,14*l+4,0,Math.PI*2);pctx.fillStyle=`rgba(251,191,36,${l*.7})`;pctx.fill();}
+const ph=Math.min(h*.55,growth*h*.6+20);
+pctx.strokeStyle=`rgba(34,197,94,${.4+growth*.6})`;pctx.lineWidth=3+growth*4;
+pctx.beginPath();pctx.moveTo(w*.5,h*.72);pctx.lineTo(w*.5,h*.72-ph);pctx.stroke();
+if(growth>0.2){const ls=(growth-.2)*45;pctx.fillStyle=`rgba(34,197,94,${.5+growth*.4})`;pctx.beginPath();pctx.ellipse(w*.5-ls*.8,h*.72-ph*.55,ls,ls*.45,-.45,0,Math.PI*2);pctx.fill();pctx.beginPath();pctx.ellipse(w*.5+ls*.8,h*.72-ph*.35,ls,ls*.45,.45,0,Math.PI*2);pctx.fill();}
+}
+function start(){document.getElementById('intro').style.display='none';sz();triggerEvent();update();}
+function showEnd(survived){
+const s=score,max=100;
+document.getElementById('end-ico').textContent=survived&&s>=60?'🏆':'💀';
+document.getElementById('end-title').textContent=survived?'МИССИЯ СӘТТІ!':'МИССИЯ СӘТСІЗ!';
+document.getElementById('fscore').textContent='Тәжірибе сәтті аяқталды!';
+document.getElementById('fbody').innerHTML=`☀️ <b>Жарық ↑</b> → фотосинтез жылдамдайды<br>💨 <b>CO₂</b> — субстрат, жетіспесе тоқтайды<br>💧 <b>Су</b> — сутек көзі, АТФ үшін<br>🌡️ <b>Лимиттеуші фактор</b> → ең аз мәнді реттеу керек`;
+document.getElementById('end-sc').style.display='flex';
+}
+</script>
+<!-- Global Language Switcher & Google Translate -->
+<div id="google_translate_element" style="display:none;"></div>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({pageLanguage: 'kk', includedLanguages: 'ru,en,kk', autoDisplay: false}, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script>
+(function() {
+    let currentLang = localStorage.getItem('vsh-lang') || 'kk';
+
+    // Synchronize cookie if needed
+    var gtrans = '/kk/' + currentLang;
+    if (currentLang === 'kk') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+    }
+
+    // Floating UI
+    if (!document.querySelector('.floating-lang-switcher')) {
+        const style = document.createElement('style');
+        style.innerHTML = `
+            body { top: 0 !important; }
+            .skiptranslate { display: none !important; }
+            .floating-lang-switcher {
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                background: rgba(15, 23, 42, 0.9);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 20px;
+                padding: 10px;
+                display: flex;
+                gap: 10px;
+                z-index: 999999;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+                font-family: 'Roboto', sans-serif;
+            }
+            .floating-lang-btn {
+                background: transparent;
+                border: 1px solid rgba(255,255,255,0.2);
+                color: #94a3b8;
+                font-size: 14px;
+                font-weight: 600;
+                padding: 8px 15px;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: 0.3s;
+            }
+            .floating-lang-btn:hover {
+                color: #fff;
+                background: rgba(255,255,255,0.1);
+            }
+            .floating-lang-btn.active {
+                background: linear-gradient(135deg, #a855f7, #3b82f6);
+                color: #fff;
+                border-color: transparent;
+            }
+        `;
+        document.head.appendChild(style);
+
+        const switcher = document.createElement('div');
+        switcher.className = 'floating-lang-switcher notranslate';
+        switcher.innerHTML = `
+            <button class="floating-lang-btn " onclick="changeLangGlobal('ru')">RU</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('kk')">ҚАЗ</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('en')">EN</button>
+        `;
+        
+        // set active
+        const btns = switcher.querySelectorAll('.floating-lang-btn');
+        if (currentLang === 'ru') btns[0].classList.add('active');
+        else if (currentLang === 'kk') btns[1].classList.add('active');
+        else if (currentLang === 'en') btns[2].classList.add('active');
+
+        document.body.appendChild(switcher);
+    }
+})();
+
+function changeLangGlobal(lang) {
+    localStorage.setItem('vsh-lang', lang);
+    var gtrans = '/kk/' + lang;
+    if (lang === 'kk') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+    }
+    location.reload();
+}
+</script>
+
+</body></html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дыбыстар — Казахская фонетика — Virtual Science Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body { background: #0f172a; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; font-family: 'Roboto', sans-serif; padding: 20px; }
+        h1 { font-size: 32px; color: #06b6d4; margin-bottom: 5px; text-align: center; }
+        p.sub { color: #94a3b8; margin-bottom: 20px; text-align: center; }
+        .lab { background: rgba(0,30,40,0.8); border: 1px solid rgba(6,182,212,0.2); border-radius: 20px; padding: 30px; width: 100%; max-width: 900px; }
+
+        .tabs { display: flex; gap: 10px; margin-bottom: 25px; justify-content: center; }
+        .tab-btn { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; padding: 10px 25px; border-radius: 20px; cursor: pointer; font-family: inherit; font-size: 15px; font-weight: 600; transition: all 0.2s; }
+        .tab-btn.active { background: rgba(6,182,212,0.2); border-color: #06b6d4; color: white; }
+
+        .letters-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 10px; margin-bottom: 25px; }
+        .letter-card { background: rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px 8px; text-align: center; cursor: pointer; transition: all 0.2s; }
+        .letter-card.vowel { border-color: rgba(251,191,36,0.3); }
+        .letter-card.consonant { border-color: rgba(6,182,212,0.3); }
+        .letter-card:hover, .letter-card.active { transform: scale(1.1); }
+        .letter-card.vowel:hover, .letter-card.vowel.active { background: rgba(251,191,36,0.2); border-color: #fbbf24; box-shadow: 0 0 15px rgba(251,191,36,0.4); }
+        .letter-card.consonant:hover, .letter-card.consonant.active { background: rgba(6,182,212,0.2); border-color: #06b6d4; box-shadow: 0 0 15px rgba(6,182,212,0.4); }
+        .letter-char { font-size: 30px; font-weight: 800; }
+        .letter-trans { font-size: 12px; color: #94a3b8; }
+
+        .info-panel { background: rgba(0,0,0,0.4); border-radius: 16px; padding: 25px; border: 1px solid rgba(255,255,255,0.05); min-height: 180px; margin-bottom: 20px; }
+        .big-letter { font-size: 80px; font-weight: 800; text-align: center; color: #06b6d4; }
+        .letter-info h3 { font-size: 22px; margin-bottom: 10px; }
+        .letter-info .example-words { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 15px; }
+        .word-tag { background: rgba(6,182,212,0.1); border: 1px solid rgba(6,182,212,0.3); border-radius: 8px; padding: 8px 15px; font-size: 16px; }
+        .word-tag span { color: #06b6d4; font-weight: 700; }
+
+        .quiz-section { background: rgba(0,0,0,0.4); border-radius: 16px; padding: 25px; border: 1px solid rgba(255,255,255,0.05); }
+        .quiz-question { font-size: 60px; text-align: center; margin-bottom: 20px; font-weight: 800; color: white; }
+        .quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 400px; margin: 0 auto; }
+        .quiz-option { background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); color: white; padding: 12px; border-radius: 10px; cursor: pointer; font-family: inherit; font-size: 16px; font-weight: 600; transition: all 0.2s; }
+        .quiz-option:hover { border-color: #06b6d4; }
+        .quiz-option.correct { background: rgba(74,222,128,0.2); border-color: #4ade80; }
+        .quiz-option.wrong { background: rgba(239,68,68,0.2); border-color: #ef4444; }
+        .quiz-score { text-align: center; font-size: 18px; color: #94a3b8; margin-bottom: 15px; }
+
+        .btn-back { display: block; width: max-content; margin: 20px auto 0; background: rgba(255,255,255,0.1); color: white; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; transition: all 0.3s; }
+        .btn-back:hover { background: rgba(255,255,255,0.2); }
+    </style>
+
+    <script id="early-lang-sync">
+        (function() {
+            let cl = localStorage.getItem('vsh-lang') || 'kk';
+            var gt = '/ru/' + cl;
+            if (cl === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+                document.cookie = "googtrans=" + gt + "; path=/";
+                if (location.hostname) {
+                    document.cookie = "googtrans=" + gt + "; domain=" + location.hostname + "; path=/";
+                    document.cookie = "googtrans=" + gt + "; domain=." + location.hostname + "; path=/";
+                }
+            }
+        })();
+    </script>
+</head>
+<body>
+    <div class="lab">
+        <h1>🗣️ Дыбыстар — Казахская фонетика</h1>
+        <p class="sub">Дауысты және дауыссыз дыбыстар / Гласные и согласные звуки казахского языка</p>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('vowels', this)">🟡 Дауысты (Гласные)</button>
+            <button class="tab-btn" onclick="showTab('consonants', this)">🔵 Дауыссыз (Согласные)</button>
+            <button class="tab-btn" onclick="showTab('quiz', this)">📝 Тест</button>
+        </div>
+
+        <div id="tab-vowels">
+            <div class="letters-grid" id="vowelGrid"></div>
+            <div class="info-panel" id="vowelInfo">
+                <div class="big-letter" id="vowelBig">А</div>
+                <div id="vowelDetails" style="text-align:center; color: #94a3b8;">Нажмите на букву чтобы узнать подробнее</div>
+            </div>
+        </div>
+
+        <div id="tab-consonants" style="display:none;">
+            <div class="letters-grid" id="consonantGrid"></div>
+            <div class="info-panel" id="consonantInfo">
+                <div class="big-letter" id="consonantBig" style="color:#06b6d4;">Б</div>
+                <div id="consonantDetails" style="text-align:center; color: #94a3b8;">Нажмите на букву чтобы узнать подробнее</div>
+            </div>
+        </div>
+
+        <div id="tab-quiz" style="display:none;">
+            <div class="quiz-score">Счёт: <span id="score">0</span> / <span id="total">0</span></div>
+            <div class="quiz-question" id="quizLetter">?</div>
+            <div class="quiz-options" id="quizOptions"></div>
+        </div>
+
+        <a href="index.html" class="btn-back">← Вернуться в лобби</a>
+    </div>
+
+    <script>
+        const vowels = [
+            { char: 'А', trans: 'a', desc: 'Широкий гласный', type: 'широкий', words: [{kk:'Ата', hi:'А'},{kk:'Апа', hi:'А'}] },
+            { char: 'Ә', trans: 'ä', desc: 'Широкий гласный переднего ряда', type: 'широкий', words: [{kk:'Әже', hi:'Ә'},{kk:'Әке', hi:'Ә'}] },
+            { char: 'Е', trans: 'e', desc: 'Среднего подъёма', type: 'средний', words: [{kk:'Ел', hi:'Е'},{kk:'Ерен', hi:'Е'}] },
+            { char: 'И', trans: 'i', desc: 'Узкий гласный переднего ряда', type: 'узкий', words: [{kk:'Іни', hi:'И'},{kk:'Ине', hi:'И'}] },
+            { char: 'О', trans: 'o', desc: 'Огублённый широкий', type: 'огублённый', words: [{kk:'От', hi:'О'},{kk:'Ол', hi:'О'}] },
+            { char: 'Ө', trans: 'ö', desc: 'Огублённый переднего ряда', type: 'огублённый', words: [{kk:'Өзен', hi:'Ө'},{kk:'Өгіз', hi:'Ө'}] },
+            { char: 'Ұ', trans: 'u', desc: 'Огублённый узкий заднего ряда', type: 'огублённый', words: [{kk:'Ұл', hi:'Ұ'},{kk:'Ұя', hi:'Ұ'}] },
+            { char: 'Ү', trans: 'ü', desc: 'Огублённый узкий переднего ряда', type: 'огублённый', words: [{kk:'Үй', hi:'Ү'},{kk:'Үш', hi:'Ү'}] },
+            { char: 'Ы', trans: 'ı', desc: 'Узкий заднего ряда', type: 'узкий', words: [{kk:'Ыс', hi:'Ы'},{kk:'Ырыс', hi:'Ы'}] },
+        ];
+
+        const consonants = [
+            { char: 'Б', trans: 'b', desc: 'Губно-губной звонкий', words: [{kk:'Бала', hi:'Б'},{kk:'Бас', hi:'Б'}] },
+            { char: 'Г', trans: 'g', desc: 'Заднеязычный звонкий', words: [{kk:'Гүл', hi:'Г'},{kk:'Газет', hi:'Г'}] },
+            { char: 'Ғ', trans: 'ğ', desc: 'Увулярный звонкий (особый казахский)', words: [{kk:'Ғалым', hi:'Ғ'},{kk:'Ғасыр', hi:'Ғ'}] },
+            { char: 'Д', trans: 'd', desc: 'Переднеязычный звонкий', words: [{kk:'Дала', hi:'Д'},{kk:'Дос', hi:'Д'}] },
+            { char: 'Ж', trans: 'j', desc: 'Шипящий звонкий', words: [{kk:'Жер', hi:'Ж'},{kk:'Жыл', hi:'Ж'}] },
+            { char: 'З', trans: 'z', desc: 'Свистящий звонкий', words: [{kk:'Зат', hi:'З'},{kk:'Заман', hi:'З'}] },
+            { char: 'Й', trans: 'y', desc: 'Среднеязычный полугласный', words: [{kk:'Үй', hi:'й'},{kk:'Жай', hi:'й'}] },
+            { char: 'К', trans: 'k', desc: 'Заднеязычный глухой', words: [{kk:'Кіт', hi:'К'},{kk:'Күн', hi:'К'}] },
+            { char: 'Қ', trans: 'q', desc: 'Увулярный глухой (особый казахский)', words: [{kk:'Қала', hi:'Қ'},{kk:'Қыз', hi:'Қ'}] },
+            { char: 'Л', trans: 'l', desc: 'Боковой сонорный', words: [{kk:'Ел', hi:'л'},{kk:'Ала', hi:'л'}] },
+            { char: 'М', trans: 'm', desc: 'Губно-губной носовой', words: [{kk:'Мал', hi:'М'},{kk:'Мектеп', hi:'М'}] },
+            { char: 'Н', trans: 'n', desc: 'Переднеязычный носовой', words: [{kk:'Нан', hi:'Н'},{kk:'Ана', hi:'Н'}] },
+            { char: 'Ң', trans: 'ñ', desc: 'Заднеязычный носовой (особый казахский)', words: [{kk:'Таң', hi:'ң'},{kk:'Жаң', hi:'ң'}] },
+            { char: 'П', trans: 'p', desc: 'Губно-губной глухой', words: [{kk:'Пар', hi:'П'},{kk:'Пішін', hi:'П'}] },
+            { char: 'Р', trans: 'r', desc: 'Дрожащий сонорный', words: [{kk:'Рас', hi:'Р'},{kk:'Арна', hi:'Р'}] },
+            { char: 'С', trans: 's', desc: 'Свистящий глухой', words: [{kk:'Су', hi:'С'},{kk:'Сан', hi:'С'}] },
+            { char: 'Т', trans: 't', desc: 'Переднеязычный глухой', words: [{kk:'Тас', hi:'Т'},{kk:'Тіл', hi:'Т'}] },
+            { char: 'Ш', trans: 'ş', desc: 'Шипящий глухой', words: [{kk:'Шай', hi:'Ш'},{kk:'Шаш', hi:'Ш'}] },
+        ];
+
+        function showTab(tab, btn) {
+            ['vowels', 'consonants', 'quiz'].forEach(t => document.getElementById('tab-' + t).style.display = 'none');
+            document.getElementById('tab-' + tab).style.display = 'block';
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            if (tab === 'quiz') nextQuestion();
+        }
+
+        function buildGrid(list, type, gridId, bigId, detailsId) {
+            const grid = document.getElementById(gridId);
+            grid.innerHTML = list.map((l, i) => `
+                <div class="letter-card ${type}" onclick="showLetter(${i}, '${type}', '${bigId}', '${detailsId}')">
+                    <div class="letter-char">${l.char}</div>
+                    <div class="letter-trans">[${l.trans}]</div>
+                </div>
+            `).join('');
+        }
+
+        function showLetter(idx, type, bigId, detailsId) {
+            const list = type === 'vowel' ? vowels : consonants;
+            const l = list[idx];
+            document.getElementById(bigId).textContent = l.char;
+            document.getElementById(detailsId).innerHTML = `
+                <div style="text-align:center;">
+                    <h3 style="font-size:24px; margin-bottom:10px;">[${l.trans}] — ${l.desc}</h3>
+                    <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+                        ${l.words.map(w => `<div class="word-tag"><span>${w.kk[0]}</span>${w.kk.slice(1)}</div>`).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Quiz
+        const allLetters = [...vowels, ...consonants];
+        let score = 0, total = 0;
+
+        function nextQuestion() {
+            const correct = allLetters[Math.floor(Math.random() * allLetters.length)];
+            document.getElementById('quizLetter').textContent = correct.char;
+
+            const options = [correct];
+            while (options.length < 4) {
+                const r = allLetters[Math.floor(Math.random() * allLetters.length)];
+                if (!options.find(o => o.trans === r.trans)) options.push(r);
+            }
+            options.sort(() => Math.random() - 0.5);
+
+            document.getElementById('quizOptions').innerHTML = options.map(o => `
+                <button class="quiz-option" onclick="checkAnswer('${o.trans}', '${correct.trans}', this)">[${o.trans}]</button>
+            `).join('');
+        }
+
+        function checkAnswer(chosen, correct, btn) {
+            total++;
+            document.querySelectorAll('.quiz-option').forEach(b => b.disabled = true);
+            if (chosen === correct) {
+                btn.classList.add('correct');
+                score++;
+            } else {
+                btn.classList.add('wrong');
+                document.querySelectorAll('.quiz-option').forEach(b => {
+                    if (b.textContent === `[${correct}]`) b.classList.add('correct');
+                });
+            }
+            document.getElementById('score').textContent = score;
+            document.getElementById('total').textContent = total;
+            setTimeout(nextQuestion, 1200);
+        }
+
+        buildGrid(vowels, 'vowel', 'vowelGrid', 'vowelBig', 'vowelDetails');
+        buildGrid(consonants, 'consonant', 'consonantGrid', 'consonantBig', 'consonantDetails');
+    </script>
+
+<!-- Global Language Switcher & Google Translate -->
+<div id="google_translate_element" style="display:none;"></div>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({pageLanguage: 'ru', includedLanguages: 'ru,en,kk', autoDisplay: false}, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script>
+(function() {
+    let currentLang = localStorage.getItem('vsh-lang') || 'kk';
+
+    // Synchronize cookie if needed
+    var gtrans = '/ru/' + currentLang;
+    if (currentLang === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) {
+            document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+        }
+    }
+
+    // Floating UI
+    const isIndex = location.pathname.endsWith('index.html') || location.pathname.endsWith('/') || location.pathname.endsWith('studio.html');
+    if (!document.querySelector('.floating-lang-switcher')) {
+        const style = document.createElement('style');
+        style.innerHTML = `
+            body { top: 0 !important; }
+            .skiptranslate { display: none !important; }
+            .floating-lang-switcher {
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                background: rgba(15, 23, 42, 0.9);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 20px;
+                padding: 10px;
+                display: flex;
+                gap: 10px;
+                z-index: 999999;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+                font-family: 'Roboto', sans-serif;
+            }
+            .floating-lang-btn {
+                background: transparent;
+                border: 1px solid rgba(255,255,255,0.2);
+                color: #94a3b8;
+                font-size: 14px;
+                font-weight: 600;
+                padding: 8px 15px;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: 0.3s;
+            }
+            .floating-lang-btn:hover {
+                color: #fff;
+                background: rgba(255,255,255,0.1);
+            }
+            .floating-lang-btn.active {
+                background: linear-gradient(135deg, #a855f7, #3b82f6);
+                color: #fff;
+                border-color: transparent;
+            }
+        `;
+        document.head.appendChild(style);
+
+        const switcher = document.createElement('div');
+        switcher.className = 'floating-lang-switcher notranslate';
+        switcher.innerHTML = `
+            <button class="floating-lang-btn " onclick="changeLangGlobal('ru')">RU</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('kk')">ҚАЗ</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('en')">EN</button>
+        `;
+        
+        // set active
+        const btns = switcher.querySelectorAll('.floating-lang-btn');
+        if (currentLang === 'ru') btns[0].classList.add('active');
+        else if (currentLang === 'kk') btns[1].classList.add('active');
+        else if (currentLang === 'en') btns[2].classList.add('active');
+
+        document.body.appendChild(switcher);
+    }
+})();
+
+function changeLangGlobal(lang) {
+    localStorage.setItem('vsh-lang', lang);
+    var gtrans = '/ru/' + lang;
+    if (lang === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+    }
+    location.reload();
+}
+</script>
+\n</body>
+</html>

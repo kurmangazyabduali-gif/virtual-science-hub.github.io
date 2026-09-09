@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Конвертер единиц — Virtual Science Hub</title>
+    <meta name="description" content="Удобный конвертер физических единиц измерения для школьников">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body.page-tool {
+            background: #0b0d17;
+        }
+
+        .tool-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 2rem;
+            background: rgba(255, 255, 255, 0.04);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+        }
+
+        .tool-header h1 {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .tool-header p {
+            font-size: 0.8rem;
+            color: #a0a0a0;
+        }
+
+        .btn-back-home {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: #a0a0a0;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-back-home:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+        }
+
+        .conv-page {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Category tabs */
+        .cat-tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .cat-tab {
+            padding: 8px 18px;
+            border-radius: 50px;
+            border: none;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #a0a0a0;
+            font-family: 'Roboto', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .cat-tab:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .cat-tab.active {
+            background: linear-gradient(135deg, #bc13fe, #7c3aed);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 0 14px rgba(188, 19, 254, 0.35);
+        }
+
+        /* Converter box */
+        .conv-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 2rem;
+        }
+
+        .conv-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #a0a0a0;
+            margin-bottom: 1.5rem;
+        }
+
+        .conv-row {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .conv-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .conv-label {
+            font-size: 0.75rem;
+            color: #777;
+        }
+
+        .conv-input-wrap {
+            display: flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .conv-input-wrap:focus-within {
+            border-color: #00f3ff;
+            box-shadow: 0 0 0 3px rgba(0, 243, 255, 0.1);
+        }
+
+        .conv-input {
+            flex: 1;
+            background: none;
+            border: none;
+            outline: none;
+            color: #fff;
+            font-family: 'Roboto', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            padding: 12px 14px;
+            min-width: 0;
+        }
+
+        .conv-unit-select {
+            background: rgba(255, 255, 255, 0.06);
+            border: none;
+            border-left: 1px solid rgba(255, 255, 255, 0.08);
+            color: #a0a0a0;
+            font-family: 'Roboto', sans-serif;
+            font-size: 0.8rem;
+            padding: 12px 10px;
+            cursor: pointer;
+            outline: none;
+            min-width: 90px;
+        }
+
+        .conv-unit-select option {
+            background: #0b0d17;
+        }
+
+        .conv-arrow {
+            font-size: 1.5rem;
+            color: #a0a0a0;
+            text-align: center;
+            user-select: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        .conv-arrow:hover {
+            color: #00f3ff;
+            background: rgba(0, 243, 255, 0.08);
+            transform: rotate(180deg);
+        }
+
+        /* Formula reference */
+        .formula-ref {
+            margin-top: 1.5rem;
+            padding: 14px 16px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            font-size: 0.82rem;
+            color: #777;
+            line-height: 1.7;
+        }
+
+        .formula-ref strong {
+            color: #00f3ff;
+        }
+
+        /* History */
+        .history-section {
+            margin-top: 2rem;
+        }
+
+        .history-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            font-size: 0.85rem;
+            color: #a0a0a0;
+        }
+
+        .history-result {
+            color: #00f3ff;
+            font-weight: 700;
+        }
+
+        @media (max-width: 600px) {
+            .conv-row {
+                grid-template-columns: 1fr;
+            }
+
+            .conv-arrow {
+                transform: rotate(90deg);
+            }
+
+            .conv-arrow:hover {
+                transform: rotate(270deg);
+            }
+        }
+    </style>
+
+    <script id="early-lang-sync">
+        (function() {
+            let cl = localStorage.getItem('vsh-lang') || 'kk';
+            var gt = '/ru/' + cl;
+            if (cl === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+                document.cookie = "googtrans=" + gt + "; path=/";
+                if (location.hostname) {
+                    document.cookie = "googtrans=" + gt + "; domain=" + location.hostname + "; path=/";
+                    document.cookie = "googtrans=" + gt + "; domain=." + location.hostname + "; path=/";
+                }
+            }
+        })();
+    </script>
+</head>
+
+<body class="page-tool">
+
+    <header class="tool-header">
+        <a href="index.html" class="btn-back-home">← Главная</a>
+        <div>
+            <h1>⚖️ Конвертер единиц</h1>
+            <p>Удобный перевод физических величин</p>
+        </div>
+    </header>
+
+    <div class="conv-page">
+
+        <!-- Category Tabs -->
+        <div class="cat-tabs" id="catTabs"></div>
+
+        <!-- Converter -->
+        <div class="conv-box">
+            <div class="conv-title" id="convTitle">Длина</div>
+            <div class="conv-row">
+                <div class="conv-field">
+                    <label class="conv-label">Из</label>
+                    <div class="conv-input-wrap">
+                        <input type="number" class="conv-input" id="inputA" value="1" oninput="convertAtoB()">
+                        <select class="conv-unit-select" id="selectA" onchange="convertAtoB()"></select>
+                    </div>
+                </div>
+                <button class="conv-arrow" onclick="swapUnits()" title="Поменять местами">⇄</button>
+                <div class="conv-field">
+                    <label class="conv-label">В</label>
+                    <div class="conv-input-wrap">
+                        <input type="number" class="conv-input" id="inputB" value="" oninput="convertBtoA()">
+                        <select class="conv-unit-select" id="selectB" onchange="convertAtoB()"></select>
+                    </div>
+                </div>
+            </div>
+            <div class="formula-ref" id="formulaRef"></div>
+        </div>
+
+        <!-- History -->
+        <div class="history-section">
+            <div class="history-title">История конвертаций</div>
+            <div class="history-list" id="historyList">
+                <div style="color:#555;font-size:0.8rem;padding:10px 0">Конвертации появятся здесь...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CATEGORIES = {
+            '📏 Длина': {
+                tip: '<strong>Основная единица СИ:</strong> метр (м) = 100 см = 1000 мм = 0.001 км',
+                units: {
+                    'Миллиметр (мм)': 0.001,
+                    'Сантиметр (см)': 0.01,
+                    'Дециметр (дм)': 0.1,
+                    'Метр (м)': 1,
+                    'Километр (км)': 1000,
+                    'Дюйм (″)': 0.0254,
+                    'Фут (ft)': 0.3048,
+                    'Ярд (yd)': 0.9144,
+                    'Миля (mi)': 1609.344,
+                    'Астр. ед. (а.е.)': 1.496e11,
+                    'Световой год': 9.461e15,
+                }
+            },
+            '⚖️ Масса': {
+                tip: '<strong>Основная единица СИ:</strong> килограмм (кг) = 1000 г = 0.001 т',
+                units: {
+                    'Миллиграмм (мг)': 1e-6,
+                    'Грамм (г)': 0.001,
+                    'Килограмм (кг)': 1,
+                    'Тонна (т)': 1000,
+                    'Карат': 0.0002,
+                    'Фунт (lb)': 0.453592,
+                    'Унция (oz)': 0.0283495,
+                }
+            },
+            '⏱ Время': {
+                tip: '<strong>Основная единица СИ:</strong> секунда (с). 1 мин = 60 с, 1 ч = 3600 с, 1 день = 86400 с',
+                units: {
+                    'Миллисекунда': 0.001,
+                    'Секунда (с)': 1,
+                    'Минута (мин)': 60,
+                    'Час (ч)': 3600,
+                    'Сутки': 86400,
+                    'Неделя': 604800,
+                    'Месяц (≈)': 2.628e6,
+                    'Год (≈)': 3.156e7,
+                }
+            },
+            '🌡 Температура': {
+                tip: '<strong>Формулы:</strong> °C = (°F − 32) ÷ 1.8 | K = °C + 273.15 | °F = °C × 1.8 + 32',
+                units: { 'Цельсий (°C)': 'C', 'Фаренгейт (°F)': 'F', 'Кельвин (K)': 'K', 'Ранкин (°R)': 'R' },
+                special: true,
+            },
+            '🚀 Скорость': {
+                tip: '<strong>Основная единица СИ:</strong> м/с. 1 км/ч = 0.2778 м/с | Скорость звука ≈ 343 м/с',
+                units: {
+                    'м/с': 1,
+                    'км/ч': 1 / 3.6,
+                    'км/мин': 1000 / 60,
+                    'миль/ч': 0.44704,
+                    'узел': 0.514444,
+                    'Маха (≈)': 343,
+                    'Км/с': 1000,
+                }
+            },
+            '⚡ Энергия': {
+                tip: '<strong>Основная единица СИ:</strong> Джоуль (Дж). 1 кДж = 1000 Дж | 1 ккал ≈ 4186 Дж',
+                units: {
+                    'Джоуль (Дж)': 1,
+                    'Килоджоуль': 1000,
+                    'кВт·ч': 3.6e6,
+                    'Калория (кал)': 4.184,
+                    'Ккал': 4184,
+                    'эВ': 1.602e-19,
+                    'эрг': 1e-7,
+                    'Британская ед.': 1055.06,
+                }
+            },
+            '💡 Мощность': {
+                tip: '<strong>Основная единица СИ:</strong> Ватт (Вт). 1 кВт = 1000 Вт | 1 л.с. ≈ 735.5 Вт',
+                units: {
+                    'Ватт (Вт)': 1,
+                    'Киловатт (кВт)': 1000,
+                    'Мегаватт (МВт)': 1e6,
+                    'Лошадиная сила': 735.499,
+                    'Кал/с': 4.184,
+                    'БТЕ/с': 1055.06,
+                }
+            },
+            '📐 Площадь': {
+                tip: '<strong>Основная единица СИ:</strong> м². 1 га = 10 000 м² | 1 км² = 1 000 000 м²',
+                units: {
+                    'мм²': 1e-6,
+                    'см²': 0.0001,
+                    'дм²': 0.01,
+                    'м²': 1,
+                    'км²': 1e6,
+                    'Гектар (га)': 10000,
+                    'Акр': 4046.86,
+                    'фт²': 0.092903,
+                    'миля²': 2589988,
+                }
+            },
+            '📦 Объём': {
+                tip: '<strong>Основная единица СИ:</strong> м³. 1 л = 0.001 м³ = 1 дм³ | 1 мл = 1 см³',
+                units: {
+                    'мл (см³)': 0.000001,
+                    'Децилитр': 0.0001,
+                    'Литр (л)': 0.001,
+                    'м³': 1,
+                    'Галлон США': 0.003785,
+                    'Галлон UK': 0.004546,
+                    'Пинта': 0.000473,
+                    'Кубический дюйм': 1.6387e-5,
+                    'Кубический фут': 0.028317,
+                }
+            },
+            '🔲 Давление': {
+                tip: '<strong>Основная единица СИ:</strong> Паскаль (Па). 1 атм = 101 325 Па | 1 мм рт.ст. = 133.3 Па',
+                units: {
+                    'Паскаль (Па)': 1,
+                    'Килопаскаль': 1000,
+                    'Мегапаскаль': 1e6,
+                    'Атмосфера (атм)': 101325,
+                    'Бар': 100000,
+                    'мм рт.ст.': 133.322,
+                    'PSI': 6894.76,
+                    'мм вод.ст.': 9.80665,
+                }
+            },
+        };
+
+        let currentCat = '📏 Длина';
+        let history = [];
+
+        function buildTabs() {
+            const tabs = document.getElementById('catTabs');
+            tabs.innerHTML = Object.keys(CATEGORIES).map(k =>
+                `<button class="cat-tab${k === currentCat ? ' active' : ''}" onclick="selectCat('${k}')">${k}</button>`
+            ).join('');
+        }
+
+        function selectCat(cat) {
+            currentCat = cat;
+            buildTabs();
+            buildSelects();
+            document.getElementById('convTitle').textContent = cat;
+            convertAtoB();
+        }
+
+        function buildSelects() {
+            const info = CATEGORIES[currentCat];
+            const units = Object.keys(info.units);
+            const optsA = units.map((u, i) => `<option value="${u}"${i === 0 ? ' selected' : ''}>${u}</option>`).join('');
+            const optsB = units.map((u, i) => `<option value="${u}"${i === 1 ? ' selected' : ''}>${u}</option>`).join('');
+            document.getElementById('selectA').innerHTML = optsA;
+            document.getElementById('selectB').innerHTML = optsB;
+            document.getElementById('formulaRef').innerHTML = info.tip || '';
+            document.getElementById('inputA').value = 1;
+            convertAtoB();
+        }
+
+        function convertAtoB() {
+            const info = CATEGORIES[currentCat];
+            const valA = parseFloat(document.getElementById('inputA').value);
+            const unitA = document.getElementById('selectA').value;
+            const unitB = document.getElementById('selectB').value;
+
+            if (isNaN(valA)) { document.getElementById('inputB').value = ''; return; }
+
+            let result;
+            if (info.special) {
+                result = tempConvert(valA, unitA, unitB);
+            } else {
+                const toBase = info.units[unitA];
+                const fromBase = info.units[unitB];
+                result = valA * toBase / fromBase;
+            }
+
+            const formatted = Math.abs(result) < 0.001 || Math.abs(result) > 1e9
+                ? result.toExponential(6)
+                : parseFloat(result.toPrecision(8));
+
+            document.getElementById('inputB').value = formatted;
+            addHistory(`${valA} ${unitA} → ${formatted} ${unitB}`);
+        }
+
+        function convertBtoA() {
+            const info = CATEGORIES[currentCat];
+            const valB = parseFloat(document.getElementById('inputB').value);
+            const unitA = document.getElementById('selectA').value;
+            const unitB = document.getElementById('selectB').value;
+
+            if (isNaN(valB)) { document.getElementById('inputA').value = ''; return; }
+
+            let result;
+            if (info.special) {
+                result = tempConvert(valB, unitB, unitA);
+            } else {
+                const toBase = info.units[unitB];
+                const fromBase = info.units[unitA];
+                result = valB * toBase / fromBase;
+            }
+
+            const formatted = Math.abs(result) < 0.001 || Math.abs(result) > 1e9
+                ? result.toExponential(6)
+                : parseFloat(result.toPrecision(8));
+
+            document.getElementById('inputA').value = formatted;
+            addHistory(`${valB} ${unitB} → ${formatted} ${unitA}`);
+        }
+
+        function tempConvert(val, from, to) {
+            // Convert to Celsius first
+            let c;
+            const fk = v => v === 'Цельсий (°C)' ? 'C' : v === 'Фаренгейт (°F)' ? 'F' : v === 'Кельвин (K)' ? 'K' : 'R';
+            const f = fk(from), t = fk(to);
+            if (f === 'C') c = val;
+            else if (f === 'F') c = (val - 32) / 1.8;
+            else if (f === 'K') c = val - 273.15;
+            else if (f === 'R') c = (val - 491.67) / 1.8;
+
+            if (t === 'C') return c;
+            if (t === 'F') return c * 1.8 + 32;
+            if (t === 'K') return c + 273.15;
+            if (t === 'R') return (c + 273.15) * 1.8;
+            return c;
+        }
+
+        function swapUnits() {
+            const sA = document.getElementById('selectA');
+            const sB = document.getElementById('selectB');
+            const tmp = sA.value;
+            sA.value = sB.value;
+            sB.value = tmp;
+            convertAtoB();
+        }
+
+        function addHistory(text) {
+            const el = document.getElementById('historyList');
+            history.unshift(text);
+            if (history.length > 8) history.pop();
+            el.innerHTML = history.map(h => {
+                const [left, right] = h.split(' → ');
+                return `<div class="history-item"><span>${left}</span><span class="history-result">→ ${right}</span></div>`;
+            }).join('');
+        }
+
+        // Init
+        buildTabs();
+        buildSelects();
+    </script>
+
+<!-- Global Language Switcher & Google Translate -->
+<div id="google_translate_element" style="display:none;"></div>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({pageLanguage: 'ru', includedLanguages: 'ru,en,kk', autoDisplay: false}, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script>
+(function() {
+    let currentLang = localStorage.getItem('vsh-lang') || 'kk';
+
+    // Synchronize cookie if needed
+    var gtrans = '/ru/' + currentLang;
+    if (currentLang === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) {
+            document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+        }
+    }
+
+    // Floating UI
+    const isIndex = location.pathname.endsWith('index.html') || location.pathname.endsWith('/') || location.pathname.endsWith('studio.html');
+    if (!document.querySelector('.floating-lang-switcher')) {
+        const style = document.createElement('style');
+        style.innerHTML = `
+            body { top: 0 !important; }
+            .skiptranslate { display: none !important; }
+            .floating-lang-switcher {
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                background: rgba(15, 23, 42, 0.9);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 20px;
+                padding: 10px;
+                display: flex;
+                gap: 10px;
+                z-index: 999999;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+                font-family: 'Roboto', sans-serif;
+            }
+            .floating-lang-btn {
+                background: transparent;
+                border: 1px solid rgba(255,255,255,0.2);
+                color: #94a3b8;
+                font-size: 14px;
+                font-weight: 600;
+                padding: 8px 15px;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: 0.3s;
+            }
+            .floating-lang-btn:hover {
+                color: #fff;
+                background: rgba(255,255,255,0.1);
+            }
+            .floating-lang-btn.active {
+                background: linear-gradient(135deg, #a855f7, #3b82f6);
+                color: #fff;
+                border-color: transparent;
+            }
+        `;
+        document.head.appendChild(style);
+
+        const switcher = document.createElement('div');
+        switcher.className = 'floating-lang-switcher notranslate';
+        switcher.innerHTML = `
+            <button class="floating-lang-btn " onclick="changeLangGlobal('ru')">RU</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('kk')">ҚАЗ</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('en')">EN</button>
+        `;
+        
+        // set active
+        const btns = switcher.querySelectorAll('.floating-lang-btn');
+        if (currentLang === 'ru') btns[0].classList.add('active');
+        else if (currentLang === 'kk') btns[1].classList.add('active');
+        else if (currentLang === 'en') btns[2].classList.add('active');
+
+        document.body.appendChild(switcher);
+    }
+})();
+
+function changeLangGlobal(lang) {
+    localStorage.setItem('vsh-lang', lang);
+    var gtrans = '/ru/' + lang;
+    if (lang === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+    }
+    location.reload();
+}
+</script>
+\n</body>
+
+</html>

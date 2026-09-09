@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Science Hub — Виртуальные лабораторные работы</title>
+    <meta name="description"
+        content="Интерактивный центр виртуальных лабораторных работ по физике, информатике, геометрии, казахскому и английскому языку и биологии.">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* AI Assistant Widget styles adapted for index.html */
+        .ai-fab { position: fixed; bottom: 2rem; right: 2rem; width: 60px; height: 60px; background: linear-gradient(135deg, #a855f7, #3b82f6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: white; box-shadow: 0 10px 25px rgba(168,85,247,0.5); cursor: pointer; z-index: 9999; border: 2px solid rgba(255,255,255,0.2); transition: all 0.3s; }
+        .ai-fab:hover { transform: scale(1.1) rotate(5deg); box-shadow: 0 15px 35px rgba(59,130,246,0.6); }
+        .ai-modal { position: fixed; bottom: 90px; right: 2rem; width: 350px; height: 500px; background: rgba(15,23,42,0.95); backdrop-filter: blur(20px); border: 1px solid rgba(168,85,247,0.3); border-radius: 20px; z-index: 9998; display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.5); transform: translateY(20px); opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-family: 'Roboto', sans-serif;}
+        .ai-modal.active { transform: translateY(0); opacity: 1; pointer-events: auto; }
+        .ai-header { background: linear-gradient(to right, rgba(168,85,247,0.2), rgba(59,130,246,0.1)); padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); border-radius: 20px 20px 0 0; display: flex; justify-content: space-between; align-items: center; }
+        .ai-messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .msg { max-width: 85%; padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.4; animation: pop 0.3s ease-out; }
+        .msg.bot { background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3); align-self: flex-start; border-bottom-left-radius: 4px; color: #e2e8f0; }
+        .msg.user { background: linear-gradient(135deg, #a855f7, #3b82f6); align-self: flex-end; border-bottom-right-radius: 4px; color: white; }
+        .ai-input-area { padding: 15px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; gap: 10px; }
+        .ai-input { flex: 1; background: #020617; border: 1px solid #1e293b; border-radius: 10px; padding: 10px 15px; color: white; outline: none; transition: border 0.3s; font-size: 14px; }
+        .ai-input:focus { border-color: #a855f7; }
+        .ai-send { background: linear-gradient(135deg, #a855f7, #3b82f6); border: none; width: 40px; height: 40px; border-radius: 10px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
+        .ai-send:active { transform: scale(0.9); }
+        @keyframes pop { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* Reset button styles inside modal */
+        .ai-modal button { padding: 0; margin: 0; font-family: inherit; }
+        .ai-header button { background: transparent; border: none; font-size: 18px; cursor: pointer; color: #94a3b8; transition: color 0.2s; }
+        .ai-header button:hover { color: white; }
+    </style>
+
+    <script id="early-lang-sync">
+        (function() {
+            let cl = localStorage.getItem('vsh-lang') || 'kk';
+            var gt = '/ru/' + cl;
+            if (cl === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+                document.cookie = "googtrans=" + gt + "; path=/";
+                if (location.hostname) {
+                    document.cookie = "googtrans=" + gt + "; domain=" + location.hostname + "; path=/";
+                    document.cookie = "googtrans=" + gt + "; domain=." + location.hostname + "; path=/";
+                }
+            }
+        })();
+        
+        // Theme System (Dark / Light)
+        window.applyTheme = function(theme) {
+            if (theme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+            const icon = document.getElementById('themeIcon');
+            if (icon) {
+                icon.className = theme === 'light' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+            }
+        };
+
+        window.toggleTheme = function() {
+            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+            const newTheme = isLight ? 'dark' : 'light';
+            localStorage.setItem('vsh-theme', newTheme);
+            window.applyTheme(newTheme);
+        };
+
+        // Initialize immediately
+        (function() {
+            const savedTheme = localStorage.getItem('vsh-theme') || 'dark';
+            window.applyTheme(savedTheme);
+        })();
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('vsh-theme') || 'dark';
+            window.applyTheme(savedTheme);
+        });
+    </script>
+</head>
+
+<body class="lab-lobby">
+
+    <!-- Interactive Background (2D Constellation + 3D Robot) -->
+    <canvas id="bg-canvas"></canvas>
+    <canvas id="robot-canvas"></canvas>
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- ══════════════════════════════════════ -->
+    <!--  TOP NAV BAR                           -->
+    <!-- ══════════════════════════════════════ -->
+    <nav class="top-nav">
+        <div class="nav-brand">
+            <span class="nav-logo">
+                <svg viewBox="0 0 100 100" class="nav-logo-svg">
+                    <defs>
+                        <linearGradient id="vshNavGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#00f3ff" />
+                            <stop offset="50%" stop-color="#a855f7" />
+                            <stop offset="100%" stop-color="#bc13fe" />
+                        </linearGradient>
+                    </defs>
+                    <polygon points="50,6 90,28 90,72 50,94 10,72 10,28" 
+                             fill="url(#vshNavGrad)" fill-opacity="0.15" 
+                             stroke="url(#vshNavGrad)" stroke-width="3" 
+                             stroke-linejoin="round" />
+                    <ellipse cx="50" cy="50" rx="38" ry="14" 
+                             fill="none" stroke="#00f3ff" stroke-width="2" 
+                             stroke-dasharray="8 4" transform="rotate(-30 50 50)" class="vsh-orbit-ring1" />
+                    <circle cx="82" cy="32" r="3.5" fill="#00f3ff" />
+                    <ellipse cx="50" cy="50" rx="38" ry="14" 
+                             fill="none" stroke="#bc13fe" stroke-width="2" 
+                             stroke-dasharray="6 3" transform="rotate(35 50 50)" class="vsh-orbit-ring2" />
+                    <circle cx="20" cy="36" r="3.5" fill="#bc13fe" />
+                    <text x="50" y="59" text-anchor="middle" font-family="'Roboto', sans-serif" 
+                          font-weight="900" font-size="28" fill="url(#vshNavGrad)">VSH</text>
+                </svg>
+            </span>
+            <span class="nav-title">Virtual Science Hub</span>
+        </div>
+        <div class="nav-actions">
+            <!-- Subjects Module Button -->
+            <a href="subjects.html" class="nav-btn nav-btn-purple" data-i18n="subjects">
+                <i class="fa-solid fa-book-open"></i> <span>Предметы</span>
+            </a>
+
+            <!-- Studio Button -->
+            <a href="studio.html" class="nav-btn nav-btn-blue" data-i18n="createGame">
+                <i class="fa-solid fa-gamepad"></i> <span>Создать игру</span>
+            </a>
+
+            <!-- Presentation Editor Button -->
+            <a href="presentation.html" class="nav-btn nav-btn-teal">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> <span>AI Презентации</span>
+            </a>
+            
+            <!-- Theme Switcher -->
+            <button id="themeToggleBtn" class="nav-btn-icon" onclick="toggleTheme()" title="Переключить тему">
+                <i class="fa-solid fa-moon" id="themeIcon"></i>
+            </button>
+
+            <!-- Language Switcher -->
+            <div class="lang-switcher">
+                <button class="lang-btn active" data-lang="ru" onclick="setLang('ru')">RU</button>
+                <button class="lang-btn" data-lang="kk" onclick="setLang('kk')">ҚАЗ</button>
+                <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+
+        <!-- ══════════════════════════════════════ -->
+        <!--  ANNOUNCEMENT BANNER                   -->
+        <!-- ══════════════════════════════════════ -->
+        <div class="announce-banner" id="announceBanner">
+            <span class="announce-icon">🚀</span>
+            <span class="announce-text" id="announceText">Новые лаборатории добавлены: Фотосинтез • Реакции • Алгоритмы</span>
+            <button class="announce-close"
+                onclick="document.getElementById('announceBanner').style.display='none'">✕</button>
+        </div>
+
+        <!-- ══════════════════════════════════════ -->
+        <!--  HERO SECTION                          -->
+        <!-- ══════════════════════════════════════ -->
+        <header class="dashboard-header">
+            <div class="hero-badge" id="heroBadge">🔬 Интерактивные лаборатории</div>
+            <h1 id="heroTitle">Virtual Science Hub</h1>
+            <p id="heroSubtitle">Центр интерактивных лабораторных исследований</p>
+
+            <!-- STATS BAR -->
+            <div class="stats-bar">
+                <div class="stat-chip">
+                    <span class="stat-chip-icon">🧪</span>
+                    <span class="stat-chip-value">32</span>
+                    <span class="stat-chip-label" id="statLabsLabel">лабораторий</span>
+                </div>
+                <div class="stat-chip">
+                    <span class="stat-chip-icon">✅</span>
+                    <span class="stat-chip-value" id="visitedCount">0</span>
+                    <span class="stat-chip-label" id="statVisitedLabel">пройдено</span>
+                </div>
+                <div class="stat-chip">
+                    <span class="stat-chip-icon">🏆</span>
+                    <span class="stat-chip-value" id="progressPct">0%</span>
+                    <span class="stat-chip-label" id="statProgressLabel">прогресс</span>
+                </div>
+                <div class="stat-chip">
+                    <span class="stat-chip-icon">📚</span>
+                    <span class="stat-chip-value">8</span>
+                    <span class="stat-chip-label" id="statSubjectsLabel">предметов</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- ══════════════════════════════════════ -->
+        <!--  AI & CREATIVE HUB SHOWCASE            -->
+        <!-- ══════════════════════════════════════ -->
+        <div class="showcase-grid">
+            <a href="presentation.html" class="showcase-card showcase-presentation">
+                <div class="showcase-badge"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Generator</div>
+                <div class="showcase-icon">🖥️</div>
+                <div class="showcase-content">
+                    <h3>AI Презентации</h3>
+                    <p>Создание презентаций за 15 секунд по методичке с 20 готовыми дизайнами</p>
+                </div>
+                <span class="showcase-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+            </a>
+
+            <a href="studio.html" class="showcase-card showcase-studio">
+                <div class="showcase-badge"><i class="fa-solid fa-gamepad"></i> Game Studio</div>
+                <div class="showcase-icon">🎓</div>
+                <div class="showcase-content">
+                    <h3>Конструктор игр</h3>
+                    <p>Создавайте свои интерактивные викторины, тесты и мини-игры</p>
+                </div>
+                <span class="showcase-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+            </a>
+
+            <div class="showcase-card showcase-assistant" onclick="toggleAI()">
+                <div class="showcase-badge"><i class="fa-solid fa-robot"></i> Gemini 2.5</div>
+                <div class="showcase-icon">🤖</div>
+                <div class="showcase-content">
+                    <h3>Нейро-Ассистент</h3>
+                    <p>Умный виртуальный помощник ответит на любой учебный вопрос 24/7</p>
+                </div>
+                <span class="showcase-arrow"><i class="fa-solid fa-comment-dots"></i></span>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════ -->
+        <!--  SEARCH BAR & CATEGORY TABS            -->
+        <!-- ══════════════════════════════════════ -->
+        <div class="search-wrapper">
+            <div class="search-bar">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" id="searchInput"
+                    placeholder="Поиск по 32 лабораториям (например: Оптика, Клетка, Пифагор)..."
+                    oninput="handleSearch(this.value)">
+                <button class="search-clear" id="searchClear" onclick="clearSearch()" style="display:none;">✕</button>
+            </div>
+            <div class="search-results" id="searchResults" style="display:none;"></div>
+        </div>
+
+        <!-- SUBJECT CATEGORY TABS -->
+        <div class="subject-filter-tabs" id="subjectFilterTabs">
+            <button class="subj-tab active" data-filter="all" data-i18n="tabAll">🌟 Все предметы (8)</button>
+            <button class="subj-tab" data-filter="exact" data-i18n="tabExact">⚛️ Точные науки</button>
+            <button class="subj-tab" data-filter="informatics" data-i18n="tabIT">💻 IT & Информатика</button>
+            <button class="subj-tab" data-filter="nature" data-i18n="tabNature">🌿 Естествознание</button>
+            <button class="subj-tab" data-filter="languages" data-i18n="tabLang">🌐 Языки</button>
+            <button class="subj-tab" data-filter="tools" data-i18n="tabTools">🛠️ Инструменты</button>
+        </div>
+
+        <!-- ══════════════════════════════════════ -->
+        <!--  DASHBOARD GRID                        -->
+        <!-- ══════════════════════════════════════ -->
+        <div class="dashboard-grid" id="dashboardGrid">
+
+            <!-- PHYSICS CARD -->
+            <div class="subject-card card-physics" data-subject="physics">
+                <div class="subject-header-small">
+                    <div class="subject-icon-small">⚛️</div>
+                    <div class="subject-title-small" data-i18n="physics">Физика</div>
+                </div>
+                <div class="experiments-list">
+                    <a href="gravity.html" class="exp-link" data-id="gravity" data-name="Гравитация"
+                        onclick="trackVisit('gravity','Гравитация','gravity.html','⚛️')">
+                        <span class="exp-icon">🪐</span>
+                        <span class="exp-name" data-i18n="gravity">Гравитация</span>
+                        <span class="exp-visited-dot" id="dot-gravity"></span>
+                    </a>
+                    <a href="optics.html" class="exp-link" data-id="optics" data-name="Оптика"
+                        onclick="trackVisit('optics','Оптика','optics.html','⚛️')">
+                        <span class="exp-icon">🔦</span>
+                        <span class="exp-name" data-i18n="optics">Оптика</span>
+                        <span class="exp-visited-dot" id="dot-optics"></span>
+                    </a>
+                    <a href="pendulum.html" class="exp-link" data-id="pendulum" data-name="Маятники"
+                        onclick="trackVisit('pendulum','Маятники','pendulum.html','⚛️')">
+                        <span class="exp-icon">🕰️</span>
+                        <span class="exp-name" data-i18n="pendulum">Маятники</span>
+                        <span class="exp-visited-dot" id="dot-pendulum"></span>
+                    </a>
+                    <a href="waves.html" class="exp-link" data-id="waves" data-name="Волны"
+                        onclick="trackVisit('waves','Волны','waves.html','⚛️')">
+                        <span class="exp-icon">🌊</span>
+                        <span class="exp-name" data-i18n="waves">Волны</span>
+                        <span class="exp-visited-dot" id="dot-waves"></span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- INFORMATICS CARD -->
+            <div class="subject-card card-informatics" data-subject="informatics">
+                <div class="subject-header-small">
+                    <div class="subject-icon-small">💻</div>
+                    <div class="subject-title-small" data-i18n="informatics">Информатика</div>
+                </div>
+                <div class="experiments-list">
+                    <a href="logic.html" class="exp-link" data-id="logic"
+                        onclick="trackVisit('logic','Логические Схемы','logic.html','💻')">
+                        <span class="exp-icon">🔌</span>
+                        <span class="exp-name" data-i18n="logic">Логические Схемы</span>
+                        <span class="exp-visited-dot" id="dot-logic"></span>
+                    </a>
+                    <a href="crypto.html" class="exp-link" data-id="crypto"
+                        onclick="trackVisit('crypto','Шифры и Загадки','crypto.html','💻')">
+                        <span class="exp-icon">🔐</span>
+                        <span class="exp-name" data-i18n="crypto">Шифры и Загадки</span>
+                        <span class="exp-visited-dot" id="dot-crypto"></span>
+                    </a>
+                    <a href="algo.html" class="exp-link" data-id="algo"
+                        onclick="trackVisit('algo','Алгоритмы','algo.html','💻')">
+                        <span class="exp-icon">📊</span>
+                        <span class="exp-name" data-i18n="algo">Алгоритмы</span>
+                        <span class="exp-visited-dot" id="dot-algo"></span>
+                    </a>
+                    <a href="binary.html" class="exp-link" data-id="binary"
+                        onclick="trackVisit('binary','Двоичный код','binary.html','💻')">
+                        <span class="exp-icon">🔢</span>
+                        <span class="exp-name" data-i18n="binary">Двоичный код</span>
+                        <span class="exp-visited-dot" id="dot-binary"></span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- GEOMETRY CARD -->
+            <div class="subject-card card-geometry" data-subject="geometry">
+                <div class="subject-header-small">
+                    <div class="subject-icon-small">📐</div>
+                    <div class="subject-title-small" data-i18n="geometry">Геометрия</div>
+                </div>
+                <div class="experiments-list">
+                    <a href="fractals.html" class="exp-link" data-id="fractals"
+                        onclick="trackVisit('fractals','Фракталы','fractals.html','📐')">
+                        <span class="exp-icon">❄️</span>
+                        <span class="exp-name" data-i18n="fractals">Фракталы</span>
+                        <span class="exp-visited-dot" id="dot-fractals"></span>
+                    </a>
+                    <a href="spiro.html" class="exp-link" data-id="spiro"
+                        onclick="trackVisit('spiro','Спирограф','spiro.html','📐')">
+                        <span class="exp-icon">🌀</span>
+                        <span class="exp-name" data-i18n="spiro">Спирограф</span>
+                        <span class="exp-visited-dot" id="dot-spiro"></span>
+                    </a>
+                    <a href="transform.html" class="exp-link" data-id="transform"
+                        onclick="trackVisit('transform','Гео-Мастер','transform.html','📐')">
+                        <span class="exp-icon">💠</span>
+                        <span class="exp-name" data-i18n="transform">Гео-Мастер</span>
+                        <span class="exp-visited-dot" id="dot-transform"></span>
+                    </a>
+                    <a href="pythagoras.html" class="exp-link" data-id="pythagoras"
+                        onclick="trackVisit('pythagoras','Теорема Пифагора','pythagoras.html','📐')">
+                        <span class="exp-icon">📐</span>
+                        <span class="exp-name" data-i18n="pythagoras">Теорема Пифагора</span>
+                        <span class="exp-visited-dot" id="dot-pythagoras"></span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- KAZAKH CARD -->
+            <div class="subject-card card-kazakh" data-subject="kazakh">
+                <div class="subject-header-small">
+                    <div class="subject-icon-small">🇰🇿</div>
+                    <div class="subject-title-small" data-i18n="kazakh">Қазақ тілі</div>
+                </div>
+                <div class="experiments-list">
+                    <a href="cards_kk.html" class="exp-link" data-id="cards_kk"
+                        onclick="trackVisit('cards_kk','Сөздік Карточкалары','cards_kk.html','🇰🇿')">
+                        <span class="exp-icon">🔤</span>
+                        <span class="exp-name" data-i18n="cards_kk">Сөздік Карточкалары</span>
+                        <span class="exp-visited-dot" id="dot-cards_kk"></span>
+                    </a>
+                    <a href="morphology.html" class="exp-link" data-id="morphology"
+                        onclick="trackVisit('morphology','Сөз Конструкторы','morphology.html','🇰🇿')">
+                        <span class="exp-icon">🏗️</span>
+                        <span class="exp-name" data-i18n="morphology">Сөз Конструкторы</span>
+                        <span class="exp-visited-dot" id="dot-morphology"></span>
+                    </a>
+                    <a href="grammar.html" class="exp-link" data-id="grammar"
+                        onclick="trackVisit('grammar','Грамматика','grammar.html','🇰🇿')">
+                        <span class="exp-icon">🧩</span>
+                        <span class="exp-name" data-i18n="grammar">Грамматика</span>
+                        <span class="exp-visited-dot" id="dot-grammar"></span>
+                    </a>
+                    <a href="phonetics_kk.html" class="exp-link" data-id="phonetics_kk"
+                        onclick="trackVisit('phonetics_kk','Дыбыстар','phonetics_kk.html','🇰🇿')">
+                        <span class="exp-icon">🗣️</span>
+                        <span class="exp-name" data-i18n="phonetics_kk">Дыбыстар</span>
+                        <span class="exp-visited-dot" id="dot-phonetics_kk"></span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- ENGLISH CARD -->
+            <div class="subject-card card-english" data-subject="english">
+                <div class="subject-header-small">
+                    <div class="subject-icon-small">🇬🇧</div>
+                    <div class="subject-title-small" data-i18n="english">English</div>
+                </div>
+                <div class="experiments-list">
+                    <a href="cards_en.html" class="exp-link" data-id="cards_en"
+                        onclick="trackVisit('cards_en','Vocabulary Lab','cards_en.html','🇬🇧')">
+                        <span class="exp-icon">🗣️</span>
+                        <span class="exp-name" data-i18n="cards_en">Vocabulary Lab</span>
+                        <span class="exp-visited-dot" id="dot-cards_en"></span>
+                    </a>
+                    <a href="tenses.html" class="exp-link" data-id="tenses"
+                        onclick="trackVisit('tenses','Машина времен','tenses.html','🇬🇧')">
+                        <span class="exp-icon">⏳</span>
+                        <span class="exp-name" data-i18n="tenses">Машина времен</span>
+                        <span class="exp-visited-dot" id="dot-tenses"></span>
+                    </a>
+                    <a href="spelling.html" class="exp-link" data-id="spelling"
+                        onclick="trackVisit('spelling','Spelling Bee','spelling.html','🇬🇧')">
+                        <span class="exp-icon">🐝</span>
+                        <span class="exp-name" data-i18n="spelling">Spelling Bee</span>
+                        <span class="exp-visited-dot" id="dot-spelling"></span>
+                    </a>
+                    <a href="idioms.html" class="exp-link" data-id="idioms"
+                        onclick="trackVisit('idioms','Idiom Matcher','idioms.html','🇬🇧')">
+                        <span class="exp-icon">🎭</span>
+                        <span class="exp-name" data-i18n="idioms">Idiom Matcher</span>
+                        <span class="exp-visited-dot" id="dot-idioms"></span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- BIOLOGY CARD -->
+            <div class="subject-card card-biology" style="--theme-color: #28a745;" data-subject="biology">
+                <div class="subject-header-small">
+                    <div class="subject-icon-small">🧬</div>
+                    <div class="subject-title-small" data-i18n="biology">Биология</div>
+                </div>
+                <div class="experiments-list">
+                    <a href="biology.html" class="exp-link" data-id="biology"
+                        onclick="trackVisit('biology','Живая Клетка','biology.html','🧬')">
+                        <span class="exp-icon">🔬</span>
+                        <span class="exp-name" data-i18n="biolab">Живая Клетка</span>
+                        <span class="exp-visited-dot" id="dot-biology"></span>
+                    </a>
+                    <a href="photosynthesis.html" class="exp-link" data-id="photosynthesis"
+                        onclick="trackVisit('photosynthesis','Фотосинтез','photosynthesis.html','🧬')">
+                        <span class="exp-icon">🌱</span>
+                        <span class="exp-name" data-i18n="photosynthesis">Фотосинтез</span>
+                        <span class="exp-visited-dot" id="dot-photosynthesis"></span>
+                    </a>
+                    <a href="genetics.html" class="exp-link" data-id="genetics"
+                        onclick="trackVisit('genetics','Законы Менделя','genetics.html','🧬')">
+                        <span class="exp-icon">🫛</span>
+                        <span class="exp-name" data-i18n="genetics">Законы Менделя</span>
+                        <span class="exp-visited-dot" id="dot-genetics"></span>
+                    </a>
+                    <a href="anatomy.html" class="exp-link" data-id="anatomy"
+                        onclick="trackVisit('anatomy','Анатомия','anatomy.html','🧬')">
+                        <span class="exp-icon">👁️</span>
+                        <span class="exp-name" data-i18n="anatomy">Анатомия</span>
+                        <span class="exp-visited-dot" id="dot-anatomy"></span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- TOOLS CARD — Таблица Менделеева -->
+            <div class="subject-card card-chemistry" style="--theme-color: #f0c040;" data-subject="chemistry">
+                <div class="subject-header-small">
+                    <div class="subject-icon-small">⚗️</div>
+                    <div class="subject-title-small">Химия</div>
+                </div>
+                <div class="experiments-list">
+                    <a href="periodic.html" class="exp-link" data-id="periodic"
+                        onclick="trackVisit('periodic','Таблица Менделеева','periodic.html','⚗️')">
+                        <span class="exp-icon">🧪</span>
+                        <span class="exp-name" data-i18n="periodic">Таблица Менделеева</span>
+                        <span class="exp-visited-dot" id="dot-periodic"></span>
+                    </a>
+                    <a href="reactions.html" class="exp-link" data-id="reactions"
+                        onclick="trackVisit('reactions','Химические реакции','reactions.html','⚗️')">
+                        <span class="exp-icon">🧫</span>
+                        <span class="exp-name" data-i18n="reactions">Химические реакции</span>
+                        <span class="exp-visited-dot" id="dot-reactions"></span>
+                    </a>
+                    <a href="molecules.html" class="exp-link" data-id="molecules"
+                        onclick="trackVisit('molecules','Конструктор молекул','molecules.html','⚗️')">
+                        <span class="exp-icon">🔗</span>
+                        <span class="exp-name" data-i18n="molecules">Конструктор молекул</span>
+                        <span class="exp-visited-dot" id="dot-molecules"></span>
+                    </a>
+                    <a href="ph_scale.html" class="exp-link" data-id="ph_scale"
+                        onclick="trackVisit('ph_scale','Шкала pH','ph_scale.html','⚗️')">
+                        <span class="exp-icon">🍋</span>
+                        <span class="exp-name" data-i18n="ph_scale">Шкала pH</span>
+                        <span class="exp-visited-dot" id="dot-ph_scale"></span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- TOOLS CARD — Инструменты -->
+            <div class="subject-card card-tools" style="--theme-color: #00cba9;" data-subject="tools">
+                <div class="subject-header-small">
+                    <div class="subject-icon-small">🛠️</div>
+                    <div class="subject-title-small">Инструменты</div>
+                </div>
+                <div class="experiments-list">
+                    <a href="calculator.html" class="exp-link" data-id="calculator"
+                        onclick="trackVisit('calculator','Научный калькулятор','calculator.html','🧮')">
+                        <span class="exp-icon">🧮</span>
+                        <span class="exp-name">Научный калькулятор</span>
+                        <span class="exp-visited-dot" id="dot-calculator"></span>
+                    </a>
+                    <a href="converter.html" class="exp-link" data-id="converter"
+                        onclick="trackVisit('converter','Конвертер единиц','converter.html','⚖️')">
+                        <span class="exp-icon">⚖️</span>
+                        <span class="exp-name" data-i18n="converter">Конвертер единиц</span>
+                        <span class="exp-visited-dot" id="dot-converter"></span>
+                    </a>
+                    <a href="graphing.html" class="exp-link" data-id="graphing"
+                        onclick="trackVisit('graphing','Построение графиков','graphing.html','🛠️')">
+                        <span class="exp-icon">📈</span>
+                        <span class="exp-name" data-i18n="graphing">Построение графиков</span>
+                        <span class="exp-visited-dot" id="dot-graphing"></span>
+                    </a>
+                    <a href="stopwatch.html" class="exp-link" data-id="stopwatch"
+                        onclick="trackVisit('stopwatch','Секундомер','stopwatch.html','🛠️')">
+                        <span class="exp-icon">⏱️</span>
+                        <span class="exp-name" data-i18n="stopwatch">Секундомер</span>
+                        <span class="exp-visited-dot" id="dot-stopwatch"></span>
+                    </a>
+                    <a href="presentation.html" class="exp-link" data-id="presentation"
+                        onclick="trackVisit('presentation','Создание презентации','presentation.html','🖥️')">
+                        <span class="exp-icon">🖥️</span>
+                        <span class="exp-name">Создание презентации</span>
+                        <span class="exp-visited-dot" id="dot-presentation"></span>
+                    </a>
+                </div>
+            </div>
+
+
+
+        <!-- ══════════════════════════════════════ -->
+        <!--  ABOUT SECTION                         -->
+        <!-- ══════════════════════════════════════ -->
+        <section class="about-section">
+            <h2 class="section-title">
+                <span id="aboutTitle">ℹ️ О проекте</span>
+            </h2>
+            <div class="about-grid">
+                <div class="about-card">
+                    <div class="about-card-icon">🎯</div>
+                    <h3 id="about1Title">Цель проекта</h3>
+                    <p id="about1Text">Интерактивные виртуальные лаборатории помогают ученикам понять сложные темы через
+                        практику и визуализацию.</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-card-icon">🖥️</div>
+                    <h3 id="about2Title">Как пользоваться</h3>
+                    <p id="about2Text">Выберите предмет, откройте лабораторию и экспериментируйте! Все симуляции
+                        работают прямо в браузере без установки.</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-card-icon">📱</div>
+                    <h3 id="about3Title">Любое устройство</h3>
+                    <p id="about3Text">Сайт адаптирован для компьютеров, планшетов и смартфонов. Учитесь где угодно и
+                        когда угодно.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="site-footer">
+            <p id="footerText">Virtual Science Hub • Виртуальные лабораторные работы • 2025</p>
+        </footer>
+
+    </div>
+
+    <!-- 3D Three.js Engine & Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="robot3d.js"></script>
+    <script src="lobby.js"></script>
+
+    <!-- AI Assistant Widget -->
+    <button class="ai-fab" onclick="toggleAI()"><i class="fa-solid fa-robot"></i></button>
+    <div class="ai-modal" id="ai-modal">
+        <div class="ai-header">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(to right, #a855f7, #3b82f6); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px rgba(168,85,247,0.5);"><i class="fa-solid fa-wand-magic-sparkles" style="color: white; font-size: 12px;"></i></div>
+                <div><h3 data-i18n="aiName" style="margin: 0; font-size: 14px; color: white; font-weight: bold;">Нейро-Ассистент</h3><p data-i18n="aiStatus" style="margin: 0; font-size: 10px; color: #4ade80;">В сети • Готов помочь</p></div>
+            </div>
+            <button onclick="toggleAI()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="ai-messages" id="ai-msgs">
+            <div class="msg bot" data-i18n="aiHello">Привет! Я встроенный ИИ <b>Virtual Science Hub</b>. Если у вас есть вопросы по любой теме учебной программы или вам нужна помощь с навигацией по сайту — просто спросите меня!</div>
+        </div>
+        <div class="ai-input-area">
+            <input type="text" id="ai-input" class="ai-input" placeholder="Спроси о чем угодно..." data-i18n-placeholder="aiPlaceholder" onkeypress="if(event.key==='Enter') sendAIMsg()">
+            <button class="ai-send" onclick="sendAIMsg()"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <script>
+        const GEMINI_API_KEY = 'AIzaSyAheibdcYZ6SC46CzJ2kO-rAvSIjHEo9to';
+
+        async function fetchGemini(prompt) {
+            try {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.7 } })
+                });
+                const data = await res.json();
+                if (data.candidates && data.candidates[0].content.parts[0].text) return data.candidates[0].content.parts[0].text;
+                return "Сбой в матрице... Попробуйте еще раз.";
+            } catch(e) { console.error(e); return "Ошибка сети."; }
+        }
+
+        function toggleAI() { document.getElementById('ai-modal').classList.toggle('active'); document.getElementById('ai-input').focus(); }
+
+        function appendAIMsg(text, sender) {
+            const m = document.createElement('div');
+            m.className = `msg ${sender}`;
+            m.innerHTML = text;
+            const container = document.getElementById('ai-msgs');
+            container.appendChild(m);
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        async function sendAIMsg() {
+            const inp = document.getElementById('ai-input');
+            const txt = inp.value.trim();
+            if(!txt) return;
+            appendAIMsg(txt, 'user');
+            inp.value = '';
+            
+            const msgObj = document.createElement('div');
+            msgObj.className = 'msg bot';
+            msgObj.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin" style="color:#38bdf8;"></i> <span data-i18n="aiThinking">Анализирую запрос...</span>';
+            document.getElementById('ai-msgs').appendChild(msgObj);
+            document.getElementById('ai-msgs').scrollTop = document.getElementById('ai-msgs').scrollHeight;
+            
+            const sysPrompt = "Тебя зовут Нейро-Ассистент. Ты умный образовательный ИИ-помощник на сайте 'Virtual Science Hub'. Отвечай на вопрос ученика: дружелюбно, очень кратко (2-3 предложения), используя HTML-теги <b> для выделения вместо маркдауна. Вопрос: " + txt;
+            let ans = await fetchGemini(sysPrompt);
+            
+            msgObj.innerHTML = ans.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
+            document.getElementById('ai-msgs').scrollTop = document.getElementById('ai-msgs').scrollHeight;
+        }
+    </script>
+</body>
+
+</html>

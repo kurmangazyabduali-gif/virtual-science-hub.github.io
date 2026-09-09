@@ -1,0 +1,365 @@
+<!DOCTYPE html><html lang="kk"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Зертхана №9 — Тіршілік дизайні</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>*{box-sizing:border-box;margin:0;padding:0}body{background:#020c1b;color:#fff;font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+nav{height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:rgba(0,0,0,.5);border-bottom:1px solid rgba(34,211,238,.2);flex-shrink:0}
+nav a{color:#22d3ee;text-decoration:none;font-size:.8rem;font-family:'Orbitron',sans-serif}#snav{font-family:'Orbitron',sans-serif;font-size:.8rem;color:#fbbf24}
+.main{flex:1;display:grid;grid-template-columns:240px 1fr 270px;overflow:hidden}
+.pn{background:rgba(5,15,35,.9);padding:14px;display:flex;flex-direction:column;gap:10px;overflow-y:auto}
+.pl{border-right:1px solid rgba(34,211,238,.1)}.pr{border-left:1px solid rgba(34,211,238,.1)}
+.plbl{font-family:'Orbitron',sans-serif;font-size:.56rem;letter-spacing:2px;color:rgba(34,211,238,.5);border-bottom:1px solid rgba(34,211,238,.08);padding-bottom:6px}
+.trait-group{border-radius:9px;padding:10px;background:rgba(34,211,238,.04);border:1px solid rgba(34,211,238,.12)}
+.tg-name{font-family:'Orbitron',sans-serif;font-size:.6rem;color:rgba(34,211,238,.6);margin-bottom:7px}
+.trait-opts{display:flex;flex-direction:column;gap:5px}
+.topt{padding:7px 10px;border-radius:7px;border:1px solid rgba(34,211,238,.15);background:rgba(34,211,238,.03);cursor:pointer;font-size:.76rem;color:#64748b;transition:.2s;display:flex;align-items:center;gap:7px}
+.topt:hover{border-color:rgba(34,211,238,.35);color:#e2e8f0}.topt.sel{border-color:#22d3ee;color:#22d3ee;background:rgba(34,211,238,.1)}
+.topt-icon{width:20px;text-align:center}
+.env-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.env-btn{padding:9px 6px;border-radius:8px;border:1px solid rgba(34,211,238,.2);background:rgba(34,211,238,.04);cursor:pointer;font-size:.74rem;color:#64748b;text-align:center;transition:.2s}
+.env-btn:hover{border-color:rgba(34,211,238,.4);color:#e2e8f0}.env-btn.sel{border-color:#22d3ee;color:#22d3ee;background:rgba(34,211,238,.1)}
+.sim-btn{width:100%;padding:12px;border-radius:10px;cursor:pointer;background:rgba(34,211,238,.1);border:2px solid rgba(34,211,238,.4);font-family:'Orbitron',sans-serif;font-size:.72rem;color:#22d3ee;letter-spacing:1px;transition:.3s}
+.sim-btn:hover{background:rgba(34,211,238,.2);transform:translateY(-2px)}.sim-btn:disabled{opacity:.3;pointer-events:none}
+.center{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px}
+.sim-info{font-family:'Orbitron',sans-serif;font-size:.72rem;color:#22d3ee;text-align:center}
+.sim-canvas-wrap{width:100%;max-width:460px;height:220px;border-radius:12px;overflow:hidden;border:1px solid rgba(34,211,238,.2);position:relative}
+#sim-canvas{width:100%;height:100%}
+.gen-bar{width:100%;max-width:460px}
+.gen-bar-outer{height:8px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden;margin-top:4px}
+.gen-bar-inner{height:100%;border-radius:4px;background:linear-gradient(90deg,#22d3ee,#34d399);transition:width .8s ease}
+.creature-display{font-size:3rem;text-align:center;line-height:1}
+.fitness-display{font-family:'Orbitron',sans-serif;font-size:1.6rem;color:#fbbf24;text-align:center}
+.fitness-lbl{font-size:.7rem;color:#475569;text-align:center;font-family:'Orbitron',sans-serif}
+.gen-log{display:flex;flex-direction:column;gap:5px}
+.gen-row{border-radius:7px;padding:7px 10px;background:rgba(0,0,0,.3);border:1px solid rgba(34,211,238,.08);font-size:.74rem;color:#475569}
+.gen-row.active{border-color:rgba(34,211,238,.3);color:#94a3b8}.gen-row.dead{border-color:rgba(239,68,68,.2);color:#ef4444}
+.gen-row strong{color:#22d3ee}
+.trait-summary{border-radius:9px;padding:10px;background:rgba(34,211,238,.05);border:1px solid rgba(34,211,238,.12);font-size:.76rem;color:#94a3b8;line-height:1.7}
+.trait-summary strong{color:#22d3ee}
+.verdict-box{border-radius:9px;padding:10px;font-size:.78rem;line-height:1.5;display:none}
+.verdict-box.show{display:block}.verdict-box.ok{background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.3);color:#94a3b8}.verdict-box.ok strong{color:#34d399}
+.verdict-box.bad{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.3);color:#94a3b8}
+.try-again{padding:9px;border-radius:8px;cursor:pointer;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.3);font-family:'Orbitron',sans-serif;font-size:.68rem;color:#22d3ee;text-align:center;display:none;margin-top:6px;transition:.3s}.try-again.show{display:block}
+.ov{position:fixed;inset:0;z-index:100;background:rgba(1,5,15,.97);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center}
+.card{width:min(580px,90vw);padding:38px 46px;text-align:center;background:rgba(5,15,35,.96);border:1px solid rgba(34,211,238,.25);border-radius:18px}
+.card h2{font-family:'Orbitron',sans-serif;font-size:1.3rem;color:#22d3ee;margin-bottom:12px}.card p{color:#94a3b8;font-size:.88rem;line-height:1.8;margin-bottom:22px}
+.cbtn{display:inline-flex;align-items:center;gap:8px;padding:12px 34px;background:#22d3ee;color:#000;font-family:'Orbitron',sans-serif;font-size:.76rem;border:none;border-radius:8px;cursor:pointer;transition:.3s}.cbtn:hover{transform:translateY(-3px);box-shadow:0 0 40px rgba(34,211,238,.5)}
+.sbig{font-family:'Orbitron',sans-serif;font-size:2.2rem;color:#fbbf24;margin:10px 0}
+.elink{display:inline-block;text-decoration:none;border:2px solid #22d3ee;color:#22d3ee;font-family:'Orbitron',sans-serif;font-size:.7rem;letter-spacing:2px;padding:10px 24px;border-radius:8px;transition:.3s;margin-top:8px}.elink:hover{background:#22d3ee;color:#000}</style>
+<!-- MODERN UI UPGRADE -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* Base Overrides */
+* { font-family: 'Roboto', sans-serif !important; }
+body { background: #020617 !important; color: #f8fafc !important; }
+
+/* Top Nav */
+nav { height: 60px !important; padding: 0 30px !important; background: rgba(15,23,42,0.95) !important; border-bottom: 2px solid #1e293b !important; box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important; }
+nav a { background: rgba(56,189,248,0.1) !important; border: 1px solid rgba(56,189,248,0.3) !important; color: #38bdf8 !important; padding: 8px 16px !important; border-radius: 8px !important; font-weight: bold !important; font-size: 14px !important; }
+nav a:hover { background: rgba(56,189,248,0.2) !important; transform: translateX(-2px) !important; }
+nav span { font-size: 16px !important; font-weight: 800 !important; letter-spacing: 1px !important; color: #f8fafc !important; }
+#snav { background: rgba(250,204,21,0.1) !important; color: #facc15 !important; padding: 6px 12px !important; border-radius: 8px !important; border: 1px solid rgba(250,204,21,0.3) !important; }
+
+/* Layout */
+.main { grid-template-columns: 320px 1fr 350px !important; background: radial-gradient(circle at 50% 50%, #1e293b 0%, #020617 100%) !important; }
+.pn { background: rgba(15,23,42,0.95) !important; padding: 25px !important; gap: 15px !important; box-shadow: 0 0 20px rgba(0,0,0,0.5) !important; overflow-y: auto !important; }
+.pl { border-right: 2px solid #1e293b !important; }
+.pr { border-left: 2px solid #1e293b !important; }
+.plbl { font-weight: 800 !important; font-size: 14px !important; letter-spacing: 1px !important; color: #22d3ee !important; border-bottom: 1px solid #1e293b !important; padding-bottom: 10px !important; text-transform: uppercase !important; margin-bottom: 10px !important; }
+
+/* Cards & Buttons */
+.dbt, .iopt, .sbt, .rxb, .disk-item, .i-btn { border-radius: 10px !important; padding: 12px 15px !important; border: 1px solid #334155 !important; background: #0f172a !important; font-size: 14px !important; font-weight: 500 !important; color: #e2e8f0 !important; transition: 0.2s !important; box-shadow: 0 4px 6px rgba(0,0,0,0.3) !important; }
+.dbt:hover, .iopt:hover, .sbt:hover, .rxb:hover, .disk-item:hover, .i-btn:hover { border-color: #22d3ee !important; background: #1e293b !important; transform: translateX(5px) !important; }
+.active, .ok { border-color: #34d399 !important; background: rgba(52,211,153,0.1) !important; color: #34d399 !important; box-shadow: inset 0 0 10px rgba(52,211,153,0.2) !important; }
+.bad { border-color: #ef4444 !important; background: rgba(239,68,68,0.1) !important; color: #ef4444 !important; }
+
+/* Text Logs & Info */
+.clog, .info-box, .evc, .vrd, .pat-card, .rx-section, .srcsec { border-radius: 12px !important; padding: 15px !important; background: rgba(255,255,255,0.03) !important; border: 1px solid rgba(255,255,255,0.05) !important; font-size: 14px !important; color: #cbd5e1 !important; line-height: 1.6 !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2) !important; margin-bottom: 10px !important; }
+
+/* Overlays & Big Modals */
+.card { width: min(600px, 90vw) !important; padding: 40px 50px !important; background: rgba(15,23,42,0.95) !important; border: 2px solid #22d3ee !important; border-radius: 20px !important; box-shadow: 0 20px 50px rgba(0,0,0,0.7) !important; backdrop-filter: blur(10px) !important; }
+.card h2 { font-size: 28px !important; color: #fff !important; margin-bottom: 15px !important; font-weight: 800 !important; }
+.card p { color: #94a3b8 !important; font-size: 16px !important; }
+.cbtn { padding: 15px 40px !important; background: #22d3ee !important; color: #000 !important; font-size: 16px !important; font-weight: bold !important; border-radius: 12px !important; border: none !important; box-shadow: 0 10px 20px rgba(0,0,0,0.4) !important; text-transform: uppercase !important; letter-spacing: 1px !important; cursor: pointer; transition: 0.3s; }
+.cbtn:hover { transform: translateY(-3px) scale(1.05) !important; box-shadow: 0 15px 30px rgba(0,0,0,0.6) !important; background: #fff !important; }
+.elink { background: transparent !important; color: #22d3ee !important; border: 2px solid #22d3ee !important; padding: 10px 20px !important; border-radius: 10px !important; font-size: 14px !important; text-decoration: none !important; font-weight: bold !important; transition: 0.3s !important; display: inline-block; }
+.elink:hover { background: #22d3ee !important; color: #020617 !important; }
+
+/* Specific fixes */
+.sev { padding: 4px 8px !important; border-radius: 6px !important; font-size: 12px !important; font-weight: bold !important; }
+.sh { background: rgba(239,68,68,0.2) !important; color: #fca5a5 !important; border: 1px solid rgba(239,68,68,0.3) !important; }
+.sm { background: rgba(250,204,21,0.2) !important; color: #fde047 !important; border: 1px solid rgba(250,204,21,0.3) !important; }
+.sl { background: rgba(52,211,153,0.2) !important; color: #86efac !important; border: 1px solid rgba(52,211,153,0.3) !important; }
+
+/* Scrollbars */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+::-webkit-scrollbar-thumb { background: #22d3ee; border-radius: 4px; }
+</style>
+</head><body>
+<div class="ov" id="intro"><div class="card"><div style="font-size:2.2rem;margin-bottom:12px">🦎🌍⚡</div><h2>ТІРШІЛІК ДИЗАЙНІ</h2>
+<p>Өзіңіздің тіршілік иесін <strong style="color:#22d3ee">жобалаңыз</strong>!<br>Белгілерді таңдап, ортаны анықтаңыз да,<br>5 ұрпақ бойы тіршілік ете алатынын тексеріңіз.</p>
+<button class="cbtn" onclick="start()">🦎 ЖОБАЛАУДЫ БАСТАУ</button></div></div>
+<div class="ov" id="end-sc" style="display:none"><div class="card"><div style="font-size:2.2rem;margin-bottom:12px" id="end-ico">🏆</div><h2 id="end-title">ЭВОЛЮЦИЯ АЯҚТАЛДЫ!</h2><div class="sbig" id="fscore">Аяқталды!</div><p id="fbody" style="margin-bottom:18px"></p><a href="biology8.html" class="elink">← МӘЗІРГЕ ОРАЛУ</a></div></div>
+<nav><a href="biology8.html">← Мәзір</a><span style="font-family:'Orbitron';font-size:.85rem;color:#22d3ee">🦎 ЗЕРТХАНА №9 — ТІРШІЛІК ДИЗАЙНІ</span><span id="snav">🟢 Белсенді</span></nav>
+<div class="main">
+<div class="pn pl"><div class="plbl">🧬 БЕЛГІЛЕР</div>
+<div id="traits-form"></div>
+<div class="plbl" style="margin-top:6px">🌍 ОРТА</div>
+<div class="env-grid" id="env-grid"></div>
+<button class="sim-btn" id="sim-btn" onclick="runSim()" disabled style="margin-top:10px">▶ СИМУЛЯЦИЯНЫ ІСКЕ ҚОСУ</button>
+</div>
+<div class="center">
+<div class="sim-info" id="sim-info">Сол жақтан белгілерді таңдап, орта анықтаңыз</div>
+<div class="sim-canvas-wrap"><canvas id="sim-canvas"></canvas></div>
+<div class="gen-bar"><div style="display:flex;justify-content:space-between;font-size:.7rem;color:#475569"><span>Ұрпақ прогресі</span><span id="gen-txt" style="color:#22d3ee;font-family:'Orbitron'">0/5</span></div><div class="gen-bar-outer"><div class="gen-bar-inner" id="gen-bar" style="width:0%"></div></div></div>
+<div style="display:flex;gap:24px;align-items:center">
+<div><div class="creature-display" id="creature-emoji">❓</div></div>
+<div><div class="fitness-display" id="fitness-num">—</div><div class="fitness-lbl">БЕЙІМДІЛІК</div></div>
+</div>
+</div>
+<div class="pn pr"><div class="plbl">📊 ҰРПАҚ ТАРИХЫ</div><div class="gen-log" id="gen-log"></div>
+<div class="trait-summary" id="trait-summary">Белгілер таңдалмаған...</div>
+<div class="verdict-box" id="verdict-box"></div>
+<div class="try-again" id="try-again" onclick="resetSim()">🔄 Қайта жобалау</div></div>
+</div>
+<script>
+const TRAITS=[
+{id:'size',name:'Дене мөлшері',opts:[{v:'small',l:'Кішкентай 🐭',fits:['desert','arctic']},{v:'medium',l:'Орташа 🐊',fits:['forest','grassland']},{v:'large',l:'Үлкен 🦣',fits:['grassland','forest']}]},
+{id:'speed',name:'Жылдамдық',opts:[{v:'slow',l:'Баяу 🐢',fits:['forest']},{v:'medium',l:'Орташа 🐆',fits:['grassland','forest']},{v:'fast',l:'Жылдам 🐎',fits:['grassland','desert']}]},
+{id:'defense',name:'Қорғаныс',opts:[{v:'none',l:'Жоқ 😊',fits:[]},{v:'shell',l:'Қауыз 🐢',fits:['desert','grassland']},{v:'venom',l:'У ☠️',fits:['forest','desert']}]},
+{id:'diet',name:'Тамақтану',opts:[{v:'herb',l:'Өсімдіктер 🌿',fits:['grassland','forest']},{v:'omni',l:'Аралас 🍎',fits:['forest','grassland','desert','arctic']},{v:'carn',l:'Жыртқыш 🥩',fits:['arctic','grassland']}]},
+];
+const ENVS=[{id:'desert',name:'Шөл 🏜️'},{id:'forest',name:'Орман 🌲'},{id:'grassland',name:'Дала 🌾'},{id:'arctic',name:'Арктика ❄️'}];
+const ENV_CHANGE={desert:'arctic',forest:'desert',grassland:'forest',arctic:'grassland'};
+const ENV_EMOJIS={desert:'🏜️',forest:'🌲',grassland:'🌾',arctic:'❄️'};
+let selected={},selectedEnv=null,simRunning=false,score=0,attempts=0;
+let canvas,ctx;
+function start(){document.getElementById('intro').style.display='none';canvas=document.getElementById('sim-canvas');ctx=canvas.getContext('2d');canvas.width=canvas.offsetWidth;canvas.height=canvas.offsetHeight;buildForm();}
+function buildForm(){
+const tf=document.getElementById('traits-form');tf.innerHTML='';
+TRAITS.forEach(t=>{
+const div=document.createElement('div');div.className='trait-group';
+div.innerHTML=`<div class="tg-name">${t.name.toUpperCase()}</div>`;
+const opts=document.createElement('div');opts.className='trait-opts';
+t.opts.forEach(o=>{
+const b=document.createElement('div');b.className='topt';b.dataset.trait=t.id;b.dataset.val=o.v;
+b.innerHTML=`<span class="topt-icon">${o.l.split(' ')[1]||'•'}</span>${o.l.split(' ')[0]}`;
+b.onclick=()=>pickTrait(t.id,o.v,b);opts.appendChild(b);
+});
+div.appendChild(opts);tf.appendChild(div);
+});
+const eg=document.getElementById('env-grid');eg.innerHTML='';
+ENVS.forEach(e=>{
+const b=document.createElement('div');b.className='env-btn';b.dataset.env=e.id;
+b.innerHTML=e.name;b.onclick=()=>pickEnv(e.id,b);eg.appendChild(b);
+});
+}
+function pickTrait(tid,val,btn){
+selected[tid]=val;
+document.querySelectorAll(`.topt[data-trait="${tid}"]`).forEach(b=>b.classList.remove('sel'));
+btn.classList.add('sel');checkReady();updateSummary();
+}
+function pickEnv(id,btn){
+selectedEnv=id;
+document.querySelectorAll('.env-btn').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');
+checkReady();updateSummary();
+}
+function checkReady(){document.getElementById('sim-btn').disabled=Object.keys(selected).length<TRAITS.length||!selectedEnv;}
+function updateSummary(){
+if(Object.keys(selected).length===0){document.getElementById('trait-summary').textContent='Белгілер таңдалмаған...';return;}
+let html='<strong>Таңдалған белгілер:</strong><br>';
+TRAITS.forEach(t=>{if(selected[t.id]){const o=t.opts.find(x=>x.v===selected[t.id]);html+=`• ${t.name}: ${o?o.l:selected[t.id]}<br>`;}});
+if(selectedEnv)html+=`<br><strong>Орта:</strong> ${ENVS.find(e=>e.id===selectedEnv).name}`;
+document.getElementById('trait-summary').innerHTML=html;
+}
+function calcFitness(env){
+let fit=0,max=0;
+TRAITS.forEach(t=>{
+max+=2;const val=selected[t.id];const opt=t.opts.find(o=>o.v===val);
+if(opt&&opt.fits.includes(env))fit+=2;else if(opt&&opt.fits.length===0)fit+=1;
+});
+return Math.round(fit/max*100);
+}
+function getEmoji(){
+const icons={small:'🐭',medium:'🐊',large:'🦣'};
+const base=icons[selected.size]||'🦎';
+const d=selected.defense==='venom'?'☠️':selected.defense==='shell'?'🛡️':'';
+return base+(d?'<br><span style="font-size:1.2rem">'+d+'</span>':'');
+}
+function runSim(){
+if(simRunning)return;simRunning=true;attempts++;
+document.getElementById('gen-log').innerHTML='';
+document.getElementById('verdict-box').className='verdict-box';
+document.getElementById('try-again').className='try-again';
+document.getElementById('sim-btn').disabled=true;
+const genLog=document.getElementById('gen-log');
+document.getElementById('creature-emoji').innerHTML=getEmoji();
+let gen=0;const maxGen=5;let alive=true;let totalFit=0;
+const envChange=gen=>gen>=3?ENV_CHANGE[selectedEnv]:selectedEnv;
+function runGen(){
+if(gen>=maxGen||!alive){finish(alive,totalFit/maxGen);return;}
+gen++;
+const env=envChange(gen);const fit=calcFitness(env);totalFit+=fit;
+document.getElementById('gen-bar').style.width=(gen/maxGen*100)+'%';
+document.getElementById('gen-txt').textContent=gen+'/'+maxGen;
+document.getElementById('fitness-num').textContent=fit+'%';
+document.getElementById('fitness-num').style.color=fit>=60?'#34d399':fit>=40?'#fbbf24':'#ef4444';
+document.getElementById('sim-info').textContent=`Ұрпақ ${gen}: ${env===selectedEnv?ENVS.find(e=>e.id===env).name:'⚠️ ОРТА ӨЗГЕРДІ! '+ENVS.find(e=>e.id===env).name}`;
+const row=document.createElement('div');row.className='gen-row active';
+const survived=fit>=30;alive=survived;
+row.innerHTML=`<strong>Ұрпақ ${gen}</strong> — ${ENVS.find(e=>e.id===env).name}: ${fit}% ${survived?'✅':'❌ Жойылды'}`;
+if(!survived)row.className='gen-row dead';
+genLog.appendChild(row);genLog.scrollTop=genLog.scrollHeight;
+drawSimCanvas(env,fit,gen,alive);
+setTimeout(runGen,1200);
+}
+runGen();
+}
+function drawSimCanvas(env,fit,gen,alive){
+if(!ctx)return;ctx.clearRect(0,0,canvas.width,canvas.height);
+const w=canvas.width,h=canvas.height;
+const envColors={desert:['#3d1a00','#7a3800'],forest:['#002200','#003a00'],grassland:['#001a00','#003300'],arctic:['#001a2a','#002240']};
+const ec=envColors[env]||['#010b14','#020c1b'];
+const bg=ctx.createLinearGradient(0,0,0,h);bg.addColorStop(0,ec[0]);bg.addColorStop(1,ec[1]);
+ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+ctx.font='28px Arial';ctx.textAlign='center';ctx.fillText(ENV_EMOJIS[env]||'🌍',w*.85,h*.25);
+const popCount=Math.max(1,Math.round(fit/20));
+for(let i=0;i<popCount;i++){
+const x=w*.2+Math.random()*w*.5,y=h*.3+Math.random()*h*.5;
+ctx.font='20px Arial';ctx.fillText(alive?'🦎':'💀',x,y);
+}
+ctx.fillStyle=alive?'rgba(34,211,238,.8)':'rgba(239,68,68,.8)';ctx.font='bold 11px Orbitron';ctx.textAlign='left';
+ctx.fillText(`Ұрпақ ${gen} • ${fit}% бейімділік`,10,20);
+}
+function finish(survived,avgFit){
+simRunning=false;document.getElementById('sim-btn').disabled=false;
+const ok=survived&&avgFit>=50;
+if(ok){score+=10;document.getElementById('snav').textContent='🟢 Жалғасуда';}
+const vb=document.getElementById('verdict-box');
+vb.className=`verdict-box ${ok?'ok':'bad'} show`;
+vb.innerHTML=ok?`<strong>✅ Тіршілік сақталды!</strong><br>Орташа бейімділік: ${Math.round(avgFit)}%. Белгілер ортаға сай таңдалды!`:`<strong>❌ Тіршілік жойылды!</strong><br>Орташа бейімділік: ${Math.round(avgFit)}%. Белгілерді орта ерекшеліктеріне сай таңдаңыз.`;
+document.getElementById('try-again').className='try-again show';
+if(attempts>=3)setTimeout(showEnd,3000);
+}
+function resetSim(){
+selected={};selectedEnv=null;simRunning=false;
+document.querySelectorAll('.topt,.env-btn').forEach(b=>b.classList.remove('sel'));
+document.getElementById('sim-btn').disabled=true;
+document.getElementById('gen-log').innerHTML='';document.getElementById('verdict-box').className='verdict-box';document.getElementById('try-again').className='try-again';
+document.getElementById('creature-emoji').innerHTML='❓';document.getElementById('fitness-num').textContent='—';
+document.getElementById('gen-bar').style.width='0%';document.getElementById('gen-txt').textContent='0/5';
+document.getElementById('sim-info').textContent='Сол жақтан белгілерді таңдап, орта анықтаңыз';
+updateSummary();
+}
+function showEnd(){
+document.getElementById('end-ico').textContent=score>=20?'🏆':'🦎';
+document.getElementById('end-title').textContent=score>=20?'ТАБИҒИ СҰРЫПТАЛУ МЕҢГЕРІЛДІ!':'ЭВОЛЮЦИЯ АЯҚТАЛДЫ!';
+document.getElementById('fscore').textContent='Тәжірибе сәтті аяқталды!';
+document.getElementById('fbody').innerHTML=`🌿 <b>Орта</b> белгілерге сай болу — бейімділік<br>❄️ <b>Орта өзгерсе</b> → жаңа белгілер пайда болуы керек<br>⚡ <b>Табиғи сұрыпталу</b> — бейімді тіршілейді<br>🧬 <b>Мутация</b> → жаңа варианттар береді`;
+document.getElementById('end-sc').style.display='flex';
+}
+</script>
+<!-- Global Language Switcher & Google Translate -->
+<div id="google_translate_element" style="display:none;"></div>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({pageLanguage: 'kk', includedLanguages: 'ru,en,kk', autoDisplay: false}, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script>
+(function() {
+    let currentLang = localStorage.getItem('vsh-lang') || 'kk';
+
+    // Synchronize cookie if needed
+    var gtrans = '/kk/' + currentLang;
+    if (currentLang === 'kk') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+    }
+
+    // Floating UI
+    if (!document.querySelector('.floating-lang-switcher')) {
+        const style = document.createElement('style');
+        style.innerHTML = `
+            body { top: 0 !important; }
+            .skiptranslate { display: none !important; }
+            .floating-lang-switcher {
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                background: rgba(15, 23, 42, 0.9);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 20px;
+                padding: 10px;
+                display: flex;
+                gap: 10px;
+                z-index: 999999;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+                font-family: 'Roboto', sans-serif;
+            }
+            .floating-lang-btn {
+                background: transparent;
+                border: 1px solid rgba(255,255,255,0.2);
+                color: #94a3b8;
+                font-size: 14px;
+                font-weight: 600;
+                padding: 8px 15px;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: 0.3s;
+            }
+            .floating-lang-btn:hover {
+                color: #fff;
+                background: rgba(255,255,255,0.1);
+            }
+            .floating-lang-btn.active {
+                background: linear-gradient(135deg, #a855f7, #3b82f6);
+                color: #fff;
+                border-color: transparent;
+            }
+        `;
+        document.head.appendChild(style);
+
+        const switcher = document.createElement('div');
+        switcher.className = 'floating-lang-switcher notranslate';
+        switcher.innerHTML = `
+            <button class="floating-lang-btn " onclick="changeLangGlobal('ru')">RU</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('kk')">ҚАЗ</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('en')">EN</button>
+        `;
+        
+        // set active
+        const btns = switcher.querySelectorAll('.floating-lang-btn');
+        if (currentLang === 'ru') btns[0].classList.add('active');
+        else if (currentLang === 'kk') btns[1].classList.add('active');
+        else if (currentLang === 'en') btns[2].classList.add('active');
+
+        document.body.appendChild(switcher);
+    }
+})();
+
+function changeLangGlobal(lang) {
+    localStorage.setItem('vsh-lang', lang);
+    var gtrans = '/kk/' + lang;
+    if (lang === 'kk') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+    }
+    location.reload();
+}
+</script>
+
+</body></html>

@@ -1,0 +1,346 @@
+<!DOCTYPE html><html lang="kk"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Зертхана №7 — Нейрон схемасы</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>*{box-sizing:border-box;margin:0;padding:0}body{background:#020c1b;color:#fff;font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+nav{height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:rgba(0,0,0,.5);border-bottom:1px solid rgba(250,204,21,.2);flex-shrink:0}
+nav a{color:#facc15;text-decoration:none;font-size:.8rem;font-family:'Orbitron',sans-serif}#snav{font-family:'Orbitron',sans-serif;font-size:.8rem;color:#fbbf24}
+.main{flex:1;display:grid;grid-template-columns:220px 1fr 260px;overflow:hidden}
+.pn{background:rgba(5,15,35,.9);padding:14px;display:flex;flex-direction:column;gap:9px;overflow-y:auto}
+.pl{border-right:1px solid rgba(250,204,21,.1)}.pr{border-left:1px solid rgba(250,204,21,.1)}
+.plbl{font-family:'Orbitron',sans-serif;font-size:.56rem;letter-spacing:2px;color:rgba(250,204,21,.5);border-bottom:1px solid rgba(250,204,21,.08);padding-bottom:6px}
+.comp-pool{display:flex;flex-direction:column;gap:7px}
+.comp{border-radius:9px;padding:10px 12px;border:2px solid var(--cc);background:color-mix(in srgb,var(--cc) 8%,transparent);cursor:pointer;font-size:.8rem;color:#cbd5e1;transition:.2s;user-select:none;display:flex;align-items:center;gap:8px}
+.comp:hover{background:color-mix(in srgb,var(--cc) 18%,transparent);transform:translateX(3px)}.comp.used{opacity:.3;pointer-events:none;border-style:dashed}
+.comp-dot{width:10px;height:10px;border-radius:50%;background:var(--cc);flex-shrink:0}
+.scenario-info{border-radius:9px;padding:10px;background:rgba(250,204,21,.05);border:1px solid rgba(250,204,21,.15);font-size:.76rem;color:#94a3b8;line-height:1.6}
+.scenario-info strong{color:#facc15}
+.center{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px}
+.arc-wrap{width:100%;max-width:520px;position:relative}
+#arc-canvas{width:100%;height:320px;border-radius:12px;background:rgba(5,12,28,.9);border:1px solid rgba(250,204,21,.15);cursor:crosshair;display:block}
+.arc-controls{display:flex;gap:10px;width:100%;max-width:520px}
+.arc-btn{padding:10px 16px;border-radius:9px;border:1px solid rgba(250,204,21,.3);background:rgba(250,204,21,.07);color:#facc15;font-family:'Orbitron',sans-serif;font-size:.68rem;cursor:pointer;transition:.3s;flex:1;text-align:center}
+.arc-btn:hover{background:rgba(250,204,21,.18);transform:translateY(-2px)}.arc-btn:disabled{opacity:.3;pointer-events:none}
+.arc-msg{width:100%;max-width:520px;border-radius:9px;padding:10px;background:rgba(0,0,0,.3);border:1px solid rgba(250,204,21,.12);font-size:.76rem;color:#94a3b8;line-height:1.5;min-height:48px}
+.sc-nav{display:flex;justify-content:space-between;align-items:center;width:100%;max-width:520px}
+.sc-num{font-family:'Orbitron',sans-serif;font-size:.72rem;color:#facc15}
+.step-list{display:flex;flex-direction:column;gap:6px}
+.step-item{border-radius:8px;padding:8px 10px;font-size:.76rem;background:rgba(0,0,0,.3);border:1px solid rgba(250,204,21,.08);color:#475569;transition:.4s;display:flex;align-items:center;gap:8px}
+.step-item.placed{border-color:rgba(250,204,21,.3);color:#e2e8f0}.step-item.active{border-color:#facc15;color:#facc15;background:rgba(250,204,21,.08)}
+.step-num{font-family:'Orbitron',sans-serif;font-size:.62rem;color:rgba(250,204,21,.4);width:16px}
+.step-item.placed .step-num{color:#facc15}
+.result-box{border-radius:9px;padding:10px;font-size:.78rem;line-height:1.5;display:none;margin-top:6px}.result-box.show{display:block}
+.result-box.ok{background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.3);color:#94a3b8}.result-box.ok strong{color:#34d399}
+.result-box.bad{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.3);color:#94a3b8}.result-box.bad strong{color:#ef4444}
+.fire-btn{padding:11px 20px;border-radius:10px;cursor:pointer;background:rgba(250,204,21,.1);border:2px solid rgba(250,204,21,.4);font-family:'Orbitron',sans-serif;font-size:.7rem;color:#facc15;transition:.3s;display:none;text-align:center;margin-top:6px}.fire-btn.show{display:block}.fire-btn:hover{background:rgba(250,204,21,.2)}
+.ov{position:fixed;inset:0;z-index:100;background:rgba(1,5,15,.97);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center}
+.card{width:min(560px,90vw);padding:38px 46px;text-align:center;background:rgba(5,15,35,.96);border:1px solid rgba(250,204,21,.25);border-radius:18px}
+.card h2{font-family:'Orbitron',sans-serif;font-size:1.3rem;color:#facc15;margin-bottom:12px}.card p{color:#94a3b8;font-size:.88rem;line-height:1.8;margin-bottom:22px}
+.cbtn{display:inline-flex;align-items:center;gap:8px;padding:12px 34px;background:#facc15;color:#000;font-family:'Orbitron',sans-serif;font-size:.76rem;border:none;border-radius:8px;cursor:pointer;transition:.3s}.cbtn:hover{transform:translateY(-3px);box-shadow:0 0 40px rgba(250,204,21,.5)}
+.sbig{font-family:'Orbitron',sans-serif;font-size:2.2rem;color:#fbbf24;margin:10px 0}
+.elink{display:inline-block;text-decoration:none;border:2px solid #facc15;color:#facc15;font-family:'Orbitron',sans-serif;font-size:.7rem;letter-spacing:2px;padding:10px 24px;border-radius:8px;transition:.3s;margin-top:8px}.elink:hover{background:#facc15;color:#000}</style>
+<!-- MODERN UI UPGRADE -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* Base Overrides */
+* { font-family: 'Roboto', sans-serif !important; }
+body { background: #020617 !important; color: #f8fafc !important; }
+
+/* Top Nav */
+nav { height: 60px !important; padding: 0 30px !important; background: rgba(15,23,42,0.95) !important; border-bottom: 2px solid #1e293b !important; box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important; }
+nav a { background: rgba(56,189,248,0.1) !important; border: 1px solid rgba(56,189,248,0.3) !important; color: #38bdf8 !important; padding: 8px 16px !important; border-radius: 8px !important; font-weight: bold !important; font-size: 14px !important; }
+nav a:hover { background: rgba(56,189,248,0.2) !important; transform: translateX(-2px) !important; }
+nav span { font-size: 16px !important; font-weight: 800 !important; letter-spacing: 1px !important; color: #f8fafc !important; }
+#snav { background: rgba(250,204,21,0.1) !important; color: #facc15 !important; padding: 6px 12px !important; border-radius: 8px !important; border: 1px solid rgba(250,204,21,0.3) !important; }
+
+/* Layout */
+.main { grid-template-columns: 320px 1fr 350px !important; background: radial-gradient(circle at 50% 50%, #1e293b 0%, #020617 100%) !important; }
+.pn { background: rgba(15,23,42,0.95) !important; padding: 25px !important; gap: 15px !important; box-shadow: 0 0 20px rgba(0,0,0,0.5) !important; overflow-y: auto !important; }
+.pl { border-right: 2px solid #1e293b !important; }
+.pr { border-left: 2px solid #1e293b !important; }
+.plbl { font-weight: 800 !important; font-size: 14px !important; letter-spacing: 1px !important; color: #facc15 !important; border-bottom: 1px solid #1e293b !important; padding-bottom: 10px !important; text-transform: uppercase !important; margin-bottom: 10px !important; }
+
+/* Cards & Buttons */
+.dbt, .iopt, .sbt, .rxb, .disk-item, .i-btn { border-radius: 10px !important; padding: 12px 15px !important; border: 1px solid #334155 !important; background: #0f172a !important; font-size: 14px !important; font-weight: 500 !important; color: #e2e8f0 !important; transition: 0.2s !important; box-shadow: 0 4px 6px rgba(0,0,0,0.3) !important; }
+.dbt:hover, .iopt:hover, .sbt:hover, .rxb:hover, .disk-item:hover, .i-btn:hover { border-color: #facc15 !important; background: #1e293b !important; transform: translateX(5px) !important; }
+.active, .ok { border-color: #34d399 !important; background: rgba(52,211,153,0.1) !important; color: #34d399 !important; box-shadow: inset 0 0 10px rgba(52,211,153,0.2) !important; }
+.bad { border-color: #ef4444 !important; background: rgba(239,68,68,0.1) !important; color: #ef4444 !important; }
+
+/* Text Logs & Info */
+.clog, .info-box, .evc, .vrd, .pat-card, .rx-section, .srcsec { border-radius: 12px !important; padding: 15px !important; background: rgba(255,255,255,0.03) !important; border: 1px solid rgba(255,255,255,0.05) !important; font-size: 14px !important; color: #cbd5e1 !important; line-height: 1.6 !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2) !important; margin-bottom: 10px !important; }
+
+/* Overlays & Big Modals */
+.card { width: min(600px, 90vw) !important; padding: 40px 50px !important; background: rgba(15,23,42,0.95) !important; border: 2px solid #facc15 !important; border-radius: 20px !important; box-shadow: 0 20px 50px rgba(0,0,0,0.7) !important; backdrop-filter: blur(10px) !important; }
+.card h2 { font-size: 28px !important; color: #fff !important; margin-bottom: 15px !important; font-weight: 800 !important; }
+.card p { color: #94a3b8 !important; font-size: 16px !important; }
+.cbtn { padding: 15px 40px !important; background: #facc15 !important; color: #000 !important; font-size: 16px !important; font-weight: bold !important; border-radius: 12px !important; border: none !important; box-shadow: 0 10px 20px rgba(0,0,0,0.4) !important; text-transform: uppercase !important; letter-spacing: 1px !important; cursor: pointer; transition: 0.3s; }
+.cbtn:hover { transform: translateY(-3px) scale(1.05) !important; box-shadow: 0 15px 30px rgba(0,0,0,0.6) !important; background: #fff !important; }
+.elink { background: transparent !important; color: #facc15 !important; border: 2px solid #facc15 !important; padding: 10px 20px !important; border-radius: 10px !important; font-size: 14px !important; text-decoration: none !important; font-weight: bold !important; transition: 0.3s !important; display: inline-block; }
+.elink:hover { background: #facc15 !important; color: #020617 !important; }
+
+/* Specific fixes */
+.sev { padding: 4px 8px !important; border-radius: 6px !important; font-size: 12px !important; font-weight: bold !important; }
+.sh { background: rgba(239,68,68,0.2) !important; color: #fca5a5 !important; border: 1px solid rgba(239,68,68,0.3) !important; }
+.sm { background: rgba(250,204,21,0.2) !important; color: #fde047 !important; border: 1px solid rgba(250,204,21,0.3) !important; }
+.sl { background: rgba(52,211,153,0.2) !important; color: #86efac !important; border: 1px solid rgba(52,211,153,0.3) !important; }
+
+/* Scrollbars */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+::-webkit-scrollbar-thumb { background: #facc15; border-radius: 4px; }
+</style>
+</head><body>
+<div class="ov" id="intro"><div class="card"><div style="font-size:2.2rem;margin-bottom:12px">⚡🧠🔌</div><h2>НЕЙРОН СХЕМАСЫ</h2>
+<p>Рефлекс доғасын өз қолыңызбен <strong style="color:#facc15">құрыңыз</strong>!<br>Компоненттерді дұрыс ретпен орналастырып,<br>импульс жолын анимациямен бақылаңыз.</p>
+<button class="cbtn" onclick="start()">▶ ЗЕРТХАНАҒА КІРУ</button></div></div>
+<div class="ov" id="end-sc" style="display:none"><div class="card"><div style="font-size:2.2rem;margin-bottom:12px">🏆</div><h2>НЕЙРОН СХЕМАСЫ МЕҢГЕРІЛДІ!</h2><div class="sbig" id="fscore">Аяқталды!</div><p id="fbody" style="margin-bottom:18px"></p><a href="biology8.html" class="elink">← МӘЗІРГЕ ОРАЛУ</a></div></div>
+<nav><a href="biology8.html">← Мәзір</a><span style="font-family:'Orbitron';font-size:.85rem;color:#facc15">⚡ ЗЕРТХАНА №7 — НЕЙРОН СХЕМАСЫ</span><span id="snav">🟢 Белсенді</span></nav>
+<div class="main">
+<div class="pn pl"><div class="plbl">🔌 КОМПОНЕНТТЕР</div><div class="comp-pool" id="comp-pool"></div>
+<div class="plbl" style="margin-top:8px">📋 СЦЕНАРИЙ</div>
+<div class="scenario-info" id="sc-info">Сценарийді жүктеу...</div></div>
+<div class="center">
+<div class="sc-nav"><div class="sc-num" id="sc-num">Сценарий 1 / 3</div><div style="font-family:'Orbitron';font-size:.62rem;color:#475569" id="placed-count">0/5 орналастырылды</div></div>
+<div class="arc-wrap"><canvas id="arc-canvas" height="320"></canvas></div>
+<div class="arc-controls">
+<button class="arc-btn" id="reset-btn" onclick="resetArc()">🔄 Тазалау</button>
+<button class="arc-btn" id="check-btn" onclick="checkArc()" disabled>✓ Тексеру</button>
+</div>
+<div class="arc-msg" id="arc-msg">Сол жақтан компоненттерді алып, доға сызбасына орналастырыңыз...</div>
+</div>
+<div class="pn pr"><div class="plbl">📋 РЕФЛЕКС ДОҒАСЫ</div>
+<div class="step-list" id="step-list"></div>
+<div class="result-box" id="result-box"></div>
+<div class="fire-btn" id="fire-btn" onclick="fireImpulse()">⚡ ИМПУЛЬС ЖІБЕРУ</div></div>
+</div>
+<script>
+const COMPS=[
+{id:'receptor',name:'Рецептор',color:'#f43f5e',icon:'👁️',desc:'Тітіркендіргішті қабылдайды'},
+{id:'afferent',name:'Афференттік жүйке',color:'#fb923c',icon:'→',desc:'Орталыққа сигнал жеткізеді'},
+{id:'center',name:'Жүйке орталығы (ми)',color:'#facc15',icon:'🧠',desc:'Сигналды талдап, жауап береді'},
+{id:'efferent',name:'Эфференттік жүйке',color:'#4ade80',icon:'←',desc:'Орталықтан бұлшықетке команда'},
+{id:'effector',name:'Эффектор (бұлшықет)',color:'#38bdf8',icon:'💪',desc:'Жауап іс-әрекеті'},
+];
+const ORDER=['receptor','afferent','center','efferent','effector'];
+const SCENARIOS=[
+{name:'Тізе рефлексі',desc:'Балғамен тізеге соқса, аяқ кенет көтеріледі.\n1 секундтан аз — жұлын рефлексі!'},
+{name:'Жарыққа қарашық тарылуы',desc:'Жарқыраған жарыққа қарашық тез тарылады.\nОрталық — ми бағанасы.'},
+{name:'Ыстыққа қол тарту',desc:'Ыстық затқа тигенде қол кенет тартылады.\nРефлекс орталығы — жұлын.'},
+];
+let sci=0,placed=[],score=0,validated=false;
+let canvas,ctx,impulseAnim=null,impulseT=0;
+function start(){document.getElementById('intro').style.display='none';canvas=document.getElementById('arc-canvas');ctx=canvas.getContext('2d');canvas.width=canvas.offsetWidth;canvas.addEventListener('click',onCanvasClick);loadScenario(0);}
+function loadScenario(i){
+sci=i;placed=[];validated=false;impulseAnim&&cancelAnimationFrame(impulseAnim);
+const sc=SCENARIOS[i];
+document.getElementById('sc-num').textContent=`Сценарий ${i+1} / ${SCENARIOS.length}`;
+document.getElementById('sc-info').innerHTML=`<strong>${sc.name}</strong><br>${sc.desc}`;
+document.getElementById('placed-count').textContent='0/5 орналастырылды';
+document.getElementById('check-btn').disabled=true;
+document.getElementById('result-box').className='result-box';document.getElementById('fire-btn').className='fire-btn';
+document.getElementById('arc-msg').textContent='Сол жақтан компоненттерді алып, доға сызбасына орналастырыңыз...';
+buildComps();buildSteps();drawArc();
+}
+function buildComps(){
+const el=document.getElementById('comp-pool');el.innerHTML='';
+COMPS.forEach(c=>{
+const div=document.createElement('div');div.className='comp';div.id='cp-'+c.id;
+div.style.setProperty('--cc',c.color);
+div.innerHTML=`<div class="comp-dot"></div><span>${c.name}</span>`;
+div.onclick=()=>selectComp(c.id);el.appendChild(div);
+});
+}
+let selectedComp=null;
+function selectComp(id){
+if(validated)return;
+document.querySelectorAll('.comp').forEach(c=>c.style.outline='none');
+selectedComp=id;
+const el=document.getElementById('cp-'+id);if(el)el.style.outline='2px solid #facc15';
+document.getElementById('arc-msg').textContent=`${COMPS.find(c=>c.id===id).name} таңдалды. Дөңгелек нүктеге орналастыру үшін басыңыз.`;
+}
+function buildSteps(){
+const el=document.getElementById('step-list');el.innerHTML='';
+ORDER.forEach((id,i)=>{
+const c=COMPS.find(x=>x.id===id);
+const div=document.createElement('div');div.className='step-item';div.id='si-'+id;
+div.innerHTML=`<div class="step-num">${i+1}</div><div><div style="font-size:.74rem;color:#e2e8f0">${c.name}</div><div style="font-size:.66rem;color:#475569">${c.desc}</div></div>`;
+el.appendChild(div);
+});
+}
+const SLOTS=[{x:.12,y:.5},{x:.29,y:.5},{x:.5,y:.5},{x:.71,y:.5},{x:.88,y:.5}];
+function drawArc(highlight=-1,signalT=-1){
+if(!canvas||!ctx)return;
+const w=canvas.width,h=canvas.height;
+ctx.clearRect(0,0,w,h);
+ctx.fillStyle='rgba(5,12,28,.95)';ctx.fillRect(0,0,w,h);
+SLOTS.forEach((s,i)=>{
+const cx=s.x*w,cy=s.y*h,r=24;
+const comp=placed[i]?COMPS.find(c=>c.id===placed[i]):null;
+ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+ctx.strokeStyle=comp?comp.color:'rgba(250,204,21,.2)';ctx.lineWidth=2;
+ctx.fillStyle=comp?`${comp.color}22`:'rgba(250,204,21,.04)';ctx.fill();ctx.stroke();
+if(comp){ctx.fillStyle=comp.color;ctx.font='bold 10px Orbitron';ctx.textAlign='center';ctx.fillText(comp.icon||comp.name.slice(0,2),cx,cy+4);}
+else{ctx.fillStyle='rgba(250,204,21,.3)';ctx.font='12px Arial';ctx.textAlign='center';ctx.fillText(i+1+'.',cx,cy+4);}
+if(i<SLOTS.length-1){
+const nx=SLOTS[i+1].x*w,ny=SLOTS[i+1].y*h;
+ctx.beginPath();ctx.moveTo(cx+r,cy);ctx.lineTo(nx-r,ny);
+ctx.strokeStyle=placed[i]&&placed[i+1]?placed[i+1]==='center'||placed[i]==='center'?'rgba(250,204,21,.4)':'rgba(250,204,21,.2)':'rgba(250,204,21,.1)';ctx.lineWidth=1.5;ctx.stroke();
+const mx=(cx+r+nx-r)/2,my=(cy+ny)/2;ctx.fillStyle='rgba(250,204,21,.4)';ctx.font='14px Arial';ctx.fillText('→',mx,my+4);
+}
+if(signalT>=0){
+const prog=Math.min(1,(signalT-i*.2)/.2);
+if(prog>0&&prog<=1){ctx.beginPath();ctx.arc(cx,cy,r*1.4*prog,0,Math.PI*2);ctx.strokeStyle='rgba(250,204,21,.8)';ctx.lineWidth=3;ctx.stroke();}
+}
+});
+COMPS.forEach(c=>{
+const sl=SLOTS[placed.indexOf(c.id)];if(sl===undefined)return;
+ctx.fillStyle='rgba(255,255,255,.6)';ctx.font='8px Inter';ctx.textAlign='center';
+ctx.fillText(c.name.slice(0,8),sl.x*w,sl.y*h+r+12);
+});
+}
+function onCanvasClick(e){
+if(!selectedComp||validated)return;
+const rect=canvas.getBoundingClientRect();const x=(e.clientX-rect.left)/rect.width,y=(e.clientY-rect.top)/rect.height;
+let closest=-1,minD=Infinity;
+SLOTS.forEach((s,i)=>{const d=Math.hypot(x-s.x,y-s.y);if(d<.08&&d<minD){minD=d;closest=i;}});
+if(closest===-1)return;
+if(placed[closest]){document.getElementById('cp-'+placed[closest]).classList.remove('used');}
+placed[closest]=selectedComp;
+document.getElementById('cp-'+selectedComp).classList.add('used');
+selectedComp=null;document.querySelectorAll('.comp').forEach(c=>c.style.outline='none');
+ORDER.forEach((id,i)=>{document.getElementById('si-'+id).className='step-item'+(placed.indexOf(id)!==-1?' placed':'');});
+const cnt=placed.filter(Boolean).length;
+document.getElementById('placed-count').textContent=cnt+'/5 орналастырылды';
+document.getElementById('check-btn').disabled=cnt<5;
+drawArc();
+document.getElementById('arc-msg').textContent=cnt<5?`${cnt}/5 компонент орналастырылды. Жалғастырыңыз...`:'Барлығы орналастырылды! ✓ Тексеру батырмасын басыңыз.';
+}
+function resetArc(){placed=[];validated=false;buildComps();buildSteps();document.getElementById('placed-count').textContent='0/5 орналастырылды';document.getElementById('check-btn').disabled=true;document.getElementById('result-box').className='result-box';document.getElementById('fire-btn').className='fire-btn';document.getElementById('arc-msg').textContent='Тазаланды. Қайта бастаңыз.';drawArc();}
+function checkArc(){
+validated=true;
+const correct=ORDER.every((id,i)=>placed[i]===id);
+if(correct){score+=10;document.getElementById('snav').textContent='🟢 Жалғасуда';}
+ORDER.forEach((id,i)=>{const el=document.getElementById('si-'+id);el.className='step-item '+(placed[i]===id?'active':'');});
+const rb=document.getElementById('result-box');rb.className=`result-box ${correct?'ok':'bad'} show`;
+rb.innerHTML=correct?`<strong>✅ Дұрыс!</strong><br>Рефлекс доғасы дұрыс құрылды! Импульс жіберіңіз.`:`<strong>❌ Қате реттелу.</strong><br>Дұрыс: Рецептор→Афференттік→Орталық→Эфференттік→Эффектор`;
+if(correct){document.getElementById('fire-btn').className='fire-btn show';}
+else{document.getElementById('fire-btn').className='fire-btn';setTimeout(()=>{if(sci<SCENARIOS.length-1){sci++;loadScenario(sci);}else showEnd();},3000);}
+}
+function fireImpulse(){
+let t=0;impulseT=0;
+function anim(){impulseT+=0.04;drawArc(-1,impulseT);if(impulseT<1.6)impulseAnim=requestAnimationFrame(anim);
+else{document.getElementById('arc-msg').textContent='✅ Импульс жетті! Эффектор жауап берді.';
+document.getElementById('fire-btn').className='fire-btn';
+setTimeout(()=>{if(sci<SCENARIOS.length-1){sci++;loadScenario(sci);}else showEnd();},2000);}
+}
+anim();
+}
+function showEnd(){
+document.getElementById('fscore').textContent='Тәжірибе сәтті аяқталды!';
+document.getElementById('fbody').innerHTML=`⚡ <b>Рецептор</b> → тітіркенуді қабылдайды<br>→ <b>Афференттік</b> → орталыққа жеткізеді<br>🧠 <b>Жүйке орталығы</b> → талдайды<br>← <b>Эфференттік</b> → бұлшықетке жібереді<br>💪 <b>Эффектор</b> → жауап береді`;
+document.getElementById('end-sc').style.display='flex';
+}
+</script>
+<!-- Global Language Switcher & Google Translate -->
+<div id="google_translate_element" style="display:none;"></div>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({pageLanguage: 'kk', includedLanguages: 'ru,en,kk', autoDisplay: false}, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script>
+(function() {
+    let currentLang = localStorage.getItem('vsh-lang') || 'kk';
+
+    // Synchronize cookie if needed
+    var gtrans = '/kk/' + currentLang;
+    if (currentLang === 'kk') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+    }
+
+    // Floating UI
+    if (!document.querySelector('.floating-lang-switcher')) {
+        const style = document.createElement('style');
+        style.innerHTML = `
+            body { top: 0 !important; }
+            .skiptranslate { display: none !important; }
+            .floating-lang-switcher {
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                background: rgba(15, 23, 42, 0.9);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 20px;
+                padding: 10px;
+                display: flex;
+                gap: 10px;
+                z-index: 999999;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+                font-family: 'Roboto', sans-serif;
+            }
+            .floating-lang-btn {
+                background: transparent;
+                border: 1px solid rgba(255,255,255,0.2);
+                color: #94a3b8;
+                font-size: 14px;
+                font-weight: 600;
+                padding: 8px 15px;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: 0.3s;
+            }
+            .floating-lang-btn:hover {
+                color: #fff;
+                background: rgba(255,255,255,0.1);
+            }
+            .floating-lang-btn.active {
+                background: linear-gradient(135deg, #a855f7, #3b82f6);
+                color: #fff;
+                border-color: transparent;
+            }
+        `;
+        document.head.appendChild(style);
+
+        const switcher = document.createElement('div');
+        switcher.className = 'floating-lang-switcher notranslate';
+        switcher.innerHTML = `
+            <button class="floating-lang-btn " onclick="changeLangGlobal('ru')">RU</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('kk')">ҚАЗ</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('en')">EN</button>
+        `;
+        
+        // set active
+        const btns = switcher.querySelectorAll('.floating-lang-btn');
+        if (currentLang === 'ru') btns[0].classList.add('active');
+        else if (currentLang === 'kk') btns[1].classList.add('active');
+        else if (currentLang === 'en') btns[2].classList.add('active');
+
+        document.body.appendChild(switcher);
+    }
+})();
+
+function changeLangGlobal(lang) {
+    localStorage.setItem('vsh-lang', lang);
+    var gtrans = '/kk/' + lang;
+    if (lang === 'kk') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+    }
+    location.reload();
+}
+</script>
+
+</body></html>

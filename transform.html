@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лаборатория: Гео-Трансформации</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .geo-canvas {
+            background-color: #0b0d17;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .mission-status {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .level-badge {
+            display: inline-block;
+            background: var(--accent-secondary);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            margin-bottom: 5px;
+        }
+
+        .task-text {
+            font-size: 0.95rem;
+            line-height: 1.4;
+            color: #fff;
+        }
+
+        .control-vertical {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .inputs-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .inputs-row input {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            color: white;
+            padding: 10px;
+            /* Bigger padding */
+            border-radius: 6px;
+            text-align: center;
+            font-family: monospace;
+            font-size: 1.1rem;
+            /* Bigger text */
+        }
+
+        .btn-action.full-width {
+            width: 100%;
+            background: var(--accent-primary);
+            color: #000;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .btn-action.full-width:active {
+            transform: scale(0.98);
+        }
+
+        .control-row label {
+            width: 80px;
+            color: var(--text-muted);
+        }
+
+        .control-row input {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            color: white;
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+            font-family: monospace;
+        }
+
+        .btn-action {
+            flex: 0 0 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-action:hover {
+            background: var(--accent-primary);
+            color: #000;
+        }
+
+        .history-log {
+            margin-top: 20px;
+            font-size: 0.8rem;
+            color: #666;
+            font-family: monospace;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        .success-msg {
+            color: var(--accent-informatics);
+            /* Greenish */
+            font-weight: bold;
+            display: none;
+            margin-top: 10px;
+        }
+
+        /* MODAL STYLES */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background: rgba(20, 20, 35, 0.95);
+            border: 1px solid var(--accent-secondary);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 0 50px rgba(255, 153, 0, 0.2);
+            transform: scale(0.9);
+            transition: transform 0.3s;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-content h2 {
+            color: var(--accent-secondary);
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        .modal-actions {
+            margin-top: 30px;
+        }
+    </style>
+
+    <script id="early-lang-sync">
+        (function() {
+            let cl = localStorage.getItem('vsh-lang') || 'kk';
+            var gt = '/ru/' + cl;
+            if (cl === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+                document.cookie = "googtrans=" + gt + "; path=/";
+                if (location.hostname) {
+                    document.cookie = "googtrans=" + gt + "; domain=" + location.hostname + "; path=/";
+                    document.cookie = "googtrans=" + gt + "; domain=." + location.hostname + "; path=/";
+                }
+            }
+        })();
+    </script>
+</head>
+
+<body class="lab-fractals geo-theme">
+    <div class="app-container">
+        <header class="glass-header">
+            <div class="header-left">
+                <a href="index.html#geometry" class="btn-back" title="Назад">⬅</a>
+                <h1>Geo <span class="accent" style="color: #ff9900;">Master</span></h1>
+            </div>
+            <div class="header-right">
+                <div class="stats">
+                    <div class="stat-item">Уровень: <span id="level-disp">1</span></div>
+                </div>
+            </div>
+        </header>
+
+        <main class="simulation-container">
+            <canvas id="geo-canvas" class="geo-canvas"></canvas>
+
+            <aside class="controls-panel glass-panel">
+                <div class="mission-status">
+                    <div class="level-badge">ЗАДАНИЕ</div>
+                    <div id="mission-task" class="task-text">Перемести квадрат в указанную область.</div>
+                    <div id="success-message" class="success-msg">🎉 ОТЛИЧНО! СЛЕДУЮЩИЙ УРОВЕНЬ...</div>
+                </div>
+
+                <h2>Действия</h2>
+
+                <!-- TRANSLATE -->
+                <div id="group-move" class="control-group">
+                    <label>Сдвиг (X, Y)</label>
+                    <div class="control-vertical">
+                        <div class="inputs-row">
+                            <input type="number" id="inp-dx" placeholder="X" value="0">
+                            <input type="number" id="inp-dy" placeholder="Y" value="0">
+                        </div>
+                        <button id="btn-move" class="btn btn-action full-width">ВЫПОЛНИТЬ СДВИГ (Enter) ▶</button>
+                    </div>
+                </div>
+
+                <!-- ROTATE -->
+                <div id="group-rotate" class="control-group">
+                    <label>Поворот (°)</label>
+                    <div class="control-vertical">
+                        <div class="inputs-row">
+                            <input type="number" id="inp-angle" placeholder="Градусы" value="90" step="90">
+                        </div>
+                        <button id="btn-rotate" class="btn btn-action full-width">ПОВЕРНУТЬ (Enter) ↻</button>
+                    </div>
+                </div>
+
+                <!-- REFLECT -->
+                <div id="group-reflect" class="control-group">
+                    <label>Отражение</label>
+                    <div class="buttons-grid">
+                        <button id="btn-flip-x" class="btn small" style="background:#333">По оси X</button>
+                        <button id="btn-flip-y" class="btn small" style="background:#333">По оси Y</button>
+                    </div>
+                </div>
+
+                <!-- SCALE -->
+                <div id="group-scale" class="control-group">
+                    <label>Масштаб</label>
+                    <div class="control-vertical">
+                        <div class="inputs-row">
+                            <input type="number" id="inp-scale" placeholder="Коэф." value="2" step="0.5">
+                        </div>
+                        <button id="btn-scale" class="btn btn-action full-width">МАСШТАБИРОВАТЬ (Enter) 🔍</button>
+                    </div>
+                </div>
+
+                <hr class="divider">
+
+                <button id="btn-reset" class="btn danger small" style="width:100%">Сбросить Фигуру</button>
+
+                <div id="history-log" class="history-log">
+                    > Ожидание команд...
+                </div>
+            </aside>
+        </main>
+
+        <!-- LEVEL COMPLETE MODAL -->
+        <div id="modal-success" class="modal-overlay">
+            <div class="modal-content">
+                <h2>🎉 Уровень пройден!</h2>
+                <p>Ты отлично справился с заданием.</p>
+                <div class="modal-actions">
+                    <button id="btn-next-level" class="btn primary">Следующий уровень ➡</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="transform.js"></script>
+
+<!-- Global Language Switcher & Google Translate -->
+<div id="google_translate_element" style="display:none;"></div>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({pageLanguage: 'ru', includedLanguages: 'ru,en,kk', autoDisplay: false}, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script>
+(function() {
+    let currentLang = localStorage.getItem('vsh-lang') || 'kk';
+
+    // Synchronize cookie if needed
+    var gtrans = '/ru/' + currentLang;
+    if (currentLang === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) {
+            document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+        }
+    }
+
+    // Floating UI
+    const isIndex = location.pathname.endsWith('index.html') || location.pathname.endsWith('/') || location.pathname.endsWith('studio.html');
+    if (!document.querySelector('.floating-lang-switcher')) {
+        const style = document.createElement('style');
+        style.innerHTML = `
+            body { top: 0 !important; }
+            .skiptranslate { display: none !important; }
+            .floating-lang-switcher {
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                background: rgba(15, 23, 42, 0.9);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 20px;
+                padding: 10px;
+                display: flex;
+                gap: 10px;
+                z-index: 999999;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+                font-family: 'Roboto', sans-serif;
+            }
+            .floating-lang-btn {
+                background: transparent;
+                border: 1px solid rgba(255,255,255,0.2);
+                color: #94a3b8;
+                font-size: 14px;
+                font-weight: 600;
+                padding: 8px 15px;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: 0.3s;
+            }
+            .floating-lang-btn:hover {
+                color: #fff;
+                background: rgba(255,255,255,0.1);
+            }
+            .floating-lang-btn.active {
+                background: linear-gradient(135deg, #a855f7, #3b82f6);
+                color: #fff;
+                border-color: transparent;
+            }
+        `;
+        document.head.appendChild(style);
+
+        const switcher = document.createElement('div');
+        switcher.className = 'floating-lang-switcher notranslate';
+        switcher.innerHTML = `
+            <button class="floating-lang-btn " onclick="changeLangGlobal('ru')">RU</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('kk')">ҚАЗ</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('en')">EN</button>
+        `;
+        
+        // set active
+        const btns = switcher.querySelectorAll('.floating-lang-btn');
+        if (currentLang === 'ru') btns[0].classList.add('active');
+        else if (currentLang === 'kk') btns[1].classList.add('active');
+        else if (currentLang === 'en') btns[2].classList.add('active');
+
+        document.body.appendChild(switcher);
+    }
+})();
+
+function changeLangGlobal(lang) {
+    localStorage.setItem('vsh-lang', lang);
+    var gtrans = '/ru/' + lang;
+    if (lang === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+    }
+    location.reload();
+}
+</script>
+\n</body>
+
+</html>

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Презентации — Virtual Science Hub</title>
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Urbanist:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Export Libraries (JSZip & PptxGenJS & html2pdf & PDF.js) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    
+    <link rel="stylesheet" href="./src/styles/presentation.css">
+</head>
+<body>
+
+    <!-- ==========================================
+         ЭКРАН 1: ПРОМПТ И НАСТРОЙКИ (ЕДИНАЯ ФОРМА)
+         ========================================== -->
+    <div id="screen-prompt" class="screen active">
+        <a href="index.html" class="back-link">
+            <i class="fa-solid fa-arrow-left"></i> Назад на главную
+        </a>
+
+        <div class="hero-content">
+            <div class="hero-badge">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <span>NotebookLM RAG API • Gemini 2.5 Flash • Multi-Page Export</span>
+            </div>
+            <h1 class="hero-title">Создайте презентацию<br>за 15 секунд</h1>
+            <p class="hero-sub">Введите тему или загрузите методичку/лабораторную работу — ИИ сгенерирует слайды строго по вашему источнику</p>
+
+            <!-- ЕДИНАЯ ФОРМА ГЕНЕРАЦИИ С RAG ИСТОЧНИКОМ -->
+            <div class="prompt-card">
+
+                <!-- NOTEBOOKLM RAG SOURCE MANAGEMENT -->
+                <div class="rag-source-card">
+                    <div class="rag-source-header">
+                        <div class="rag-title">
+                            <i class="fa-solid fa-book-bookmark"></i>
+                            <span>Источник базы знаний (NotebookLM RAG):</span>
+                        </div>
+                        <span class="rag-badge" id="rag-status-badge">Без файла (Общий ИИ)</span>
+                    </div>
+
+                    <!-- Source Selector Tabs -->
+                    <div class="rag-tabs">
+                        <button type="button" class="rag-tab active" data-source-tab="none">
+                            <i class="fa-solid fa-globe"></i> Без источника
+                        </button>
+                        <button type="button" class="rag-tab" data-source-tab="file">
+                            <i class="fa-solid fa-file-arrow-up"></i> Загрузить PDF / TXT
+                        </button>
+                        <button type="button" class="rag-tab" data-source-tab="text">
+                            <i class="fa-solid fa-file-lines"></i> Вставить текст
+                        </button>
+                        <button type="button" class="rag-tab" data-source-tab="vsh">
+                            <i class="fa-solid fa-flask"></i> Лабы VSH
+                        </button>
+                    </div>
+
+                    <!-- Panel 1: File Upload (PDF / TXT / MD) -->
+                    <div id="rag-panel-file" class="rag-panel hidden">
+                        <div class="rag-dropzone" id="rag-dropzone">
+                            <i class="fa-solid fa-cloud-arrow-up drop-icon"></i>
+                            <p>Перетащите файл методички или нажмите для выбора</p>
+                            <span class="drop-sub">Поддерживаются .PDF, .TXT, .MD (до 10 МБ)</span>
+                            <input type="file" id="rag-file-input" accept=".pdf,.txt,.md,.text" style="display:none;" />
+                        </div>
+                        <div id="rag-file-info" class="rag-file-info hidden">
+                            <i class="fa-solid fa-file-pdf file-icon"></i>
+                            <div class="file-details">
+                                <span id="rag-file-name" class="file-name">filename.pdf</span>
+                                <span id="rag-file-meta" class="file-meta">0 КБ • Извлечение текста...</span>
+                            </div>
+                            <button type="button" id="rag-file-remove" class="btn-remove-file" title="Удалить файл"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Panel 2: Manual Textarea -->
+                    <div id="rag-panel-text" class="rag-panel hidden">
+                        <textarea id="rag-text-input" class="rag-textarea" rows="4" placeholder="Вставьте текст методички, лабы или конспекта (цель работы, оборудование, теория, ход работы, выводы)..."></textarea>
+                    </div>
+
+                    <!-- Panel 3: Preloaded Lab Manuals -->
+                    <div id="rag-panel-vsh" class="rag-panel hidden">
+                        <select id="rag-vsh-select" class="rag-select">
+                            <option value="">-- Выберите лабораторную работу --</option>
+                            <option value="physics_ohm">⚛️ Физика: Закон Ома для участка цепи (Цель, Схема, Законы, Выводы)</option>
+                            <option value="biology_cell">🌿 Биология: Строение клетки, Фотосинтез и Митохондрии</option>
+                            <option value="physics_newton">🪐 Физика: Законы движения Ньютона и динамика тел</option>
+                            <option value="chemistry_periodic">🧪 Химия: Периодический закон Менделеева и структура атома</option>
+                            <option value="geometry_pythagoras">📐 Геометрия: Теорема Пифагора и свойства треугольников</option>
+                        </select>
+                    </div>
+                </div>
+
+                <textarea
+                    id="prompt-input"
+                    class="prompt-textarea"
+                    placeholder="Тема презентации: например «Законы движения Ньютона, 7 класс» или «Лабораторная работа №3: Закон Ома»"
+                    rows="3"
+                ></textarea>
+
+                <div class="prompt-hints">
+                    <span class="hint-chip" data-text="История развития космонавтики, от первых ракет до МКС">🚀 Космонавтика</span>
+                    <span class="hint-chip" data-text="Законы движения Ньютона с примерами">⚛️ Физика</span>
+                    <span class="hint-chip" data-text="Строение и функции растительной клетки">🌿 Биология</span>
+                    <span class="hint-chip" data-text="Искусственный интеллект и будущее медицины">🤖 ИИ в медицине</span>
+                </div>
+
+                <div class="prompt-options">
+                    <div class="option-group">
+                        <label for="select-grade"><i class="fa-solid fa-graduation-cap"></i> Аудитория:</label>
+                        <select id="select-grade" class="prompt-select">
+                            <option value="">Любая аудитория</option>
+                            <option value="1-4 класс">1–4 класс</option>
+                            <option value="5-9 класс">5–9 класс</option>
+                            <option value="10-11 класс">10–11 класс</option>
+                            <option value="Студенты / ВУЗ">Студенты / ВУЗ</option>
+                        </select>
+                    </div>
+
+                    <div class="option-group">
+                        <label for="select-slides"><i class="fa-solid fa-layer-group"></i> Слайдов:</label>
+                        <select id="select-slides" class="prompt-select">
+                            <option value="5">5 слайдов</option>
+                            <option value="6">6 слайдов</option>
+                            <option value="7" selected>7 слайдов</option>
+                            <option value="8">8 слайдов</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- TEMPLATE DESIGN PICKER -->
+                <div class="template-picker-section">
+                    <div class="template-picker-header">
+                        <div class="template-picker-title">
+                            <i class="fa-solid fa-palette"></i>
+                            <span>Выберите дизайн презентации</span>
+                        </div>
+                        <div class="template-picker-actions">
+                            <button type="button" id="btn-random-template" class="btn-random-template" title="Случайный дизайн">
+                                <i class="fa-solid fa-dice"></i> <span>Случайный</span>
+                            </button>
+                            <span class="template-picker-count" id="template-count-badge">20 шаблонов</span>
+                        </div>
+                    </div>
+
+                    <!-- Категории шаблонов -->
+                    <div class="template-category-tabs" id="template-cat-tabs">
+                        <button type="button" class="tpl-cat-tab active" data-category="all">🌟 Все (20)</button>
+                        <button type="button" class="tpl-cat-tab" data-category="academic">🎓 Академические</button>
+                        <button type="button" class="tpl-cat-tab" data-category="tech">💻 IT & Технологии</button>
+                        <button type="button" class="tpl-cat-tab" data-category="creative">🎨 Креатив</button>
+                        <button type="button" class="tpl-cat-tab" data-category="business">💼 Бизнес & Премиум</button>
+                    </div>
+
+                    <div class="template-grid" id="template-grid">
+                        <!-- Templates are rendered dynamically by JS -->
+                    </div>
+                </div>
+
+                <button id="btn-generate" class="btn-generate">
+                    <i class="fa-solid fa-sparkles" id="btn-gen-icon"></i>
+                    <span id="btn-gen-text">Сгенерировать презентацию</span>
+                </button>
+
+                <!-- Шкала прогресса -->
+                <div id="generation-progress" class="gen-progress hidden">
+                    <div class="gen-progress-bar">
+                        <div id="gen-progress-fill" class="gen-progress-fill"></div>
+                    </div>
+                    <span id="gen-progress-text" class="gen-progress-text">Анализируем тему...</span>
+                </div>
+            </div>
+
+            <div class="features-row">
+                <div class="feat-item"><i class="fa-solid fa-file-pdf"></i> Скачать ВСЕ слайды в PDF</div>
+                <div class="feat-item"><i class="fa-solid fa-file-powerpoint"></i> Скачать ВСЕ слайды в PPTX</div>
+                <div class="feat-item"><i class="fa-solid fa-desktop"></i> Полноэкранный показ</div>
+                <div class="feat-item"><i class="fa-solid fa-plus-minus"></i> Добавление/Удаление слайдов</div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ==========================================
+         ЭКРАН 2: РАБОЧАЯ ОБЛАСТЬ (WORKSPACE & EDITOR)
+         ========================================== -->
+    <div id="screen-workspace" class="screen workspace">
+        
+        <!-- Шапка Рабочей Области -->
+        <header class="workspace-header">
+            <button id="btn-back-to-prompt" class="ws-btn-back">
+                <i class="fa-solid fa-arrow-left"></i> Новая презентация
+            </button>
+
+            <div class="ws-title-container">
+                <input id="workspace-title-input" class="ws-title-input" type="text" value="Презентация" placeholder="Название..." />
+                <span id="theme-style-badge" class="theme-style-badge">Дизайн: Академический Синий</span>
+            </div>
+
+            <div class="ws-actions">
+                <!-- Полноэкранный просмотр -->
+                <button id="btn-present-mode" class="btn-present">
+                    <i class="fa-solid fa-play"></i> Показ слайдов
+                </button>
+
+                <!-- Скачивание PPTX и PDF (ВСЕ СЛАЙДЫ) -->
+                <button id="btn-download-pptx" class="btn-pptx">
+                    <i class="fa-solid fa-file-powerpoint"></i> Скачать PPTX (Все)
+                </button>
+                <button id="btn-download-pdf" class="btn-pdf">
+                    <i class="fa-solid fa-file-pdf"></i> Скачать PDF (Все)
+                </button>
+            </div>
+        </header>
+
+        <!-- Главный контент (Панель редактирования + Живой Предпросмотр) -->
+        <div class="workspace-body">
+            
+            <!-- Левая боковая панель: Навигатор и Редактор -->
+            <aside class="sidebar-editor">
+                
+                <!-- Навигатор миниатюр слайдов -->
+                <div class="slides-nav-header">
+                    <span>Слайды (<span id="slides-count">0</span>)</span>
+                    <button id="btn-add-slide" class="btn-sm-action" title="Добавить слайд">
+                        <i class="fa-solid fa-plus"></i> Добавить
+                    </button>
+                </div>
+                <div id="slides-thumbnails-list" class="slides-thumbnails-list">
+                    <!-- Заполняется из JS -->
+                </div>
+
+                <!-- Панель управления порядком текущего слайда -->
+                <div class="slide-controls-bar">
+                    <button id="btn-move-left" class="btn-icon-sub" title="Переместить назад"><i class="fa-solid fa-chevron-left"></i> Назад</button>
+                    <button id="btn-move-right" class="btn-icon-sub" title="Переместить вперед">Вперед <i class="fa-solid fa-chevron-right"></i></button>
+                    <button id="btn-delete-slide" class="btn-icon-sub danger" title="Удалить слайд"><i class="fa-solid fa-trash-can"></i></button>
+                </div>
+
+                <!-- Быстрая смена дизайна прямо в редакторе (20 шаблонов) -->
+                <div class="theme-picker-bar">
+                    <div class="theme-picker-header-ws">
+                        <span class="picker-label"><i class="fa-solid fa-palette"></i> Дизайн презентации:</span>
+                        <select id="ws-template-select" class="ws-template-dropdown" title="Сменить дизайн презентации">
+                            <!-- Заполняется из JS всеми 20 шаблонами -->
+                        </select>
+                    </div>
+                    <div class="ws-quick-swatches" id="ws-quick-swatches">
+                        <!-- Быстрые мини-свотчи 20 шаблонов -->
+                    </div>
+                </div>
+
+                <!-- Форма редактирования выбранного слайда -->
+                <div class="slide-edit-form">
+                    <h3 class="edit-form-title">
+                        <i class="fa-solid fa-pen-to-square"></i> Редактор слайда <span id="active-slide-num">1</span>
+                    </h3>
+
+                    <!-- Поле: Заголовок -->
+                    <div class="form-group">
+                        <label for="edit-slide-title">Заголовок слайда:</label>
+                        <input id="edit-slide-title" class="form-input" type="text" placeholder="Заголовок..." />
+                    </div>
+
+                    <!-- Поле: Тезисы -->
+                    <div class="form-group">
+                        <label for="edit-slide-points">Тезисы (каждый пункт с новой строки):</label>
+                        <textarea id="edit-slide-points" class="form-textarea" rows="5" placeholder="Введите тезисы..."></textarea>
+                    </div>
+
+                    <!-- Поле: Промпт для картинки + Кнопки -->
+                    <div class="form-group">
+                        <label for="edit-image-prompt">
+                            <i class="fa-solid fa-image"></i> Промпт картинки (English):
+                        </label>
+                        <input id="edit-image-prompt" class="form-input" type="text" placeholder="Description in English..." />
+                        
+                        <button id="btn-refresh-image" class="btn-refresh-img">
+                            <i class="fa-solid fa-dice"></i> Сгенерировать новый вариант (Pollinations.ai)
+                        </button>
+                    </div>
+                </div>
+
+            </aside>
+
+            <!-- Правая часть: Живой Предпросмотр -->
+            <main class="preview-area">
+                <div class="preview-stage-container">
+                    <div class="preview-stage-header">
+                        <span><i class="fa-solid fa-eye"></i> Живой предпросмотр слайда</span>
+                        <span class="preview-nav-hint">Используйте ⬅ ➡ для переключения слайдов</span>
+                    </div>
+
+                    <!-- Текущий слайд 16:9 -->
+                    <div class="slide-preview-wrapper">
+                        <div id="live-slide-card" class="slide-card">
+                            <!-- Отрисовывается из JS -->
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+        </div>
+    </div>
+
+
+    <!-- ==========================================
+         ПОЛНОЭКРАННЫЙ РЕЖИМ ПОКАЗА (PRESENTER MODE)
+         ========================================== -->
+    <div id="screen-presenter" class="screen presenter-mode">
+        <button id="btn-close-presenter" class="presenter-close" title="Закрыть показ (Esc)">
+            <i class="fa-solid fa-xmark"></i> Esc
+        </button>
+
+        <button id="btn-prev-slide" class="presenter-nav prev" title="Предыдущий слайд (⬅)">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <button id="btn-next-slide" class="presenter-nav next" title="Следующий слайд (➡)">
+            <i class="fa-solid fa-chevron-right"></i>
+        </button>
+
+        <div class="presenter-stage">
+            <div id="presenter-slide-card" class="slide-card presenter-card">
+                <!-- Отрисовывается для показа -->
+            </div>
+        </div>
+
+        <div class="presenter-footer">
+            <span id="presenter-counter">Слайд 1 из 7</span>
+            <div class="presenter-progress-bar">
+                <div id="presenter-progress-fill" class="presenter-progress-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Уведомления -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Скрипт приложения -->
+    <script src="./src/features/presentation/app.js"></script>
+</body>
+</html>

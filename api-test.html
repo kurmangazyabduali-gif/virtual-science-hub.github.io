@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>API Test</title>
+    <style>
+        body { font-family: monospace; background: #111; color: #eee; padding: 30px; font-size: 14px; line-height: 1.5; }
+        h2 { color: #a78bfa; }
+        button { background: #7c6df6; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 14px; margin-bottom: 24px; }
+        button:hover { background: #9b87f5; }
+        .card { background: #1a1a2e; padding: 18px; border-radius: 10px; margin-bottom: 14px; border: 1px solid #2a2a4a; }
+        .ok  { color: #22c55e; font-weight: bold; }
+        .err { color: #ef4444; font-weight: bold; }
+        .warn { color: #f59e0b; }
+        pre { background: #0d0d1a; padding: 12px; border-radius: 6px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; font-size: 12px; max-height: 200px; overflow-y: auto; }
+        #log { background: #0d0d1a; padding: 14px; border-radius: 8px; font-size: 12px; white-space: pre-wrap; max-height: 300px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h2>🔍 Gemini API Key Tester</h2>
+    <p>Нажмите кнопку. Тест проверит ваш ключ с тремя разными моделями и двумя способами авторизации.</p>
+    <button onclick="runAllTests()">▶ Запустить все тесты</button>
+    <div id="results"></div>
+    <h3 style="color:#64748b; margin-top:20px;">Лог консоли:</h3>
+    <div id="log"></div>
+
+    <script>
+        const API_KEY = localStorage.getItem('gemini_api_key') || '';
+        const MODELS = [
+            'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
+            'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
+            'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent'
+        ];
+        const AUTHS = [
+            { label: 'Header: x-goog-api-key', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': API_KEY } },
+            { label: 'URL param: ?key=', url_suffix: '?key=' + API_KEY, headers: { 'Content-Type': 'application/json' } }
+        ];
+        const BODY = JSON.stringify({
+            contents: [{ role: 'user', parts: [{ text: 'Say "OK" in one word' }] }],
+            generationConfig: { temperature: 0, maxOutputTokens: 5 }
+        });
+
+        function log(msg) {
+            document.getElementById('log').textContent += msg + '\n';
+        }
+
+        async function runAllTests() {
+            document.getElementById('results').innerHTML = '<p class="warn">Тестирование...</p>';
+            document.getElementById('log').textContent = '';
+            const results = [];
+
+            for (const model of MODELS) {
+                for (const auth of AUTHS) {
+                    const url = model + (auth.url_suffix || '');
+                    const label = model.split('/models/')[1].split(':')[0] + ' | ' + auth.label;
+                    log('Testing: ' + label);
+                    try {
+                        const r = await fetch(url, { method: 'POST', headers: auth.headers, body: BODY });
+                        const status = r.status;
+                        let body = '';
+                        try { body = await r.text(); } catch(_) {}
+                        const ok = r.ok;
+                        let answer = '';
+                        if (ok) {
+                            try { answer = JSON.parse(body)?.candidates?.[0]?.content?.parts?.[0]?.text || ''; } catch(_) {}
+                        }
+                        results.push({ label, ok, status, body: ok ? answer : body });
+                        log((ok ? '✅' : '❌') + ' ' + status);
+                    } catch(e) {
+                        results.push({ label, ok: false, status: 'network', body: e.message });
+                        log('💥 Network error: ' + e.message);
+                    }
+                }
+            }
+
+            let html = '';
+            let foundWorking = false;
+            for (const r of results) {
+                if (r.ok) foundWorking = true;
+                html += `<div class="card">
+                    <span class="${r.ok ? 'ok' : 'err'}">${r.ok ? '✅ РАБОТАЕТ' : '❌ ОШИБКА ' + r.status}</span>
+                    <span style="color:#64748b; margin-left: 14px;">${r.label}</span>
+                    ${r.ok ? `<pre style="color:#22c55e">Ответ: "${r.body}"</pre>` : `<pre>${r.body.substring(0, 400)}</pre>`}
+                </div>`;
+            }
+
+            if (!foundWorking) {
+                html = '<div class="card"><p class="err">🚫 НИ ОДНА модель не работает с этим ключом.</p><p>Пожалуйста, перейдите на <a href="https://aistudio.google.com/apikey" target="_blank" style="color:#a78bfa">aistudio.google.com/apikey</a> и создайте новый ключ.</p></div>' + html;
+            } else {
+                html = '<div class="card"><p class="ok">🎉 Нашли рабочую комбинацию! Смотрите зелёные строки ниже.</p></div>' + html;
+            }
+
+            document.getElementById('results').innerHTML = html;
+        }
+    </script>
+</body>
+</html>

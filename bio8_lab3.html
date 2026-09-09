@@ -1,0 +1,344 @@
+<!DOCTYPE html><html lang="kk"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Зертхана №3 — Жасуша дәрігері</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#020c1b;color:#fff;font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+nav{height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:rgba(5,15,35,.97);border-bottom:2px solid #1e293b;box-shadow:0 4px 20px rgba(0,0,0,.5);flex-shrink:0}
+nav a{color:#38bdf8;text-decoration:none;font-size:.8rem;font-family:'Orbitron',sans-serif;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.3);padding:7px 14px;border-radius:8px;font-weight:bold;transition:.2s}
+nav a:hover{background:rgba(56,189,248,.2)}
+#snav{font-family:'Orbitron',sans-serif;font-size:.82rem;color:#facc15;background:rgba(250,204,21,.1);border:1px solid rgba(250,204,21,.3);padding:6px 12px;border-radius:8px}
+.main{flex:1;display:grid;grid-template-columns:280px 1fr 300px;overflow:hidden}
+.pn{background:rgba(5,15,35,.95);padding:18px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;box-shadow:0 0 20px rgba(0,0,0,.5)}
+.pl{border-right:2px solid #1e293b}.pr{border-left:2px solid #1e293b}
+.plbl{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:800;letter-spacing:1px;color:#38bdf8;border-bottom:1px solid #1e293b;padding-bottom:10px;text-transform:uppercase}
+.pat-btn{border-radius:10px;padding:12px;border:1px solid #334155;background:#0f172a;cursor:pointer;transition:.2s}
+.pat-btn:hover{border-color:#38bdf8;background:#1e293b}
+.pat-btn.active{border-color:#38bdf8;background:rgba(56,189,248,.08)}
+.pat-btn.solved{border-color:#34d399;background:rgba(52,211,153,.06)}
+.pat-title{font-family:'Orbitron',sans-serif;font-size:11px;color:#38bdf8;margin-bottom:5px}
+.pat-sym{font-size:12px;color:#64748b;line-height:1.5}
+.pat-btn.solved .pat-sym{color:#34d399}
+.center{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;background:radial-gradient(circle at 50% 40%,#0d1a2e,#020c1b)}
+.cell-wrap{position:relative;width:100%;max-width:480px}
+.cell-svg{width:100%;max-height:320px}
+.organelle{cursor:pointer;transition:all .3s}
+.organelle:hover{filter:brightness(1.5) drop-shadow(0 0 8px currentColor)}
+.organelle.broken{animation:pulse 1s ease infinite;cursor:grab}
+.organelle.fixed{filter:drop-shadow(0 0 10px #34d399)}
+@keyframes pulse{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
+.cell-info{width:100%;max-width:480px;border-radius:10px;padding:12px;background:rgba(0,0,0,.3);border:1px solid rgba(56,189,248,.15);font-size:13px;color:#94a3b8;line-height:1.6;min-height:56px}
+/* Tool tray */
+.tool-tray{width:100%;max-width:480px;border-radius:12px;padding:14px;background:rgba(0,0,0,.3);border:1px solid rgba(56,189,248,.12)}
+.tray-lbl{font-family:'Orbitron',sans-serif;font-size:11px;color:rgba(56,189,248,.6);letter-spacing:1px;margin-bottom:10px}
+.tools-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.tool-card{border-radius:9px;padding:10px 8px;border:2px solid var(--tc);background:color-mix(in srgb,var(--tc) 8%,transparent);cursor:grab;font-size:12px;color:#e2e8f0;text-align:center;transition:.2s;user-select:none}
+.tool-card:hover{background:color-mix(in srgb,var(--tc) 18%,transparent);transform:scale(1.05)}
+.tool-card.used{opacity:.25;pointer-events:none;border-style:dashed}
+.tool-card.dragging{opacity:.5;transform:scale(0.95)}
+.tool-icon{font-size:22px;display:block;margin-bottom:4px}
+/* Right panel */
+.info-box{border-radius:10px;padding:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);font-size:13px;color:#cbd5e1;line-height:1.6}
+.result-row{border-radius:9px;padding:10px 12px;font-size:12px;border:1px solid;margin-bottom:6px;line-height:1.4}
+.result-row.ok{border-color:rgba(52,211,153,.3);background:rgba(52,211,153,.06);color:#86efac}
+.result-row.pending{border-color:rgba(56,189,248,.2);background:rgba(56,189,248,.04);color:#7dd3fc}
+.ov{position:fixed;inset:0;z-index:100;background:rgba(1,5,15,.97);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center}
+.card{width:min(580px,90vw);padding:40px 48px;text-align:center;background:rgba(5,15,35,.96);border:2px solid #38bdf8;border-radius:20px;box-shadow:0 20px 50px rgba(0,0,0,.7)}
+.card h2{font-family:'Orbitron',sans-serif;font-size:22px;color:#fff;margin-bottom:12px;font-weight:900}
+.card p{color:#94a3b8;font-size:15px;line-height:1.8;margin-bottom:24px}
+.cbtn{padding:14px 38px;background:#38bdf8;color:#000;font-family:'Orbitron',sans-serif;font-size:14px;font-weight:900;border:none;border-radius:12px;cursor:pointer;transition:.3s;letter-spacing:1px}
+.cbtn:hover{transform:translateY(-3px);box-shadow:0 0 40px rgba(56,189,248,.5)}
+.sbig{font-family:'Orbitron',sans-serif;font-size:2.4rem;color:#fbbf24;margin:10px 0}
+.elink{display:inline-block;text-decoration:none;border:2px solid #38bdf8;color:#38bdf8;font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:2px;padding:11px 26px;border-radius:10px;transition:.3s;margin-top:10px}
+.elink:hover{background:#38bdf8;color:#000}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:#38bdf8;border-radius:3px}
+</style>
+</head><body>
+
+<div class="ov" id="intro"><div class="card">
+  <div style="font-size:2.6rem;margin-bottom:14px">🧫🔬💊</div>
+  <h2>ЖАСУША ДӘРІГЕРІ</h2>
+  <p>4 пациенттің жасушасын зерттеңіз!<br>
+  Бүлінген <strong style="color:#38bdf8">органоидты</strong> анықтап,<br>
+  оң жақтағы <strong style="color:#34d399">дәрілік препаратты</strong> сүйреп апарыңыз<br>
+  және бүлінген органоидқа тастаңыз.</p>
+  <button class="cbtn" onclick="start()">▶ ЗЕРТХАНАҒА КІРУ</button>
+</div></div>
+
+<div class="ov" id="end-sc" style="display:none"><div class="card">
+  <div style="font-size:2.6rem;margin-bottom:14px">🏆</div>
+  <h2>ДИАГНОЗ ҚОЙЫЛДЫ!</h2>
+  <div class="sbig" id="fscore">Аяқталды!</div>
+  <p id="fbody" style="margin-bottom:18px"></p>
+  <a href="biology8.html" class="elink">← МӘЗІРГЕ ОРАЛУ</a>
+</div></div>
+
+<nav>
+  <a href="biology8.html">← Мәзір</a>
+  <span style="font-family:'Orbitron',sans-serif;font-size:.85rem;color:#38bdf8">🧫 ЗЕРТХАНА №3 — ЖАСУША ДӘРІГЕРІ</span>
+  <span id="snav">🟢 Белсенді</span>
+</nav>
+
+<div class="main">
+
+<div class="pn pl">
+  <div class="plbl">👤 ПАЦИЕНТТЕР</div>
+  <div id="plist"></div>
+</div>
+
+<div class="center">
+  <div class="vitals-box" style="width:100%; max-width:480px; background:rgba(0,0,0,0.3); border:1px solid rgba(239,68,68,0.3); padding:10px; border-radius:10px;">
+    <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px; color:#fca5a5; font-family:'Orbitron',sans-serif;">
+      <span>❤️ ПАЦИЕНТ ЖАҒДАЙЫ</span>
+      <span id="vitals-text">100%</span>
+    </div>
+    <div style="height:8px; background:rgba(0,0,0,0.5); border-radius:4px; overflow:hidden;">
+      <div id="vitals-fill" style="height:100%; width:100%; background:linear-gradient(90deg, #ef4444, #34d399); transition:width 1s linear;"></div>
+    </div>
+  </div>
+  <div class="cell-wrap">
+    <svg class="cell-svg" viewBox="0 0 460 320" xmlns="http://www.w3.org/2000/svg" id="cellsvg">
+      <ellipse cx="230" cy="160" rx="210" ry="148" fill="rgba(56,189,248,.03)" stroke="rgba(56,189,248,.2)" stroke-width="2"/>
+      <ellipse cx="230" cy="160" rx="196" ry="135" fill="rgba(5,20,40,.6)" stroke="rgba(56,189,248,.1)" stroke-width="1"/>
+      <!-- Nucleus -->
+      <ellipse id="org-nucleus" class="organelle" cx="160" cy="155" rx="52" ry="44"
+        fill="rgba(56,189,248,.1)" stroke="rgba(56,189,248,.5)" stroke-width="2"
+        ondragover="allowDrop(event)" ondrop="dropTool(event,'nucleus')"/>
+      <text x="136" y="158" font-size="10" fill="rgba(56,189,248,.7)" pointer-events="none">Ядро</text>
+      <!-- Mitochondria -->
+      <ellipse id="org-mito" class="organelle" cx="330" cy="120" rx="36" ry="22"
+        fill="rgba(251,191,36,.1)" stroke="rgba(251,191,36,.5)" stroke-width="2"
+        ondragover="allowDrop(event)" ondrop="dropTool(event,'mito')"/>
+      <text x="304" y="123" font-size="9" fill="rgba(251,191,36,.7)" pointer-events="none">Митохондрия</text>
+      <!-- Golgi -->
+      <g id="org-golgi" class="organelle" ondragover="allowDrop(event)" ondrop="dropTool(event,'golgi')">
+        <path d="M340 200 Q380 196 380 210 Q380 224 340 220 Z" fill="rgba(232,121,249,.1)" stroke="rgba(232,121,249,.5)" stroke-width="1.5"/>
+        <path d="M338 220 Q378 216 378 230 Q378 244 338 240 Z" fill="rgba(232,121,249,.08)" stroke="rgba(232,121,249,.4)" stroke-width="1.5"/>
+        <text x="338" y="195" font-size="9" fill="rgba(232,121,249,.7)" pointer-events="none">Гольджи</text>
+      </g>
+      <!-- Ribosome -->
+      <circle id="org-ribo" class="organelle" cx="100" cy="240" r="16"
+        fill="rgba(52,211,153,.1)" stroke="rgba(52,211,153,.5)" stroke-width="2"
+        ondragover="allowDrop(event)" ondrop="dropTool(event,'ribo')"/>
+      <text x="72" y="243" font-size="9" fill="rgba(52,211,153,.7)" pointer-events="none">Рибосома</text>
+      <!-- Lysosome -->
+      <circle id="org-lyso" class="organelle" cx="380" cy="270" r="18"
+        fill="rgba(239,68,68,.1)" stroke="rgba(239,68,68,.5)" stroke-width="2"
+        ondragover="allowDrop(event)" ondrop="dropTool(event,'lyso')"/>
+      <text x="356" y="273" font-size="9" fill="rgba(239,68,68,.7)" pointer-events="none">Лизосома</text>
+      <!-- Chloroplast -->
+      <ellipse id="org-chloro" class="organelle" cx="230" cy="270" rx="38" ry="20"
+        fill="rgba(74,222,128,.1)" stroke="rgba(74,222,128,.5)" stroke-width="2"
+        ondragover="allowDrop(event)" ondrop="dropTool(event,'chloro')"/>
+      <text x="204" y="273" font-size="9" fill="rgba(74,222,128,.7)" pointer-events="none">Хлоропласт</text>
+    </svg>
+  </div>
+  <div class="cell-info" id="cell-info">Сол жақтан пациентті таңдаңыз, содан кейін дәрі-дәрмекті бүлінген органоидқа сүйреп апарыңыз.</div>
+  <div class="tool-tray">
+    <div class="tray-lbl">💊 ДӘРІЛІК ПРЕПАРАТТАР — СҮЙРЕП АПАРЫҢЫЗ</div>
+    <div class="tools-grid" id="tools-grid"></div>
+  </div>
+</div>
+
+<div class="pn pr">
+  <div class="plbl">📋 НӘТИЖЕ</div>
+  <div class="info-box" id="info-box">Пациентті таңдаңыз...</div>
+  <div id="results-log" style="margin-top:8px"></div>
+</div>
+
+</div>
+
+<style>
+.pat-btn.dead { border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.06); }
+.pat-btn.dead .pat-sym { color: #fca5a5; }
+.result-row.dead { border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.06); color: #fca5a5; }
+</style>
+
+<script>
+const CASES=[
+  {name:'Науқас Асель, 8 ж.',sym:'Бұлшықет әлсіздігі, шаршағыштық, дем қысылу.',broken:'mito',
+   medicine:'atp',info:'Митохондриялар АТФ өндіреді — жасушаның энергия көзі. Бүлінсе → энергия жетіспейді.',
+   medicineName:'АТФ Синтетаза'},
+  {name:'Науқас Берік, 14 ж.',sym:'Иммунитет төмен, инфекция жиі қайталанады.',broken:'lyso',
+   medicine:'lyso',info:'Лизосомалар — жасушаның «ас қорытушысы». Бүлінсе → зиянды заттар жинақталады.',
+   medicineName:'Лизосомотроп'},
+  {name:'Науқас Дина, 22 ж.',sym:'Ақуыз синтезі бұзылған, бой өспеу.',broken:'ribo',
+   medicine:'ribo',info:'Рибосомалар ақуыз синтездейді. Жетіспесе → ферменттер, гормондар қалыптаспайды.',
+   medicineName:'Рибозим терапия'},
+  {name:'Науқас Ерлан, 35 ж.',sym:'Секреция бұзылды, гормон шығарылмайды.',broken:'golgi',
+   medicine:'golgi',info:'Гольджи аппараты ақуыздарды өңдеп жеткізеді. Бүлінсе → секреция тоқтайды.',
+   medicineName:'Голджи активатор'},
+];
+
+const MEDICINES=[
+  {id:'atp',name:'АТФ Синтетаза',icon:'⚡',color:'#fbbf24',targets:['mito']},
+  {id:'lyso',name:'Лизосомотроп',icon:'🗑️',color:'#ef4444',targets:['lyso']},
+  {id:'ribo',name:'Рибозим',icon:'🟢',color:'#34d399',targets:['ribo']},
+  {id:'golgi',name:'Голджи актив.',icon:'📦',color:'#e879f9',targets:['golgi']},
+  {id:'nucleus',name:'Ядро протектор',icon:'🔵',color:'#38bdf8',targets:['nucleus']},
+  {id:'chloro',name:'Хлорофилл',icon:'🌿',color:'#4ade80',targets:['chloro']},
+];
+
+let ci=0, solved={}, score=0;
+let vitalVal=100, vitalInterval=null;
+
+function start(){
+  document.getElementById('intro').style.display='none';
+  buildList();
+  buildMedicines();
+  loadCase(0);
+}
+
+function buildList(){
+  const el=document.getElementById('plist');el.innerHTML='';
+  CASES.forEach((c,i)=>{
+    const b=document.createElement('div');
+    b.className='pat-btn'+(i===0?' active':'');b.id='pb-'+i;
+    b.innerHTML=`<div class="pat-title">${c.name}</div><div class="pat-sym">${c.sym}</div>`;
+    b.onclick=()=>selectCase(i);el.appendChild(b);
+  });
+}
+
+function buildMedicines(){
+  const el=document.getElementById('tools-grid');el.innerHTML='';
+  MEDICINES.forEach(m=>{
+    const d=document.createElement('div');
+    d.className='tool-card';d.id='tool-'+m.id;
+    d.style.setProperty('--tc',m.color);
+    d.draggable=true;
+    d.dataset.med=m.id;
+    d.innerHTML=`<span class="tool-icon">${m.icon}</span>${m.name}`;
+    d.addEventListener('dragstart',e=>{
+      e.dataTransfer.setData('medId',m.id);
+      d.classList.add('dragging');
+    });
+    d.addEventListener('dragend',()=>d.classList.remove('dragging'));
+    el.appendChild(d);
+  });
+}
+
+function selectCase(i){
+  document.querySelectorAll('.pat-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('pb-'+i).classList.add('active');
+  loadCase(i);
+}
+
+function loadCase(i){
+  ci=i;
+  resetOrganelles();
+  clearInterval(vitalInterval);
+  const c=CASES[i];
+  
+  if(!solved[i]){
+    vitalVal=100;
+    document.getElementById('vitals-fill').style.width='100%';
+    document.getElementById('vitals-text').textContent='100%';
+    document.getElementById('org-'+c.broken).classList.add('broken');
+    document.getElementById('cell-info').textContent='🔴 Бүлінген органоид байқалды! Дұрыс дәрі-дәрмекті сүйреп апарыңыз.';
+    document.getElementById('info-box').innerHTML=`<strong style="color:#38bdf8">${c.name}</strong><br><span style="color:#64748b">${c.sym}</span><br><br>💡 Дұрыс дәріні сүйреп, бүлінген органоидқа тастаңыз! Жылдам болыңыз!`;
+    
+    vitalInterval=setInterval(()=>{
+      vitalVal-=3; // lose 3% per second
+      if(vitalVal<0) vitalVal=0;
+      document.getElementById('vitals-fill').style.width=vitalVal+'%';
+      document.getElementById('vitals-text').textContent=vitalVal+'%';
+      if(vitalVal<=0){
+        clearInterval(vitalInterval);
+        solved[ci]='dead';
+        document.getElementById('org-'+c.broken).classList.remove('broken');
+        document.getElementById('pb-'+ci).classList.add('dead');
+        document.getElementById('cell-info').textContent='💀 Уақыт бітті. Пациент қайтыс болды...';
+        document.getElementById('info-box').innerHTML=`<strong style="color:#ef4444">❌ ${c.name} қайтыс болды</strong><br>Сіз үлгермедіңіз.`;
+        addResult(c.name, false, true);
+        checkEnd();
+      }
+    }, 1000);
+  } else if (solved[i]==='dead') {
+    document.getElementById('vitals-fill').style.width='0%';
+    document.getElementById('vitals-text').textContent='0%';
+    document.getElementById('cell-info').textContent='💀 Бұл пациентке көмектесе алмадыңыз.';
+    document.getElementById('info-box').innerHTML=`<strong style="color:#ef4444">❌ ${c.name} қайтыс болды</strong><br>Өмірлік маңызды органоид істен шықты.`;
+  } else {
+    document.getElementById('vitals-fill').style.width='100%';
+    document.getElementById('vitals-text').textContent='Тұрақты';
+    document.getElementById('org-'+c.broken).classList.add('fixed');
+    document.getElementById('cell-info').textContent='✅ Емдеу аяқталды!';
+    document.getElementById('info-box').innerHTML=`<strong style="color:#34d399">✅ ${c.name}</strong><br>${c.info}`;
+  }
+}
+
+function resetOrganelles(){
+  ['nucleus','mito','golgi','ribo','lyso','chloro'].forEach(id=>{
+    const el=document.getElementById('org-'+id);
+    if(el){el.classList.remove('broken','fixed');}
+  });
+}
+
+function allowDrop(e){e.preventDefault();}
+
+function dropTool(e,orgId){
+  e.preventDefault();
+  if(solved[ci])return;
+  const medId=e.dataTransfer.getData('medId');
+  const med=MEDICINES.find(m=>m.id===medId);
+  const c=CASES[ci];
+
+  if(med && med.targets.includes(orgId) && orgId===c.broken){
+    // Correct!
+    clearInterval(vitalInterval);
+    solved[ci]=true;score+=10;
+    document.getElementById('pb-'+ci).classList.add('solved');
+    document.getElementById('org-'+c.broken).classList.remove('broken');
+    document.getElementById('org-'+c.broken).classList.add('fixed');
+    document.getElementById('tool-'+medId).classList.add('used');
+    document.getElementById('cell-info').textContent='✅ Дұрыс! '+med.name+' препараты жасушаны емдеді!';
+    document.getElementById('snav').textContent='🟢 Жалғасуда';
+    document.getElementById('info-box').innerHTML=`<strong style="color:#34d399">✅ Емдеу сәтті!</strong><br>${c.info}`;
+    addResult(c.name,true,false);
+    checkEnd();
+  } else {
+    // Wrong organelle or wrong medicine
+    const org=document.getElementById('org-'+orgId);
+    if(org){
+      org.style.filter='drop-shadow(0 0 10px #ef4444)';
+      setTimeout(()=>org.style.filter='',800);
+    }
+    document.getElementById('cell-info').textContent='❌ Қате! Бүлінген органоидты тауып, дұрыс дәрі таңдаңыз.';
+  }
+}
+
+function checkEnd() {
+  if(Object.keys(solved).length===CASES.length) setTimeout(showEnd,1000);
+}
+
+function addResult(name,ok,dead){
+  const el=document.getElementById('results-log');
+  const d=document.createElement('div');
+  d.className='result-row '+(dead?'dead':ok?'ok':'pending');
+  d.innerHTML=(dead?'💀 ':ok?'✅ ':'⏳ ')+name+' — '+(dead?'Қайтыс болды':ok?'Емделді':'Күтуде');
+  el.prepend(d);
+}
+
+function showEnd(){
+  document.getElementById('fscore').textContent='Тәжірибе сәтті аяқталды!';
+  document.getElementById('fbody').innerHTML=
+    `⚡ <b>Митохондрия</b> бүлінсе → АТФ жоқ<br>`+
+    `🗑️ <b>Лизосома</b> бүлінсе → у жинақталады<br>`+
+    `🟢 <b>Рибосома</b> бүлінсе → ақуыз синтезі тоқтайды<br>`+
+    `📦 <b>Гольджи</b> бүлінсе → секреция тоқтайды`;
+  document.getElementById('end-sc').style.display='flex';
+}
+</script>
+
+<!-- Global Language Switcher -->
+<div id="google_translate_element" style="display:none;"></div>
+<script type="text/javascript">
+function googleTranslateElementInit(){new google.translate.TranslateElement({pageLanguage:'kk',includedLanguages:'ru,en,kk',autoDisplay:false},'google_translate_element');}
+</script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script>
+(function(){let l=localStorage.getItem('vsh-lang')||'kk';let g='/kk/'+l;if(l==='kk'){document.cookie="googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";if(location.hostname){document.cookie="googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain="+location.hostname+"; path=/;";document.cookie="googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=."+location.hostname+"; path=/;";}}else{document.cookie="googtrans="+g+"; path=/";if(location.hostname)document.cookie="googtrans="+g+"; domain="+location.hostname+"; path=/";}
+if(!document.querySelector('.floating-lang-switcher')){const s=document.createElement('style');s.innerHTML=`body{top:0!important}.skiptranslate{display:none!important}.floating-lang-switcher{position:fixed;bottom:20px;left:20px;background:rgba(15,23,42,.9);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:10px;display:flex;gap:10px;z-index:999999;box-shadow:0 5px 15px rgba(0,0,0,.5)}.floating-lang-btn{background:transparent;border:1px solid rgba(255,255,255,.2);color:#94a3b8;font-size:14px;font-weight:600;padding:8px 15px;border-radius:12px;cursor:pointer;transition:.3s}.floating-lang-btn:hover{color:#fff;background:rgba(255,255,255,.1)}.floating-lang-btn.active{background:linear-gradient(135deg,#a855f7,#3b82f6);color:#fff;border-color:transparent}`;document.head.appendChild(s);const sw=document.createElement('div');sw.className='floating-lang-switcher notranslate';sw.innerHTML=`<button class="floating-lang-btn" onclick="changeLangGlobal('ru')">RU</button><button class="floating-lang-btn" onclick="changeLangGlobal('kk')">ҚАЗ</button><button class="floating-lang-btn" onclick="changeLangGlobal('en')">EN</button>`;const bs=sw.querySelectorAll('.floating-lang-btn');if(l==='ru')bs[0].classList.add('active');else if(l==='kk')bs[1].classList.add('active');else bs[2].classList.add('active');document.body.appendChild(sw);}})();
+function changeLangGlobal(lang){localStorage.setItem('vsh-lang',lang);let g='/kk/'+lang;if(lang==='kk'){document.cookie="googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";if(location.hostname){document.cookie="googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain="+location.hostname+"; path=/;";document.cookie="googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=."+location.hostname+"; path=/;";}}else{document.cookie="googtrans="+g+"; path=/";if(location.hostname)document.cookie="googtrans="+g+"; domain="+location.hostname+"; path=/";}location.reload();}
+</script>
+</body></html>

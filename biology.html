@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Микроскоп: Живая Клетка — Virtual Science Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Roboto', sans-serif; user-select: none; }
+        body { background: #020617; color: #fff; height: 100vh; display: flex; overflow: hidden; }
+
+        /* Left Tray */
+        .tray {
+            width: 300px; background: rgba(15,23,42,0.95); border-right: 2px solid #1e293b;
+            padding: 20px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; z-index: 10;
+        }
+        .tray h2 { font-size: 20px; color: #38bdf8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; border-bottom: 1px solid #1e293b; padding-bottom: 10px; position: sticky; top: -20px; background: rgba(15,23,42,0.95); z-index: 5; }
+        .tray-counter { font-size: 12px; color: #94a3b8; display: block; margin-top: -5px; margin-bottom: 15px; }
+
+        .sample {
+            background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 10px 15px;
+            cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .sample:hover { border-color: #38bdf8; background: #1e293b; transform: translateX(5px); }
+        .sample.active { border-color: #38bdf8; background: rgba(56,189,248,0.1); box-shadow: inset 0 0 10px rgba(56,189,248,0.2); }
+        .sample-icon { font-size: 20px; width: 35px; height: 35px; background: rgba(0,0,0,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid #475569; }
+        .sample-name { font-weight: 600; font-size: 14px; flex: 1; }
+
+        /* Main Workspace */
+        .workspace {
+            flex: 1; display: flex; flex-direction: column; position: relative;
+            background: radial-gradient(circle at 50% 50%, #1e293b 0%, #020617 100%);
+        }
+
+        .microscope-stage {
+            flex: 1; display: flex; justify-content: center; align-items: center; position: relative;
+        }
+
+        /* The Lens */
+        .lens {
+            width: 500px; height: 500px; border-radius: 50%;
+            background: #000; border: 15px solid #0f172a;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8), inset 0 0 50px rgba(255,255,255,0.05);
+            position: relative; overflow: hidden;
+        }
+
+        .lens::before {
+            content: ''; position: absolute; top: 0; left: 50%; width: 1px; height: 100%; background: rgba(56,189,248,0.1); z-index: 2; pointer-events: none;
+        }
+        .lens::after {
+            content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background: rgba(56,189,248,0.1); z-index: 2; pointer-events: none;
+        }
+
+        .lens-bg {
+            position: absolute; inset: 0; background: radial-gradient(circle, rgba(15,23,42,1) 0%, #000 100%); opacity: 0.8; z-index:1;
+        }
+
+        /* Specimen display */
+        .specimen-stage {
+            position: absolute; width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center;
+            transition: transform 0.1s linear, filter 0.1s linear;
+            z-index: 3;
+        }
+
+        .specimen-icon {
+            font-size: 150px; 
+            width: 300px; height: 300px; 
+            display: flex; justify-content: center; align-items: center;
+            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 4s infinite ease-in-out alternate;
+        }
+
+        @keyframes float { 0% { transform: translateY(-10px) rotate(-2deg); } 100% { transform: translateY(10px) rotate(2deg); } }
+
+        /* Controls */
+        .controls {
+            background: rgba(15,23,42,0.9); padding: 25px 40px; display: flex; gap: 40px; justify-content: center; border-top: 1px solid #1e293b; z-index: 10;
+        }
+        .control-group { display: flex; flex-direction: column; gap: 10px; flex: 1; max-width: 400px; }
+        .control-group label { color: #94a3b8; font-size: 14px; text-transform: uppercase; font-weight: bold; display: flex; justify-content: space-between; }
+        .control-group label span { color: #38bdf8; }
+        
+        input[type=range] { -webkit-appearance: none; width: 100%; background: #334155; height: 10px; border-radius: 5px; outline: none; cursor: pointer; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; background: #38bdf8; border-radius: 50%; cursor: pointer; border: 4px solid #0f172a; box-shadow: 0 0 15px rgba(56,189,248,0.8); transition: transform 0.1s; }
+        input[type=range]::-webkit-slider-thumb:active { transform: scale(1.1); }
+
+        /* Right Dashboard */
+        .dashboard {
+            width: 380px; background: rgba(15,23,42,0.95); border-left: 2px solid #1e293b;
+            padding: 30px; display: flex; flex-direction: column; overflow-y: auto; transition: background 0.3s;
+        }
+        .dashboard.flash { background: #064e3b; }
+
+        .scan-header { color: #10b981; font-family: monospace; font-size: 14px; margin-bottom: 20px; border-bottom: 1px dashed #1e293b; padding-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .scan-header.unidentified { color: #ef4444; }
+        
+        .scan-header .led { width: 10px; height: 10px; border-radius: 50%; background: currentcolor; box-shadow: 0 0 10px currentcolor; animation: blink 1s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        
+        .specimen-title { font-size: 28px; color: #fff; margin-bottom: 5px; font-weight: 800; min-height: 35px; }
+        .specimen-latin { font-size: 16px; color: #94a3b8; font-style: italic; margin-bottom: 25px; min-height: 20px;}
+        
+        .fact-card {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-bottom: 20px;
+        }
+        .fact-card h4 { color: #38bdf8; font-size: 14px; margin-bottom: 10px; text-transform: uppercase; display:flex; align-items:center; gap:8px;}
+        .fact-card p { color: #cbd5e1; font-size: 15px; line-height: 1.6; }
+
+        .hint-box { background: rgba(239,68,68,0.1); border: 1px dashed #ef4444; padding: 15px; border-radius: 10px; color: #fca5a5; font-size: 14px; text-align: center; }
+
+        .btn-back { position: absolute; top: 20px; left: 320px; background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.3); color: #38bdf8; text-decoration: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; z-index: 100; transition: 0.2s; }
+        .btn-back:hover { background: rgba(56,189,248,0.2); }
+
+    </style>
+
+    <script id="early-lang-sync">
+        (function() {
+            let cl = localStorage.getItem('vsh-lang') || 'kk';
+            var gt = '/ru/' + cl;
+            if (cl === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+                document.cookie = "googtrans=" + gt + "; path=/";
+                if (location.hostname) {
+                    document.cookie = "googtrans=" + gt + "; domain=" + location.hostname + "; path=/";
+                    document.cookie = "googtrans=" + gt + "; domain=." + location.hostname + "; path=/";
+                }
+            }
+        })();
+    </script>
+</head>
+<body>
+
+    <a href="index.html" class="btn-back">⬅ В меню</a>
+
+    <div class="tray" id="trayList">
+        <h2>Образцы</h2>
+        <span class="tray-counter">Доступно 30 элементов</span>
+        <!-- JS Injected Samples -->
+    </div>
+
+    <div class="workspace">
+        <div class="microscope-stage">
+            <div class="lens">
+                <div class="lens-bg"></div>
+                <div class="specimen-stage" id="stage">
+                    <!-- Icon injected here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>Микровинт (Фокус) <span id="focusVal">0</span></label>
+                <input type="range" id="focusSlider" min="0" max="100" value="0">
+            </div>
+            <div class="control-group">
+                <label>Объектив (Зум) <span id="zoomVal">10x</span></label>
+                <input type="range" id="zoomSlider" min="10" max="100" value="20">
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard" id="dbCard">
+        <div class="scan-header unidentified" id="scanHeader">
+            <div class="led"></div> 
+            <span id="scanStatusTxt">СТАТУС: ОБЪЕКТ НЕ В ФОКУСЕ</span>
+        </div>
+
+        <h1 class="specimen-title" id="db-title">???</h1>
+        <div class="specimen-latin" id="db-latin">Classificatio ignota</div>
+        
+        <div class="fact-card">
+            <h4>🧬 Описание</h4>
+            <p id="db-desc">ОБЪЕКТ РАЗМЫТ.<br><br>Выберите образец слева и настраивайте <b>Фокус</b> (ползунок внизу), пока изображение в микроскопе не станет абсолютно четким!</p>
+        </div>
+        
+        <div class="fact-card" id="factBox" style="opacity:0.3;">
+            <h4>🔬 Секретный Факт</h4>
+            <p id="db-facts" style="filter: blur(4px);">[ДАННЫЕ ЗАСЕКРЕЧЕНЫ ПОКА ОБЪЕКТ РАЗМЫТ]</p>
+        </div>
+
+        <div class="hint-box" id="hintBox">
+            Крутите микровинт влево или вправо, чтобы найти оптимум!
+        </div>
+    </div>
+
+    <script>
+        const dbArray = [
+            { icon: '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/Blausen_0761_RedBloodCells.png/500px-Blausen_0761_RedBloodCells.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid rgba(56,189,248,0.5);box-shadow: 0 0 15px rgba(56,189,248,0.3);">', name: 'Эритроцит', latin: 'Erythrocyte', desc: 'Красная кровяная клетка. Транспортирует кислород от легких к тканям.', fact: 'У млекопитающих лишены ядра, чтобы вместить больше гемоглобина.', f: 15 },
+            { icon: '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Blausen_0909_WhiteBloodCells.png/500px-Blausen_0909_WhiteBloodCells.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid #38bdf8;">', name: 'Лейкоцит', latin: 'Leukocyte', desc: 'Белая кровяная клетка, солдат иммунной системы организма.', fact: 'Способны к амебоидному движению и могут выходить сквозь стенки сосудов.', f: 85 },
+            { icon: '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Platelets2.JPG/500px-Platelets2.JPG" style="width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid #38bdf8;">', name: 'Тромбоцит', latin: 'Thrombocyte', desc: 'Кровяная пластинка, участвующая в процессе свертывания крови.', fact: 'Это не полноценные клетки, а обломки крупных клеток — мегакариоцитов.', f: 42 },
+            { icon: '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Blausen_0657_MultipolarNeuron.png/500px-Blausen_0657_MultipolarNeuron.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid #38bdf8;">', name: 'Нейрон', latin: 'Neuron', desc: 'Электрически возбудимая клетка нервной системы.', fact: 'Некоторые аксоны (отростки) нейронов у человека могут достигать длины более 1 метра.', f: 67 },
+            { icon: '<img src="https://upload.wikimedia.org/wikipedia/commons/8/86/Sperm-egg.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid #38bdf8;">', name: 'Сперматозоид', latin: 'Spermatozoon', desc: 'Мужская половая клетка, снабженная мощным жгутиком.', fact: 'Это самая маленькая клетка в организме человека.', f: 22 },
+            { icon: '<img src="https://upload.wikimedia.org/wikipedia/commons/8/81/Gray3.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid rgba(56,189,248,0.5);box-shadow: 0 0 15px rgba(56,189,248,0.3);">', name: 'Яйцеклетка', latin: 'Ovum', desc: 'Женская половая клетка с огромным запасом питательных веществ.', fact: 'Самая крупная клетка человека, ее можно увидеть невооруженным глазом (0.1 мм).', f: 91 },
+            { icon: '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Synapse_diag3.png/500px-Synapse_diag3.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid rgba(56,189,248,0.5);box-shadow: 0 0 15px rgba(56,189,248,0.3);">', name: 'Мышечное волокно', latin: 'Myocytus', desc: 'Многоядерная вытянутая структура, способная к сокращению.', fact: 'Содержит белки актин и миозин, которые "скользят" друг по другу при сокращении.', f: 5 },
+            { icon: '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Illu_epithelium.jpg/500px-Illu_epithelium.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid #38bdf8;">', name: 'Клетка Эпителия', latin: 'Epithelium', desc: 'Клетка, выстилающая поверхность тела и все полости органов.', fact: 'Они плотно прилегают друг к другу, образуя надежный защитный барьер.', f: 53 },
+            { icon: '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Paramecium_caudatum_Ehrenberg%2C_1833.jpg/500px-Paramecium_caudatum_Ehrenberg%2C_1833.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid #38bdf8;">', name: 'Инфузория-туфелька', latin: 'Paramecium caudatum', desc: 'Крупное одноклеточное животное, густо покрытое ресничками.', fact: 'Имеет два ядра: макронуклеус (для жизни) и микронуклеус (для размножения).', f: 77 },
+            { icon: '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Amoeba_proteus_with_many_pseudopodia.jpg/500px-Amoeba_proteus_with_many_pseudopodia.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid #38bdf8;">', name: 'Амёба Протей', latin: 'Amoeba proteus', desc: 'Одноклеточное, не имеющее постоянной формы тела.', fact: 'Питается фагоцитозом — обволакивает жертву своими "ложноножками".', f: 31 },
+            { icon: '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Euglena_-_400x_%288999902391%29.jpg/500px-Euglena_-_400x_%288999902391%29.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid rgba(56,189,248,0.5);box-shadow: 0 0 15px rgba(56,189,248,0.3);">', name: 'Эвглена зеленая', latin: 'Euglena viridis', desc: 'Уникальный организм: на свету — растение, в темноте — хищник.', fact: 'Имеет светочувствительный красный глазок (стигма) для навигации к свету.', f: 64 },
+            { icon: '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/T4_Bacteriophage.gif/500px-T4_Bacteriophage.gif" style="width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid rgba(56,189,248,0.5);box-shadow: 0 0 15px rgba(56,189,248,0.3);">', name: 'Бактериофаг', latin: 'Bacteriophage', desc: 'Вирус-убийца, специфично поражающий только бактерии.', fact: 'Выглядит как лунный модуль: "головка" с ДНК и "ножки" для посадки на жертву.', f: 88 },
+            { icon: '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/E_coli_at_10000x%2C_original.jpg/500px-E_coli_at_10000x%2C_original.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid rgba(56,189,248,0.5);box-shadow: 0 0 15px rgba(56,189,248,0.3);">', name: 'Кишечная палочка', latin: 'Escherichia coli', desc: 'Палочковидная бактерия, часть нормальной микрофлоры человека.', fact: 'Это самая изученная бактерия в мире, "рабочая лошадка" генной инженерии.', f: 11 },
+            { icon: '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Staphylococcus_aureus_01.jpg/500px-Staphylococcus_aureus_01.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid rgba(56,189,248,0.5);box-shadow: 0 0 15px rgba(56,189,248,0.3);">', name: 'Стафилококк', latin: 'Staphylococcus', desc: 'Шаровидные бактерии (кокки), растущие гроздьями.', fact: 'Обычно живут на нашей коже без вреда, но при ранениях вызывают гнойные воспаления.', f: 29 },
+            { icon: '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Fimmu-09-01581-g001.jpg/500px-Fimmu-09-01581-g001.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid rgba(56,189,248,0.5);box-shadow: 0 0 15px rgba(56,189,248,0.3);">', name: 'Вирус гриппа', latin: 'Orthomyxoviridae', desc: 'Опасный РНК-содержащий вирус дыхательных путей.', fact: 'Обладает поразительной скоростью мутаций, из-за чего вакцины нужно делать ежегодно.', f: 95 },
+            { icon: '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Viruses-07-01700-g003.jpg/500px-Viruses-07-01700-g003.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid rgba(56,189,248,0.5);box-shadow: 0 0 15px rgba(56,189,248,0.3);">', name: 'Коронавирус', latin: 'Coronaviridae', desc: 'Вирус с характерными "шипами" на оболочке-короне.', fact: 'Шип-белок работает как отмычка, взламывая рецепторы человеческих клеток.', f: 48 },
+            { icon: '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Chlamydomonas_%2810000x%29.jpg/500px-Chlamydomonas_%2810000x%29.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid rgba(56,189,248,0.5);box-shadow: 0 0 15px rgba(56,189,248,0.3);">', name: 'Хламидомонада', latin: 'Chlamydomonas', desc: 'Одноклеточная подвижная зеленая водоросль с двумя жгутиками.', fact: 'Её гигантский зеленый хлоропласт имеет форму чаши, занимая почти всю клетку.', f: 72 },
+            { icon: '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Saccharomyces_cerevisiae_SEM.jpg/500px-Saccharomyces_cerevisiae_SEM.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid rgba(56,189,248,0.5);box-shadow: 0 0 15px rgba(56,189,248,0.3);">', name: 'Дрожжи (Сахаромицеты)', latin: 'Saccharomyces', desc: 'Одноклеточные микроскопические грибы.', fact: 'Размножаются почкованием: на теле материнской клетки надувается и отрывается пузырек-дочка.', f: 38 },
+            { icon: '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Penicillium_Pengo.jpg/500px-Penicillium_Pengo.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid rgba(56,189,248,0.5);box-shadow: 0 0 15px rgba(56,189,248,0.3);">', name: 'Плесень Пеницилл', latin: 'Penicillium', desc: 'Зеленоватый микроскопический гриб (плесень).', fact: 'Из него Александр Флеминг выделил первый в истории антибиотик — пенициллин.', f: 82 },
+            { icon: '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Plant_cell_structure-en.svg/500px-Plant_cell_structure-en.svg.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid rgba(56,189,248,0.5);box-shadow: 0 0 15px rgba(56,189,248,0.3);">', name: 'Растительная клетка', latin: 'Plantae Cellula', desc: 'Клетка, надежно закрытая в коробку из прочной целлюлозы.', fact: 'У взрослых клеток внутри есть огромный "пузырь" (вакуоль) с клеточным соком.', f: 19 },
+            { icon: '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Chloroplast_II_%28cropped%29.svg/500px-Chloroplast_II_%28cropped%29.svg.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid rgba(56,189,248,0.5);box-shadow: 0 0 15px rgba(56,189,248,0.3);">', name: 'Хлоропласт', latin: 'Chloroplast', desc: 'Зеленый органоид, внутри которого происходит фотосинтез.', fact: 'Имеет собственную ДНК. Миллиарды лет назад он был отдельной бактерией!', f: 57 },
+            { icon: '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Animal_mitochondrion_diagram_en.svg/500px-Animal_mitochondrion_diagram_en.svg.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid rgba(56,189,248,0.5);box-shadow: 0 0 15px rgba(56,189,248,0.3);">', name: 'Митохондрия', latin: 'Mitochondrion', desc: '"Энергетическая станция" клетки. Превращает еду в энергию (АТФ).', fact: 'Чем активнее клетка, тем их больше. В мышцах их могут быть тысячи на одну клетку.', f: 9 },
+            { icon: '<img src="https://upload.wikimedia.org/wikipedia/commons/6/6c/HeLa_cells_stained_with_Hoechst_33258.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid rgba(56,189,248,0.5);box-shadow: 0 0 15px rgba(56,189,248,0.3);">', name: 'Клеточное Ядро', latin: 'Nucleus', desc: 'Центр управления клеткой, сейф, где хранится ДНК.', fact: 'Если вытянуть ДНК из одного ядра человека в струну, её длина составит около 2 метров!', f: 75 },
+            { icon: '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Ribosome_shape.png/500px-Ribosome_shape.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid rgba(56,189,248,0.5);box-shadow: 0 0 15px rgba(56,189,248,0.3);">', name: 'Рибосома', latin: 'Ribosome', desc: 'Молекулярная машина, занимающаяся сборкой белков.', fact: 'В одной бактерии в секунду могут трудиться до 100 000 таких крошечных станков.', f: 90 },
+            { icon: '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Misc_pollen_colorized.jpg/500px-Misc_pollen_colorized.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid rgba(56,189,248,0.5);box-shadow: 0 0 15px rgba(56,189,248,0.3);">', name: 'Пыльца Цветка', latin: 'Pollen', desc: 'Скопление микроспор семенных растений.', fact: 'Оболочка пыльцы настолько пуленепробиваема, что она сохраняется в торфе миллионы лет.', f: 62 },
+            { icon: '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Tomato_leaf_stomate_1-color.jpg/500px-Tomato_leaf_stomate_1-color.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid rgba(56,189,248,0.5);box-shadow: 0 0 15px rgba(56,189,248,0.3);">', name: 'Устьице Листа', latin: 'Stoma', desc: 'Микроскопическая щель (пора) на кожице листьев.', fact: 'Работает как губы: две клетки могут надуваться, закрывая или открывая щель для дыхания.', f: 25 },
+            { icon: '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Waterbear.jpg/500px-Waterbear.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid rgba(56,189,248,0.5);box-shadow: 0 0 15px rgba(56,189,248,0.3);">', name: 'Тихоходка', latin: 'Tardigrada', desc: 'Мельчайшее животное, прозванное "водяным медведем".', fact: 'Абсолютный чемпион по выживанию. Выдерживает радиацию, вакуум космоса и кипячение.', f: 50 },
+            { icon: '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Rotifera_collage.png/500px-Rotifera_collage.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid rgba(56,189,248,0.5);box-shadow: 0 0 15px rgba(56,189,248,0.3);">', name: 'Коловратка', latin: 'Rotifera', desc: 'Микро-многоклеточное животное. На голове есть "колеса" из ресничек.', fact: 'Некоторые виды состоят исключительно из самок, которые размножаются без самцов (партеногенез).', f: 14 },
+            { icon: '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Adult_Caenorhabditis_elegans.jpg/500px-Adult_Caenorhabditis_elegans.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid rgba(56,189,248,0.5);box-shadow: 0 0 15px rgba(56,189,248,0.3);">', name: 'Нематода (C. elegans)', latin: 'Caenorhabditis elegans', desc: 'Микроскопический прозрачный круглый червь.', fact: 'Это первое в мире животное, чей геном был полностью, до буквы, расшифрован учеными.', f: 81 },
+            { icon: '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Daphnia_pulex.png/500px-Daphnia_pulex.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid rgba(56,189,248,0.5);box-shadow: 0 0 15px rgba(56,189,248,0.3);">', name: 'Дафния', latin: 'Daphnia', desc: 'Мелкое пресноводное ракообразное ("водяная блоха").', fact: 'У неё прозрачный панцирь! В микроскоп видно, как внутри бьется её крошечное сердце.', f: 3 }
+        ];
+
+        let currentTargetFocus = null;
+        let isIdentified = false;
+
+        const stage = document.getElementById('stage');
+        const focusSlider = document.getElementById('focusSlider');
+        const zoomSlider = document.getElementById('zoomSlider');
+        const trayList = document.getElementById('trayList');
+        const scanHeader = document.getElementById('scanHeader');
+
+        // Populate tray
+        dbArray.forEach((s, idx) => {
+            const div = document.createElement('div');
+            div.className = 'sample';
+            div.id = `sample-${idx}`;
+            div.innerHTML = `<div class="sample-icon">${s.icon}</div><div class="sample-name">${idx+1}. ${s.name}</div>`;
+            div.onclick = () => loadSample(idx);
+            trayList.appendChild(div);
+        });
+
+        function loadSample(idx) {
+            const s = dbArray[idx];
+            currentTargetFocus = s.f;
+            isIdentified = false;
+
+            // Update UI tray
+            document.querySelectorAll('.sample').forEach(el=>el.classList.remove('active'));
+            document.getElementById(`sample-${idx}`).classList.add('active');
+
+            // Reset right panel to hidden state
+            document.getElementById('db-title').textContent = 'НЕИЗВЕСТНО';
+            document.getElementById('db-latin').textContent = 'Classificatio ignota';
+            document.getElementById('db-desc').innerHTML = 'ОБЪЕКТ СИЛЬНО РАЗМЫТ.<br><br>Вращайте макро- и микровинт (ползунок Фокус) влево или вправо, чтобы поймать фокусное расстояние объекта!';
+            document.getElementById('db-facts').textContent = '[ДАННЫЕ ЗАСЕКРЕЧЕНЫ]';
+            document.getElementById('db-facts').style.filter = 'blur(4px)';
+            document.getElementById('factBox').style.opacity = '0.3';
+            
+            scanHeader.classList.add('unidentified');
+            scanHeader.style.color = '#ef4444';
+            document.getElementById('scanStatusTxt').textContent = 'СТАТУС: ОБЪЕКТ РАЗМЫТ. ТРЕБУЕТСЯ ФОКУСИРОВКА';
+            document.getElementById('hintBox').style.display = 'block';
+
+            // Inject icon into microscope
+            stage.innerHTML = `<div class="specimen-icon">${s.icon}</div>`;
+
+            // Randomize focus slider so user must search
+            let rF = Math.floor(Math.random() * 100);
+            while(Math.abs(rF - currentTargetFocus) < 20) {
+                rF = Math.floor(Math.random() * 100);
+            }
+            focusSlider.value = rF;
+
+            updateMicroscope();
+        }
+
+        function updateMicroscope() {
+            if (currentTargetFocus === null) return;
+
+            const focus = parseInt(focusSlider.value);
+            const zoom = parseInt(zoomSlider.value);
+            
+            document.getElementById('focusVal').textContent = focus;
+            document.getElementById('zoomVal').textContent = zoom + 'x';
+
+            const dist = Math.abs(focus - currentTargetFocus);
+            
+            // Calculate blur (max blur is 50px)
+            let blurAmt = Math.min(50, dist);
+            if (dist <= 3) blurAmt = 0; // perfectly sharp
+
+            const scale = zoom / 10;
+            
+            // Apply visual effect
+            stage.style.filter = `blur(${blurAmt}px) drop-shadow(0 0 20px rgba(56,189,248,0.7))`;
+            stage.style.transform = `scale(${scale})`;
+
+            // Check recognition
+            if (dist <= 3 && !isIdentified) {
+                unlockData();
+            } else if (dist > 3 && isIdentified) {
+                // Relock if they lose focus
+                isIdentified = false;
+                scanHeader.style.color = '#facc15';
+                document.getElementById('scanStatusTxt').textContent = 'СТАТУС: ФОКУС ПОТЕРЯН!';
+            }
+        }
+
+        function unlockData() {
+            isIdentified = true;
+            const activeIdx = Array.from(document.querySelectorAll('.sample')).findIndex(s => s.classList.contains('active'));
+            const s = dbArray[activeIdx];
+
+            document.getElementById('db-title').textContent = s.name;
+            document.getElementById('db-latin').textContent = s.latin;
+            document.getElementById('db-desc').textContent = s.desc;
+            document.getElementById('db-facts').textContent = s.fact;
+            
+            // Reveal visuals
+            document.getElementById('db-facts').style.filter = 'blur(0)';
+            document.getElementById('factBox').style.opacity = '1';
+            document.getElementById('hintBox').style.display = 'none';
+
+            // Success Header
+            scanHeader.classList.remove('unidentified');
+            scanHeader.style.color = '#4ade80';
+            document.getElementById('scanStatusTxt').textContent = 'СТАТУС: ОБЪЕКТ УСПЕШНО РАСПОЗНАН ✓';
+
+            // Flash effect
+            const dbCard = document.getElementById('dbCard');
+            dbCard.classList.add('flash');
+            setTimeout(() => dbCard.classList.remove('flash'), 300);
+        }
+
+        focusSlider.addEventListener('input', updateMicroscope);
+        zoomSlider.addEventListener('input', updateMicroscope);
+
+        // Load first item on start
+        setTimeout(() => loadSample(0), 100);
+
+    </script>
+
+<!-- Global Language Switcher & Google Translate -->
+<div id="google_translate_element" style="display:none;"></div>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({pageLanguage: 'ru', includedLanguages: 'ru,en,kk', autoDisplay: false}, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script>
+(function() {
+    let currentLang = localStorage.getItem('vsh-lang') || 'kk';
+
+    // Synchronize cookie if needed
+    var gtrans = '/ru/' + currentLang;
+    if (currentLang === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) {
+            document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+        }
+    }
+
+    // Floating UI
+    const isIndex = location.pathname.endsWith('index.html') || location.pathname.endsWith('/') || location.pathname.endsWith('studio.html');
+    if (!document.querySelector('.floating-lang-switcher')) {
+        const style = document.createElement('style');
+        style.innerHTML = `
+            body { top: 0 !important; }
+            .skiptranslate { display: none !important; }
+            .floating-lang-switcher {
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                background: rgba(15, 23, 42, 0.9);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 20px;
+                padding: 10px;
+                display: flex;
+                gap: 10px;
+                z-index: 999999;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+                font-family: 'Roboto', sans-serif;
+            }
+            .floating-lang-btn {
+                background: transparent;
+                border: 1px solid rgba(255,255,255,0.2);
+                color: #94a3b8;
+                font-size: 14px;
+                font-weight: 600;
+                padding: 8px 15px;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: 0.3s;
+            }
+            .floating-lang-btn:hover {
+                color: #fff;
+                background: rgba(255,255,255,0.1);
+            }
+            .floating-lang-btn.active {
+                background: linear-gradient(135deg, #a855f7, #3b82f6);
+                color: #fff;
+                border-color: transparent;
+            }
+        `;
+        document.head.appendChild(style);
+
+        const switcher = document.createElement('div');
+        switcher.className = 'floating-lang-switcher notranslate';
+        switcher.innerHTML = `
+            <button class="floating-lang-btn " onclick="changeLangGlobal('ru')">RU</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('kk')">ҚАЗ</button>
+            <button class="floating-lang-btn " onclick="changeLangGlobal('en')">EN</button>
+        `;
+        
+        // set active
+        const btns = switcher.querySelectorAll('.floating-lang-btn');
+        if (currentLang === 'ru') btns[0].classList.add('active');
+        else if (currentLang === 'kk') btns[1].classList.add('active');
+        else if (currentLang === 'en') btns[2].classList.add('active');
+
+        document.body.appendChild(switcher);
+    }
+})();
+
+function changeLangGlobal(lang) {
+    localStorage.setItem('vsh-lang', lang);
+    var gtrans = '/ru/' + lang;
+    if (lang === 'ru') { 
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+        }
+ } else {
+        document.cookie = "googtrans=" + gtrans + "; path=/";
+        if (location.hostname) document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
+    }
+    location.reload();
+}
+</script>
+\n</body>
+</html>
