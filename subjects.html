@@ -191,43 +191,74 @@
     <canvas id="bg-canvas"></canvas>
 
     <!-- Top Navigation -->
-    <nav class="top-nav">
-        <div class="nav-brand">
-            <span class="nav-logo">
-                <svg viewBox="0 0 100 100" class="nav-logo-svg">
-                    <defs>
-                        <linearGradient id="vshNavGradSub" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#00f3ff" />
-                            <stop offset="50%" stop-color="#a855f7" />
-                            <stop offset="100%" stop-color="#bc13fe" />
-                        </linearGradient>
-                    </defs>
-                    <polygon points="50,6 90,28 90,72 50,94 10,72 10,28" 
-                             fill="url(#vshNavGradSub)" fill-opacity="0.15" 
-                             stroke="url(#vshNavGradSub)" stroke-width="3" 
-                             stroke-linejoin="round" />
-                    <ellipse cx="50" cy="50" rx="38" ry="14" 
-                             fill="none" stroke="#00f3ff" stroke-width="2" 
-                             stroke-dasharray="8 4" transform="rotate(-30 50 50)" class="vsh-orbit-ring1" />
-                    <circle cx="82" cy="32" r="3.5" fill="#00f3ff" />
-                    <ellipse cx="50" cy="50" rx="38" ry="14" 
-                             fill="none" stroke="#bc13fe" stroke-width="2" 
-                             stroke-dasharray="6 3" transform="rotate(35 50 50)" class="vsh-orbit-ring2" />
-                    <circle cx="20" cy="36" r="3.5" fill="#bc13fe" />
-                    <text x="50" y="59" text-anchor="middle" font-family="'Roboto', sans-serif" 
-                          font-weight="900" font-size="28" fill="url(#vshNavGradSub)">VSH</text>
-                </svg>
-            </span>
-            <span class="nav-title">Virtual Science Hub</span>
+    <nav class="top-nav" id="topNav">
+        <div class="nav-left">
+            <a href="index.html" class="nav-brand" title="Virtual Science Hub">
+                <span class="nav-logo">
+                    <svg viewBox="0 0 100 100" class="nav-logo-svg" width="36" height="36">
+                        <defs>
+                            <linearGradient id="vshNavGradSub" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#00f3ff" />
+                                <stop offset="50%" stop-color="#a855f7" />
+                                <stop offset="100%" stop-color="#bc13fe" />
+                            </linearGradient>
+                        </defs>
+                        <polygon points="50,6 90,28 90,72 50,94 10,72 10,28" 
+                                 fill="url(#vshNavGradSub)" fill-opacity="0.15" 
+                                 stroke="url(#vshNavGradSub)" stroke-width="3" 
+                                 stroke-linejoin="round" />
+                        <ellipse cx="50" cy="50" rx="38" ry="14" 
+                                 fill="none" stroke="#00f3ff" stroke-width="2" 
+                                 stroke-dasharray="8 4" transform="rotate(-30 50 50)" class="vsh-orbit-ring1" />
+                        <circle cx="82" cy="32" r="3.5" fill="#00f3ff" />
+                        <ellipse cx="50" cy="50" rx="38" ry="14" 
+                                 fill="none" stroke="#bc13fe" stroke-width="2" 
+                                 stroke-dasharray="6 3" transform="rotate(35 50 50)" class="vsh-orbit-ring2" />
+                        <circle cx="20" cy="36" r="3.5" fill="#bc13fe" />
+                        <text x="50" y="59" text-anchor="middle" font-family="'Roboto', sans-serif" 
+                              font-weight="900" font-size="28" fill="url(#vshNavGradSub)">VSH</text>
+                    </svg>
+                </span>
+                <div class="nav-brand-text">
+                    <span class="nav-title">Virtual Science Hub</span>
+                    <span class="nav-tagline">Предметы и классы</span>
+                </div>
+            </a>
         </div>
+
+        <!-- Central Desktop Menu Links -->
+        <div class="nav-links-center">
+            <a href="index.html" class="nav-link-item">
+                <i class="fa-solid fa-arrow-left"></i> <span data-i18n="navHome">На главную</span>
+            </a>
+            <a href="presentation.html" class="nav-link-item">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> <span data-i18n="presentationTitle">AI Презентации</span>
+            </a>
+            <a href="studio.html" class="nav-link-item">
+                <i class="fa-solid fa-gamepad"></i> <span data-i18n="studioTitle">Конструктор игр</span>
+            </a>
+        </div>
+
+        <!-- Right Action Controls -->
         <div class="nav-actions">
-            <a href="index.html" style="background:rgba(255,255,255,0.1); color:white; padding:6px 14px; border-radius:8px; font-weight:bold; text-decoration:none; margin-right:15px; font-size:0.9rem; transition:0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'"><i class="fa-solid fa-arrow-left"></i> Назад на главную</a>
-            
-            <div class="lang-switcher">
-                <button class="lang-btn active" data-lang="ru" onclick="setLang('ru')">RU</button>
-                <button class="lang-btn" data-lang="kk" onclick="setLang('kk')">ҚАЗ</button>
-                <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+            <!-- Theme Switcher -->
+            <button id="themeToggleBtn" class="nav-icon-btn" onclick="toggleTheme()" title="Переключить тему">
+                <i class="fa-solid fa-moon" id="themeIcon"></i>
+            </button>
+
+            <!-- Modern Segmented Language Switcher -->
+            <div class="lang-segmented-control">
+                <button class="lang-segment active" data-lang="ru" onclick="setLang('ru')">RU</button>
+                <button class="lang-segment" data-lang="kk" onclick="setLang('kk')">ҚАЗ</button>
+                <button class="lang-segment" data-lang="en" onclick="setLang('en')">EN</button>
             </div>
+
+            <!-- Hamburger Button for Mobile Drawer -->
+            <button type="button" class="nav-hamburger-btn" id="navHamburgerBtn" onclick="toggleMobileDrawer()" title="Меню">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
         </div>
     </nav>
 
@@ -490,6 +521,105 @@
         </div>
         
     </div>
+
+    <!-- ══════════════════════════════════════ -->
+    <!--  MOBILE SLIDE-OUT DRAWER               -->
+    <!-- ══════════════════════════════════════ -->
+    <div class="mobile-drawer-backdrop" id="drawerBackdrop" onclick="toggleMobileDrawer(false)"></div>
+    <aside class="mobile-drawer" id="mobileDrawer" aria-hidden="true">
+        <div class="drawer-header">
+            <div class="drawer-brand">
+                <span class="drawer-logo">🚀</span>
+                <div class="drawer-brand-text">
+                    <span class="drawer-title">Virtual Science Hub</span>
+                    <span class="drawer-subtitle" data-i18n="drawerSub">Меню платформы</span>
+                </div>
+            </div>
+            <button type="button" class="drawer-close-btn" onclick="toggleMobileDrawer(false)" title="Закрыть">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="drawer-body">
+            <div class="drawer-section-title" data-i18n="drawerNavTitle">Навигация</div>
+            <nav class="drawer-nav">
+                <a href="index.html" class="drawer-link" onclick="toggleMobileDrawer(false)">
+                    <span class="drawer-link-icon"><i class="fa-solid fa-house"></i></span>
+                    <span class="drawer-link-text" data-i18n="navHome">Главная</span>
+                </a>
+                
+                <a href="subjects.html" class="drawer-link active" onclick="toggleMobileDrawer(false)">
+                    <span class="drawer-link-icon"><i class="fa-solid fa-book-open"></i></span>
+                    <span class="drawer-link-text" data-i18n="navSubjects">Предметы и классы</span>
+                </a>
+
+                <a href="presentation.html" class="drawer-link" onclick="toggleMobileDrawer(false)">
+                    <span class="drawer-link-icon text-teal"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+                    <span class="drawer-link-text" data-i18n="presentationTitle">AI Презентации</span>
+                    <span class="drawer-badge">AI</span>
+                </a>
+
+                <a href="studio.html" class="drawer-link" onclick="toggleMobileDrawer(false)">
+                    <span class="drawer-link-icon text-blue"><i class="fa-solid fa-gamepad"></i></span>
+                    <span class="drawer-link-text" data-i18n="studioTitle">Конструктор игр</span>
+                </a>
+            </nav>
+
+            <div class="drawer-section-title" data-i18n="navTools">Инструменты</div>
+            <div class="drawer-tools-grid">
+                <a href="calculator.html" class="drawer-tool-chip" onclick="toggleMobileDrawer(false)">
+                    <span>🧮 <span data-i18n="calculator">Калькулятор</span></span>
+                </a>
+                <a href="converter.html" class="drawer-tool-chip" onclick="toggleMobileDrawer(false)">
+                    <span>⚖️ <span data-i18n="converter">Конвертер</span></span>
+                </a>
+                <a href="graphing.html" class="drawer-tool-chip" onclick="toggleMobileDrawer(false)">
+                    <span>📈 <span data-i18n="graphing">Графики</span></span>
+                </a>
+                <a href="stopwatch.html" class="drawer-tool-chip" onclick="toggleMobileDrawer(false)">
+                    <span>⏱️ <span data-i18n="stopwatch">Секундомер</span></span>
+                </a>
+            </div>
+        </div>
+
+        <div class="drawer-footer">
+            <div class="drawer-footer-row">
+                <span class="drawer-footer-label" data-i18n="langLabel">Язык:</span>
+                <div class="lang-segmented-control drawer-lang-control">
+                    <button class="lang-segment active" data-lang="ru" onclick="setLang('ru')">RU</button>
+                    <button class="lang-segment" data-lang="kk" onclick="setLang('kk')">ҚАЗ</button>
+                    <button class="lang-segment" data-lang="en" onclick="setLang('en')">EN</button>
+                </div>
+            </div>
+            <div class="drawer-footer-row">
+                <span class="drawer-footer-label" data-i18n="themeLabel">Тема:</span>
+                <button type="button" class="drawer-theme-btn" onclick="toggleTheme()">
+                    <i class="fa-solid fa-moon" id="drawerThemeIcon"></i>
+                    <span id="drawerThemeText">Темная</span>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Mobile Bottom Navigation Dock -->
+    <nav class="mobile-bottom-dock" id="mobileBottomDock">
+        <a href="index.html" class="dock-item">
+            <i class="fa-solid fa-house"></i>
+            <span data-i18n="dockHome">Главная</span>
+        </a>
+        <a href="subjects.html" class="dock-item active">
+            <i class="fa-solid fa-book-open"></i>
+            <span data-i18n="dockSubjects">Предметы</span>
+        </a>
+        <a href="studio.html" class="dock-item">
+            <i class="fa-solid fa-gamepad"></i>
+            <span data-i18n="dockStudio">Игры</span>
+        </a>
+        <a href="presentation.html" class="dock-item">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span data-i18n="dockSlides">Слайды</span>
+        </a>
+    </nav>
 
     <!-- Background Animation Script -->
     <script src="lobby.js"></script>

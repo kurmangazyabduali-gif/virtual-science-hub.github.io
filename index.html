@@ -95,62 +95,216 @@
     <!-- ══════════════════════════════════════ -->
     <!--  TOP NAV BAR                           -->
     <!-- ══════════════════════════════════════ -->
-    <nav class="top-nav">
-        <div class="nav-brand">
-            <span class="nav-logo">
-                <svg viewBox="0 0 100 100" class="nav-logo-svg" width="36" height="36" style="width: 36px; height: 36px; max-width: 36px; max-height: 36px; display: inline-block; vertical-align: middle;">
-                    <defs>
-                        <linearGradient id="vshNavGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#00f3ff" />
-                            <stop offset="50%" stop-color="#a855f7" />
-                            <stop offset="100%" stop-color="#bc13fe" />
-                        </linearGradient>
-                    </defs>
-                    <polygon points="50,6 90,28 90,72 50,94 10,72 10,28" 
-                             fill="url(#vshNavGrad)" fill-opacity="0.15" 
-                             stroke="url(#vshNavGrad)" stroke-width="3" 
-                             stroke-linejoin="round" />
-                    <ellipse cx="50" cy="50" rx="38" ry="14" 
-                             fill="none" stroke="#00f3ff" stroke-width="2" 
-                             stroke-dasharray="8 4" transform="rotate(-30 50 50)" class="vsh-orbit-ring1" />
-                    <circle cx="82" cy="32" r="3.5" fill="#00f3ff" />
-                    <ellipse cx="50" cy="50" rx="38" ry="14" 
-                             fill="none" stroke="#bc13fe" stroke-width="2" 
-                             stroke-dasharray="6 3" transform="rotate(35 50 50)" class="vsh-orbit-ring2" />
-                    <circle cx="20" cy="36" r="3.5" fill="#bc13fe" />
-                    <text x="50" y="59" text-anchor="middle" font-family="'Roboto', sans-serif" 
-                          font-weight="900" font-size="28" fill="url(#vshNavGrad)">VSH</text>
-                </svg>
-            </span>
-            <span class="nav-title">Virtual Science Hub</span>
+    <nav class="top-nav" id="topNav">
+        <div class="nav-left">
+            <a href="index.html" class="nav-brand" title="Virtual Science Hub">
+                <span class="nav-logo">
+                    <svg viewBox="0 0 100 100" class="nav-logo-svg" width="36" height="36" style="width: 36px; height: 36px; max-width: 36px; max-height: 36px; display: inline-block; vertical-align: middle;">
+                        <defs>
+                            <linearGradient id="vshNavGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#00f3ff" />
+                                <stop offset="50%" stop-color="#a855f7" />
+                                <stop offset="100%" stop-color="#bc13fe" />
+                            </linearGradient>
+                        </defs>
+                        <polygon points="50,6 90,28 90,72 50,94 10,72 10,28" 
+                                 fill="url(#vshNavGrad)" fill-opacity="0.15" 
+                                 stroke="url(#vshNavGrad)" stroke-width="3" 
+                                 stroke-linejoin="round" />
+                        <ellipse cx="50" cy="50" rx="38" ry="14" 
+                                 fill="none" stroke="#00f3ff" stroke-width="2" 
+                                 stroke-dasharray="8 4" transform="rotate(-30 50 50)" class="vsh-orbit-ring1" />
+                        <circle cx="82" cy="32" r="3.5" fill="#00f3ff" />
+                        <ellipse cx="50" cy="50" rx="38" ry="14" 
+                                 fill="none" stroke="#bc13fe" stroke-width="2" 
+                                 stroke-dasharray="6 3" transform="rotate(35 50 50)" class="vsh-orbit-ring2" />
+                        <circle cx="20" cy="36" r="3.5" fill="#bc13fe" />
+                        <text x="50" y="59" text-anchor="middle" font-family="'Roboto', sans-serif" 
+                              font-weight="900" font-size="28" fill="url(#vshNavGrad)">VSH</text>
+                    </svg>
+                </span>
+                <div class="nav-brand-text">
+                    <span class="nav-title">Virtual Science Hub</span>
+                    <span class="nav-tagline">32 Interactive Labs</span>
+                </div>
+            </a>
         </div>
+
+        <!-- Central Desktop Menu Links with Dropdowns -->
+        <div class="nav-links-center">
+            <a href="index.html" class="nav-link-item active">
+                <i class="fa-solid fa-house"></i> <span data-i18n="navHome">Главная</span>
+            </a>
+
+            <!-- Subjects Mega Dropdown -->
+            <div class="nav-dropdown">
+                <a href="subjects.html" class="nav-link-item nav-dropdown-trigger">
+                    <i class="fa-solid fa-book-open"></i> <span data-i18n="navSubjects">Предметы</span>
+                    <i class="fa-solid fa-chevron-down nav-arrow"></i>
+                </a>
+                <div class="nav-dropdown-menu nav-mega-menu">
+                    <div class="mega-menu-header">
+                        <span class="mega-header-title" data-i18n="megaSubjectsTitle">📚 Образовательные предметы</span>
+                        <a href="subjects.html" class="mega-header-all" data-i18n="viewAllClasses">Все классы (7-11) →</a>
+                    </div>
+                    <div class="mega-menu-grid">
+                        <a href="#dashboardGrid" onclick="scrollToSubject('physics')" class="mega-item">
+                            <span class="mega-icon">⚛️</span>
+                            <div class="mega-info">
+                                <span class="mega-name" data-i18n="physics">Физика</span>
+                                <span class="mega-desc">4 <span data-i18n="labsUnit">лаб</span></span>
+                            </div>
+                        </a>
+                        <a href="#dashboardGrid" onclick="scrollToSubject('informatics')" class="mega-item">
+                            <span class="mega-icon">💻</span>
+                            <div class="mega-info">
+                                <span class="mega-name" data-i18n="informatics">Информатика</span>
+                                <span class="mega-desc">4 <span data-i18n="labsUnit">лаб</span></span>
+                            </div>
+                        </a>
+                        <a href="#dashboardGrid" onclick="scrollToSubject('geometry')" class="mega-item">
+                            <span class="mega-icon">📐</span>
+                            <div class="mega-info">
+                                <span class="mega-name" data-i18n="geometry">Геометрия</span>
+                                <span class="mega-desc">4 <span data-i18n="labsUnit">лаб</span></span>
+                            </div>
+                        </a>
+                        <a href="#dashboardGrid" onclick="scrollToSubject('biology')" class="mega-item">
+                            <span class="mega-icon">🧬</span>
+                            <div class="mega-info">
+                                <span class="mega-name" data-i18n="biology">Биология</span>
+                                <span class="mega-desc">4 <span data-i18n="labsUnit">лаб</span></span>
+                            </div>
+                        </a>
+                        <a href="#dashboardGrid" onclick="scrollToSubject('chemistry')" class="mega-item">
+                            <span class="mega-icon">⚗️</span>
+                            <div class="mega-info">
+                                <span class="mega-name" data-i18n="chemistry">Химия</span>
+                                <span class="mega-desc">4 <span data-i18n="labsUnit">лаб</span></span>
+                            </div>
+                        </a>
+                        <a href="#dashboardGrid" onclick="scrollToSubject('kazakh')" class="mega-item">
+                            <span class="mega-icon">🇰🇿</span>
+                            <div class="mega-info">
+                                <span class="mega-name" data-i18n="kazakh">Қазақ тілі</span>
+                                <span class="mega-desc">4 <span data-i18n="labsUnit">лаб</span></span>
+                            </div>
+                        </a>
+                        <a href="#dashboardGrid" onclick="scrollToSubject('english')" class="mega-item">
+                            <span class="mega-icon">🇬🇧</span>
+                            <div class="mega-info">
+                                <span class="mega-name" data-i18n="english">English</span>
+                                <span class="mega-desc">4 <span data-i18n="labsUnit">лаб</span></span>
+                            </div>
+                        </a>
+                        <a href="#dashboardGrid" onclick="scrollToSubject('tools')" class="mega-item">
+                            <span class="mega-icon">🛠️</span>
+                            <div class="mega-info">
+                                <span class="mega-name" data-i18n="tools">Инструменты</span>
+                                <span class="mega-desc">5 <span data-i18n="labsUnit">лаб</span></span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI & Creative Studio Dropdown -->
+            <div class="nav-dropdown">
+                <button type="button" class="nav-link-item nav-dropdown-trigger">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> <span data-i18n="navCreative">AI & Студия</span>
+                    <i class="fa-solid fa-chevron-down nav-arrow"></i>
+                </button>
+                <div class="nav-dropdown-menu">
+                    <a href="presentation.html" class="dropdown-item">
+                        <div class="dropdown-icon bg-teal"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                        <div class="dropdown-info">
+                            <span class="dropdown-title" data-i18n="presentationTitle">AI Презентации</span>
+                            <span class="dropdown-desc" data-i18n="presentationDesc">Слайды за 15 секунд по методичке</span>
+                        </div>
+                    </a>
+                    <a href="studio.html" class="dropdown-item">
+                        <div class="dropdown-icon bg-blue"><i class="fa-solid fa-gamepad"></i></div>
+                        <div class="dropdown-info">
+                            <span class="dropdown-title" data-i18n="studioTitle">Конструктор игр</span>
+                            <span class="dropdown-desc" data-i18n="studioDesc">Создавайте свои викторины и тесты</span>
+                        </div>
+                    </a>
+                    <div class="dropdown-item" onclick="toggleAI()">
+                        <div class="dropdown-icon bg-purple"><i class="fa-solid fa-robot"></i></div>
+                        <div class="dropdown-info">
+                            <span class="dropdown-title" data-i18n="aiTitle">Нейро-Ассистент</span>
+                            <span class="dropdown-desc" data-i18n="aiDesc">Умный ИИ помощник 24/7</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tools Dropdown -->
+            <div class="nav-dropdown">
+                <button type="button" class="nav-link-item nav-dropdown-trigger">
+                    <i class="fa-solid fa-screwdriver-wrench"></i> <span data-i18n="navTools">Инструменты</span>
+                    <i class="fa-solid fa-chevron-down nav-arrow"></i>
+                </button>
+                <div class="nav-dropdown-menu">
+                    <a href="calculator.html" class="dropdown-item">
+                        <span class="dropdown-emoji">🧮</span>
+                        <div class="dropdown-info">
+                            <span class="dropdown-title" data-i18n="calculator">Научный калькулятор</span>
+                            <span class="dropdown-desc">Инженерные вычисления</span>
+                        </div>
+                    </a>
+                    <a href="converter.html" class="dropdown-item">
+                        <span class="dropdown-emoji">⚖️</span>
+                        <div class="dropdown-info">
+                            <span class="dropdown-title" data-i18n="converter">Конвертер единиц</span>
+                            <span class="dropdown-desc">СИ, давление, температура</span>
+                        </div>
+                    </a>
+                    <a href="graphing.html" class="dropdown-item">
+                        <span class="dropdown-emoji">📈</span>
+                        <div class="dropdown-info">
+                            <span class="dropdown-title" data-i18n="graphing">Построение графиков</span>
+                            <span class="dropdown-desc">2D графики функций</span>
+                        </div>
+                    </a>
+                    <a href="stopwatch.html" class="dropdown-item">
+                        <span class="dropdown-emoji">⏱️</span>
+                        <div class="dropdown-info">
+                            <span class="dropdown-title" data-i18n="stopwatch">Секундомер</span>
+                            <span class="dropdown-desc">Таймер с кругами</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Action Controls -->
         <div class="nav-actions">
-            <!-- Subjects Module Button -->
-            <a href="subjects.html" class="nav-btn nav-btn-purple" data-i18n="subjects">
-                <i class="fa-solid fa-book-open"></i> <span>Предметы</span>
-            </a>
+            <!-- Quick Search Button -->
+            <button type="button" class="nav-search-btn" onclick="focusSearch()" title="Поиск (Ctrl+K)">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <span class="search-btn-text" data-i18n="quickSearch">Поиск...</span>
+                <kbd class="search-btn-kbd">⌘K</kbd>
+            </button>
 
-            <!-- Studio Button -->
-            <a href="studio.html" class="nav-btn nav-btn-blue" data-i18n="createGame">
-                <i class="fa-solid fa-gamepad"></i> <span>Создать игру</span>
-            </a>
-
-            <!-- Presentation Editor Button -->
-            <a href="presentation.html" class="nav-btn nav-btn-teal">
-                <i class="fa-solid fa-wand-magic-sparkles"></i> <span>AI Презентации</span>
-            </a>
-            
             <!-- Theme Switcher -->
-            <button id="themeToggleBtn" class="nav-btn-icon" onclick="toggleTheme()" title="Переключить тему">
+            <button id="themeToggleBtn" class="nav-icon-btn" onclick="toggleTheme()" title="Переключить тему">
                 <i class="fa-solid fa-moon" id="themeIcon"></i>
             </button>
 
-            <!-- Language Switcher -->
-            <div class="lang-switcher">
-                <button class="lang-btn active" data-lang="ru" onclick="setLang('ru')">RU</button>
-                <button class="lang-btn" data-lang="kk" onclick="setLang('kk')">ҚАЗ</button>
-                <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+            <!-- Modern Segmented Language Switcher -->
+            <div class="lang-segmented-control">
+                <button class="lang-segment active" data-lang="ru" onclick="setLang('ru')">RU</button>
+                <button class="lang-segment" data-lang="kk" onclick="setLang('kk')">ҚАЗ</button>
+                <button class="lang-segment" data-lang="en" onclick="setLang('en')">EN</button>
             </div>
+
+            <!-- Hamburger Button for Mobile Drawer -->
+            <button type="button" class="nav-hamburger-btn" id="navHamburgerBtn" onclick="toggleMobileDrawer()" title="Меню">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
         </div>
     </nav>
 
@@ -712,6 +866,127 @@
             document.getElementById('ai-msgs').scrollTop = document.getElementById('ai-msgs').scrollHeight;
         }
     </script>
+
+    <!-- ══════════════════════════════════════ -->
+    <!--  MOBILE SLIDE-OUT DRAWER               -->
+    <!-- ══════════════════════════════════════ -->
+    <div class="mobile-drawer-backdrop" id="drawerBackdrop" onclick="toggleMobileDrawer(false)"></div>
+    <aside class="mobile-drawer" id="mobileDrawer" aria-hidden="true">
+        <div class="drawer-header">
+            <div class="drawer-brand">
+                <span class="drawer-logo">🚀</span>
+                <div class="drawer-brand-text">
+                    <span class="drawer-title">Virtual Science Hub</span>
+                    <span class="drawer-subtitle" data-i18n="drawerSub">Меню платформы</span>
+                </div>
+            </div>
+            <button type="button" class="drawer-close-btn" onclick="toggleMobileDrawer(false)" title="Закрыть">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="drawer-body">
+            <!-- Navigation Links Section -->
+            <div class="drawer-section-title" data-i18n="drawerNavTitle">Навигация</div>
+            <nav class="drawer-nav">
+                <a href="index.html" class="drawer-link active" onclick="toggleMobileDrawer(false)">
+                    <span class="drawer-link-icon"><i class="fa-solid fa-house"></i></span>
+                    <span class="drawer-link-text" data-i18n="navHome">Главная</span>
+                </a>
+                
+                <!-- Expandable Subject Section in Drawer -->
+                <div class="drawer-accordion" id="drawerAccordion">
+                    <button type="button" class="drawer-link drawer-accordion-trigger" onclick="toggleDrawerSubmenu(this)">
+                        <span class="drawer-link-icon"><i class="fa-solid fa-book-open"></i></span>
+                        <span class="drawer-link-text" data-i18n="navSubjects">Предметы (8)</span>
+                        <i class="fa-solid fa-chevron-down drawer-accordion-arrow"></i>
+                    </button>
+                    <div class="drawer-submenu">
+                        <a href="subjects.html" class="drawer-sublink" onclick="toggleMobileDrawer(false)">
+                            <span>🎓 Все классы (7-11)</span>
+                        </a>
+                        <a href="#dashboardGrid" class="drawer-sublink" onclick="scrollToSubject('physics'); toggleMobileDrawer(false);">
+                            <span>⚛️ Физика</span>
+                        </a>
+                        <a href="#dashboardGrid" class="drawer-sublink" onclick="scrollToSubject('informatics'); toggleMobileDrawer(false);">
+                            <span>💻 Информатика</span>
+                        </a>
+                        <a href="#dashboardGrid" class="drawer-sublink" onclick="scrollToSubject('geometry'); toggleMobileDrawer(false);">
+                            <span>📐 Геометрия</span>
+                        </a>
+                        <a href="#dashboardGrid" class="drawer-sublink" onclick="scrollToSubject('biology'); toggleMobileDrawer(false);">
+                            <span>🧬 Биология</span>
+                        </a>
+                        <a href="#dashboardGrid" class="drawer-sublink" onclick="scrollToSubject('chemistry'); toggleMobileDrawer(false);">
+                            <span>⚗️ Химия</span>
+                        </a>
+                        <a href="#dashboardGrid" class="drawer-sublink" onclick="scrollToSubject('kazakh'); toggleMobileDrawer(false);">
+                            <span>🇰🇿 Қазақ тілі</span>
+                        </a>
+                        <a href="#dashboardGrid" class="drawer-sublink" onclick="scrollToSubject('english'); toggleMobileDrawer(false);">
+                            <span>🇬🇧 English</span>
+                        </a>
+                        <a href="#dashboardGrid" class="drawer-sublink" onclick="scrollToSubject('tools'); toggleMobileDrawer(false);">
+                            <span>🛠️ Инструменты</span>
+                        </a>
+                    </div>
+                </div>
+
+                <a href="presentation.html" class="drawer-link" onclick="toggleMobileDrawer(false)">
+                    <span class="drawer-link-icon text-teal"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+                    <span class="drawer-link-text" data-i18n="presentationTitle">AI Презентации</span>
+                    <span class="drawer-badge">AI</span>
+                </a>
+
+                <a href="studio.html" class="drawer-link" onclick="toggleMobileDrawer(false)">
+                    <span class="drawer-link-icon text-blue"><i class="fa-solid fa-gamepad"></i></span>
+                    <span class="drawer-link-text" data-i18n="studioTitle">Конструктор игр</span>
+                </a>
+
+                <button type="button" class="drawer-link" onclick="toggleMobileDrawer(false); toggleAI();">
+                    <span class="drawer-link-icon text-purple"><i class="fa-solid fa-robot"></i></span>
+                    <span class="drawer-link-text" data-i18n="aiTitle">Нейро-Ассистент</span>
+                </button>
+            </nav>
+
+            <!-- Tools Section in Drawer -->
+            <div class="drawer-section-title" data-i18n="navTools">Инструменты</div>
+            <div class="drawer-tools-grid">
+                <a href="calculator.html" class="drawer-tool-chip" onclick="toggleMobileDrawer(false)">
+                    <span>🧮 <span data-i18n="calculator">Калькулятор</span></span>
+                </a>
+                <a href="converter.html" class="drawer-tool-chip" onclick="toggleMobileDrawer(false)">
+                    <span>⚖️ <span data-i18n="converter">Конвертер</span></span>
+                </a>
+                <a href="graphing.html" class="drawer-tool-chip" onclick="toggleMobileDrawer(false)">
+                    <span>📈 <span data-i18n="graphing">Графики</span></span>
+                </a>
+                <a href="stopwatch.html" class="drawer-tool-chip" onclick="toggleMobileDrawer(false)">
+                    <span>⏱️ <span data-i18n="stopwatch">Секундомер</span></span>
+                </a>
+            </div>
+        </div>
+
+        <div class="drawer-footer">
+            <!-- Language Selector -->
+            <div class="drawer-footer-row">
+                <span class="drawer-footer-label" data-i18n="langLabel">Язык:</span>
+                <div class="lang-segmented-control drawer-lang-control">
+                    <button class="lang-segment active" data-lang="ru" onclick="setLang('ru')">RU</button>
+                    <button class="lang-segment" data-lang="kk" onclick="setLang('kk')">ҚАЗ</button>
+                    <button class="lang-segment" data-lang="en" onclick="setLang('en')">EN</button>
+                </div>
+            </div>
+            <!-- Theme Toggle -->
+            <div class="drawer-footer-row">
+                <span class="drawer-footer-label" data-i18n="themeLabel">Тема:</span>
+                <button type="button" class="drawer-theme-btn" onclick="toggleTheme()">
+                    <i class="fa-solid fa-moon" id="drawerThemeIcon"></i>
+                    <span id="drawerThemeText">Темная</span>
+                </button>
+            </div>
+        </div>
+    </aside>
 
     <!-- Mobile Bottom Navigation Dock -->
     <nav class="mobile-bottom-dock" id="mobileBottomDock">

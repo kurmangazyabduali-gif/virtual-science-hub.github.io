@@ -45,7 +45,26 @@ const i18n = {
         dockSubjects: 'Предметы',
         dockAI: 'ИИ Чат',
         dockStudio: 'Игры',
-        dockSlides: 'Слайды'
+        dockSlides: 'Слайды',
+        navHome: 'Главная',
+        navSubjects: 'Предметы',
+        navCreative: 'AI & Студия',
+        navTools: 'Инструменты',
+        quickSearch: 'Поиск...',
+        megaSubjectsTitle: '📚 Образовательные предметы',
+        viewAllClasses: 'Все классы (7-11) →',
+        presentationTitle: 'AI Презентации',
+        presentationDesc: 'Слайды за 15 секунд по методичке',
+        studioTitle: 'Конструктор игр',
+        studioDesc: 'Викторины, тесты и мини-игры',
+        aiTitle: 'Нейро-Ассистент',
+        aiDesc: 'Умный ИИ помощник 24/7',
+        drawerSub: 'Меню платформы',
+        drawerNavTitle: 'Навигация',
+        langLabel: 'Язык:',
+        themeLabel: 'Тема:',
+        themeDark: 'Темная',
+        themeLight: 'Светлая'
     },
     kk: {
         heroBadge: '🔬 Интерактивті зертханалар',
@@ -86,7 +105,26 @@ const i18n = {
         dockSubjects: 'Пәндер',
         dockAI: 'ИИ Чат',
         dockStudio: 'Ойындар',
-        dockSlides: 'Слайдтар'
+        dockSlides: 'Слайдтар',
+        navHome: 'Басты',
+        navSubjects: 'Пәндер',
+        navCreative: 'AI & Студия',
+        navTools: 'Құралдар',
+        quickSearch: 'Іздеу...',
+        megaSubjectsTitle: '📚 Оқу пәндері',
+        viewAllClasses: 'Барлық сыныптар (7-11) →',
+        presentationTitle: 'AI Презентациялар',
+        presentationDesc: 'Әдістеме бойынша 15 сек слайд',
+        studioTitle: 'Ойын студиясы',
+        studioDesc: 'Викториналар мен мини-ойындар',
+        aiTitle: 'Нейро-Көмекші',
+        aiDesc: 'Ақылды ИИ көмекші 24/7',
+        drawerSub: 'Платформа мәзірі',
+        drawerNavTitle: 'Навигация',
+        langLabel: 'Тіл:',
+        themeLabel: 'Тақырып:',
+        themeDark: 'Күңгірт',
+        themeLight: 'Жарық'
     },
     en: {
         heroBadge: '🔬 Interactive Laboratories',
@@ -127,7 +165,26 @@ const i18n = {
         dockSubjects: 'Subjects',
         dockAI: 'AI Chat',
         dockStudio: 'Games',
-        dockSlides: 'Slides'
+        dockSlides: 'Slides',
+        navHome: 'Home',
+        navSubjects: 'Subjects',
+        navCreative: 'AI & Studio',
+        navTools: 'Tools',
+        quickSearch: 'Search...',
+        megaSubjectsTitle: '📚 Academic Subjects',
+        viewAllClasses: 'All grades (7-11) →',
+        presentationTitle: 'AI Presentations',
+        presentationDesc: 'Slides in 15 seconds from text',
+        studioTitle: 'Game Studio',
+        studioDesc: 'Quizzes, tests and mini-games',
+        aiTitle: 'Neuro-Assistant',
+        aiDesc: 'Smart AI tutor 24/7',
+        drawerSub: 'Platform Menu',
+        drawerNavTitle: 'Navigation',
+        langLabel: 'Language:',
+        themeLabel: 'Theme:',
+        themeDark: 'Dark',
+        themeLight: 'Light'
     }
 };
 
@@ -623,6 +680,96 @@ function toggleAllSubjects() {
 }
 
 // ══════════════════════════════════════════
+//  NAVBAR, SEARCH FOCUS & DRAWER CONTROLS
+// ══════════════════════════════════════════
+function focusSearch() {
+    const input = document.getElementById('searchInput');
+    const wrapper = document.querySelector('.search-wrapper');
+    if (!input || !wrapper) return;
+
+    // Smooth scroll to search area
+    const rect = wrapper.getBoundingClientRect();
+    window.scrollTo({
+        top: window.scrollY + rect.top - 90,
+        behavior: 'smooth'
+    });
+
+    setTimeout(() => {
+        input.focus();
+        wrapper.classList.remove('search-glow-active');
+        void wrapper.offsetWidth;
+        wrapper.classList.add('search-glow-active');
+        setTimeout(() => wrapper.classList.remove('search-glow-active'), 1200);
+    }, 250);
+}
+
+function scrollToSubject(subjKey) {
+    const card = document.querySelector(`.subject-card[data-subject="${subjKey}"]`);
+    if (!card) return;
+
+    // Unhide if filtered or hidden
+    card.style.display = '';
+    card.classList.remove('is-collapsed', 'search-hidden');
+
+    const rect = card.getBoundingClientRect();
+    window.scrollTo({
+        top: window.scrollY + rect.top - 80,
+        behavior: 'smooth'
+    });
+
+    updateToggleAllButton();
+}
+
+function toggleMobileDrawer(forceState) {
+    const drawer = document.getElementById('mobileDrawer');
+    const backdrop = document.getElementById('drawerBackdrop');
+    const hamburger = document.getElementById('navHamburgerBtn');
+    if (!drawer || !backdrop) return;
+
+    const shouldOpen = typeof forceState === 'boolean' ? forceState : !drawer.classList.contains('active');
+
+    drawer.classList.toggle('active', shouldOpen);
+    backdrop.classList.toggle('active', shouldOpen);
+    if (hamburger) hamburger.classList.toggle('active', shouldOpen);
+    drawer.setAttribute('aria-hidden', !shouldOpen);
+
+    // Prevent body scroll when drawer is open
+    document.body.style.overflow = shouldOpen ? 'hidden' : '';
+}
+
+function toggleDrawerSubmenu(triggerEl) {
+    const accordion = triggerEl.closest('.drawer-accordion');
+    if (accordion) {
+        accordion.classList.toggle('open');
+    }
+}
+
+// Global Keyboard Shortcuts (Ctrl+K for search, Esc to close modals/drawer)
+document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        focusSearch();
+    }
+    if (e.key === 'Escape') {
+        toggleMobileDrawer(false);
+        const searchResults = document.getElementById('searchResults');
+        if (searchResults) searchResults.style.display = 'none';
+        const aiModal = document.getElementById('ai-modal');
+        if (aiModal && aiModal.classList.contains('active')) {
+            aiModal.classList.remove('active');
+        }
+    }
+});
+
+// Top Navbar Scroll Shadow Effect
+window.addEventListener('scroll', () => {
+    const nav = document.getElementById('topNav');
+    if (nav) {
+        nav.classList.toggle('scrolled', window.scrollY > 15);
+    }
+}, { passive: true });
+
+// ══════════════════════════════════════════
 //  LANGUAGE SWITCHER
 // ══════════════════════════════════════════
 function setLang(lang) {
@@ -645,7 +792,8 @@ function setLang(lang) {
         }
     }
 
-    document.querySelectorAll('.lang-btn').forEach(btn => {
+    // Sync all language buttons (both desktop and mobile drawer)
+    document.querySelectorAll('.lang-btn, .lang-segment').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.lang === lang);
     });
     const t = i18n[lang];
@@ -684,6 +832,13 @@ function setLang(lang) {
         if (t[key]) el.placeholder = t[key];
     });
     
+    // Sync drawer theme text
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    const drawerThemeText = document.getElementById('drawerThemeText');
+    if (drawerThemeText) {
+        drawerThemeText.textContent = isLight ? (t.themeLight || 'Светлая') : (t.themeDark || 'Темная');
+    }
+
     updateToggleAllButton();
     updateRecent();
 }
@@ -700,6 +855,15 @@ function applyTheme(theme) {
     const icon = document.getElementById('themeIcon');
     if (icon) {
         icon.className = theme === 'light' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    }
+    const drawerIcon = document.getElementById('drawerThemeIcon');
+    if (drawerIcon) {
+        drawerIcon.className = theme === 'light' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    }
+    const t = i18n[currentLang] || i18n.ru;
+    const drawerThemeText = document.getElementById('drawerThemeText');
+    if (drawerThemeText) {
+        drawerThemeText.textContent = theme === 'light' ? (t.themeLight || 'Светлая') : (t.themeDark || 'Темная');
     }
 }
 
