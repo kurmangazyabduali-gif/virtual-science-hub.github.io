@@ -258,288 +258,349 @@
             <button class="subj-tab" data-filter="tools" data-i18n="tabTools">🛠️ Инструменты</button>
         </div>
 
+        <!-- MOBILE INTERACTIVE SUBJECTS PROMPT & TOGGLE -->
+        <div class="mobile-subjects-header" id="mobileSubjectsHeader">
+            <div class="mobile-subjects-title">
+                <span class="mobile-pulse-dot"></span>
+                <span id="mobileSubjectPrompt" data-i18n="mobileSubjectPrompt">📚 Выберите предмет для изучения:</span>
+            </div>
+            <button type="button" class="mobile-toggle-all-btn" id="mobileToggleAllBtn" onclick="toggleAllSubjects()">
+                <i class="fa-solid fa-layer-group"></i> <span id="toggleAllText" data-i18n="expandAll">Развернуть все</span>
+            </button>
+        </div>
+
         <!-- ══════════════════════════════════════ -->
         <!--  DASHBOARD GRID                        -->
         <!-- ══════════════════════════════════════ -->
         <div class="dashboard-grid" id="dashboardGrid">
 
             <!-- PHYSICS CARD -->
-            <div class="subject-card card-physics" data-subject="physics">
-                <div class="subject-header-small">
+            <div class="subject-card card-physics is-collapsed" data-subject="physics">
+                <div class="subject-header-small" onclick="toggleSubjectCard(this.closest('.subject-card'))">
                     <div class="subject-icon-small">⚛️</div>
                     <div class="subject-title-small" data-i18n="physics">Физика</div>
+                    <span class="subject-count-badge">4 <span class="badge-unit" data-i18n="labsUnit">лаб</span></span>
+                    <span class="subject-chevron"><i class="fa-solid fa-chevron-down"></i></span>
                 </div>
-                <div class="experiments-list">
-                    <a href="gravity.html" class="exp-link" data-id="gravity" data-name="Гравитация"
-                        onclick="trackVisit('gravity','Гравитация','gravity.html','⚛️')">
-                        <span class="exp-icon">🪐</span>
-                        <span class="exp-name" data-i18n="gravity">Гравитация</span>
-                        <span class="exp-visited-dot" id="dot-gravity"></span>
-                    </a>
-                    <a href="optics.html" class="exp-link" data-id="optics" data-name="Оптика"
-                        onclick="trackVisit('optics','Оптика','optics.html','⚛️')">
-                        <span class="exp-icon">🔦</span>
-                        <span class="exp-name" data-i18n="optics">Оптика</span>
-                        <span class="exp-visited-dot" id="dot-optics"></span>
-                    </a>
-                    <a href="pendulum.html" class="exp-link" data-id="pendulum" data-name="Маятники"
-                        onclick="trackVisit('pendulum','Маятники','pendulum.html','⚛️')">
-                        <span class="exp-icon">🕰️</span>
-                        <span class="exp-name" data-i18n="pendulum">Маятники</span>
-                        <span class="exp-visited-dot" id="dot-pendulum"></span>
-                    </a>
-                    <a href="waves.html" class="exp-link" data-id="waves" data-name="Волны"
-                        onclick="trackVisit('waves','Волны','waves.html','⚛️')">
-                        <span class="exp-icon">🌊</span>
-                        <span class="exp-name" data-i18n="waves">Волны</span>
-                        <span class="exp-visited-dot" id="dot-waves"></span>
-                    </a>
+                <div class="experiments-list-wrap">
+                    <div class="experiments-list-inner">
+                        <div class="experiments-list">
+                            <a href="gravity.html" class="exp-link" data-id="gravity" data-name="Гравитация"
+                                onclick="trackVisit('gravity','Гравитация','gravity.html','⚛️')">
+                                <span class="exp-icon">🪐</span>
+                                <span class="exp-name" data-i18n="gravity">Гравитация</span>
+                                <span class="exp-visited-dot" id="dot-gravity"></span>
+                            </a>
+                            <a href="optics.html" class="exp-link" data-id="optics" data-name="Оптика"
+                                onclick="trackVisit('optics','Оптика','optics.html','⚛️')">
+                                <span class="exp-icon">🔦</span>
+                                <span class="exp-name" data-i18n="optics">Оптика</span>
+                                <span class="exp-visited-dot" id="dot-optics"></span>
+                            </a>
+                            <a href="pendulum.html" class="exp-link" data-id="pendulum" data-name="Маятники"
+                                onclick="trackVisit('pendulum','Маятники','pendulum.html','⚛️')">
+                                <span class="exp-icon">🕰️</span>
+                                <span class="exp-name" data-i18n="pendulum">Маятники</span>
+                                <span class="exp-visited-dot" id="dot-pendulum"></span>
+                            </a>
+                            <a href="waves.html" class="exp-link" data-id="waves" data-name="Волны"
+                                onclick="trackVisit('waves','Волны','waves.html','⚛️')">
+                                <span class="exp-icon">🌊</span>
+                                <span class="exp-name" data-i18n="waves">Волны</span>
+                                <span class="exp-visited-dot" id="dot-waves"></span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- INFORMATICS CARD -->
-            <div class="subject-card card-informatics" data-subject="informatics">
-                <div class="subject-header-small">
+            <div class="subject-card card-informatics is-collapsed" data-subject="informatics">
+                <div class="subject-header-small" onclick="toggleSubjectCard(this.closest('.subject-card'))">
                     <div class="subject-icon-small">💻</div>
                     <div class="subject-title-small" data-i18n="informatics">Информатика</div>
+                    <span class="subject-count-badge">4 <span class="badge-unit" data-i18n="labsUnit">лаб</span></span>
+                    <span class="subject-chevron"><i class="fa-solid fa-chevron-down"></i></span>
                 </div>
-                <div class="experiments-list">
-                    <a href="logic.html" class="exp-link" data-id="logic"
-                        onclick="trackVisit('logic','Логические Схемы','logic.html','💻')">
-                        <span class="exp-icon">🔌</span>
-                        <span class="exp-name" data-i18n="logic">Логические Схемы</span>
-                        <span class="exp-visited-dot" id="dot-logic"></span>
-                    </a>
-                    <a href="crypto.html" class="exp-link" data-id="crypto"
-                        onclick="trackVisit('crypto','Шифры и Загадки','crypto.html','💻')">
-                        <span class="exp-icon">🔐</span>
-                        <span class="exp-name" data-i18n="crypto">Шифры и Загадки</span>
-                        <span class="exp-visited-dot" id="dot-crypto"></span>
-                    </a>
-                    <a href="algo.html" class="exp-link" data-id="algo"
-                        onclick="trackVisit('algo','Алгоритмы','algo.html','💻')">
-                        <span class="exp-icon">📊</span>
-                        <span class="exp-name" data-i18n="algo">Алгоритмы</span>
-                        <span class="exp-visited-dot" id="dot-algo"></span>
-                    </a>
-                    <a href="binary.html" class="exp-link" data-id="binary"
-                        onclick="trackVisit('binary','Двоичный код','binary.html','💻')">
-                        <span class="exp-icon">🔢</span>
-                        <span class="exp-name" data-i18n="binary">Двоичный код</span>
-                        <span class="exp-visited-dot" id="dot-binary"></span>
-                    </a>
+                <div class="experiments-list-wrap">
+                    <div class="experiments-list-inner">
+                        <div class="experiments-list">
+                            <a href="logic.html" class="exp-link" data-id="logic"
+                                onclick="trackVisit('logic','Логические Схемы','logic.html','💻')">
+                                <span class="exp-icon">🔌</span>
+                                <span class="exp-name" data-i18n="logic">Логические Схемы</span>
+                                <span class="exp-visited-dot" id="dot-logic"></span>
+                            </a>
+                            <a href="crypto.html" class="exp-link" data-id="crypto"
+                                onclick="trackVisit('crypto','Шифры и Загадки','crypto.html','💻')">
+                                <span class="exp-icon">🔐</span>
+                                <span class="exp-name" data-i18n="crypto">Шифры и Загадки</span>
+                                <span class="exp-visited-dot" id="dot-crypto"></span>
+                            </a>
+                            <a href="algo.html" class="exp-link" data-id="algo"
+                                onclick="trackVisit('algo','Алгоритмы','algo.html','💻')">
+                                <span class="exp-icon">📊</span>
+                                <span class="exp-name" data-i18n="algo">Алгоритмы</span>
+                                <span class="exp-visited-dot" id="dot-algo"></span>
+                            </a>
+                            <a href="binary.html" class="exp-link" data-id="binary"
+                                onclick="trackVisit('binary','Двоичный код','binary.html','💻')">
+                                <span class="exp-icon">🔢</span>
+                                <span class="exp-name" data-i18n="binary">Двоичный код</span>
+                                <span class="exp-visited-dot" id="dot-binary"></span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- GEOMETRY CARD -->
-            <div class="subject-card card-geometry" data-subject="geometry">
-                <div class="subject-header-small">
+            <div class="subject-card card-geometry is-collapsed" data-subject="geometry">
+                <div class="subject-header-small" onclick="toggleSubjectCard(this.closest('.subject-card'))">
                     <div class="subject-icon-small">📐</div>
                     <div class="subject-title-small" data-i18n="geometry">Геометрия</div>
+                    <span class="subject-count-badge">4 <span class="badge-unit" data-i18n="labsUnit">лаб</span></span>
+                    <span class="subject-chevron"><i class="fa-solid fa-chevron-down"></i></span>
                 </div>
-                <div class="experiments-list">
-                    <a href="fractals.html" class="exp-link" data-id="fractals"
-                        onclick="trackVisit('fractals','Фракталы','fractals.html','📐')">
-                        <span class="exp-icon">❄️</span>
-                        <span class="exp-name" data-i18n="fractals">Фракталы</span>
-                        <span class="exp-visited-dot" id="dot-fractals"></span>
-                    </a>
-                    <a href="spiro.html" class="exp-link" data-id="spiro"
-                        onclick="trackVisit('spiro','Спирограф','spiro.html','📐')">
-                        <span class="exp-icon">🌀</span>
-                        <span class="exp-name" data-i18n="spiro">Спирограф</span>
-                        <span class="exp-visited-dot" id="dot-spiro"></span>
-                    </a>
-                    <a href="transform.html" class="exp-link" data-id="transform"
-                        onclick="trackVisit('transform','Гео-Мастер','transform.html','📐')">
-                        <span class="exp-icon">💠</span>
-                        <span class="exp-name" data-i18n="transform">Гео-Мастер</span>
-                        <span class="exp-visited-dot" id="dot-transform"></span>
-                    </a>
-                    <a href="pythagoras.html" class="exp-link" data-id="pythagoras"
-                        onclick="trackVisit('pythagoras','Теорема Пифагора','pythagoras.html','📐')">
-                        <span class="exp-icon">📐</span>
-                        <span class="exp-name" data-i18n="pythagoras">Теорема Пифагора</span>
-                        <span class="exp-visited-dot" id="dot-pythagoras"></span>
-                    </a>
+                <div class="experiments-list-wrap">
+                    <div class="experiments-list-inner">
+                        <div class="experiments-list">
+                            <a href="fractals.html" class="exp-link" data-id="fractals"
+                                onclick="trackVisit('fractals','Фракталы','fractals.html','📐')">
+                                <span class="exp-icon">❄️</span>
+                                <span class="exp-name" data-i18n="fractals">Фракталы</span>
+                                <span class="exp-visited-dot" id="dot-fractals"></span>
+                            </a>
+                            <a href="spiro.html" class="exp-link" data-id="spiro"
+                                onclick="trackVisit('spiro','Спирограф','spiro.html','📐')">
+                                <span class="exp-icon">🌀</span>
+                                <span class="exp-name" data-i18n="spiro">Спирограф</span>
+                                <span class="exp-visited-dot" id="dot-spiro"></span>
+                            </a>
+                            <a href="transform.html" class="exp-link" data-id="transform"
+                                onclick="trackVisit('transform','Гео-Мастер','transform.html','📐')">
+                                <span class="exp-icon">💠</span>
+                                <span class="exp-name" data-i18n="transform">Гео-Мастер</span>
+                                <span class="exp-visited-dot" id="dot-transform"></span>
+                            </a>
+                            <a href="pythagoras.html" class="exp-link" data-id="pythagoras"
+                                onclick="trackVisit('pythagoras','Теорема Пифагора','pythagoras.html','📐')">
+                                <span class="exp-icon">📐</span>
+                                <span class="exp-name" data-i18n="pythagoras">Теорема Пифагора</span>
+                                <span class="exp-visited-dot" id="dot-pythagoras"></span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- KAZAKH CARD -->
-            <div class="subject-card card-kazakh" data-subject="kazakh">
-                <div class="subject-header-small">
+            <div class="subject-card card-kazakh is-collapsed" data-subject="kazakh">
+                <div class="subject-header-small" onclick="toggleSubjectCard(this.closest('.subject-card'))">
                     <div class="subject-icon-small">🇰🇿</div>
                     <div class="subject-title-small" data-i18n="kazakh">Қазақ тілі</div>
+                    <span class="subject-count-badge">4 <span class="badge-unit" data-i18n="labsUnit">лаб</span></span>
+                    <span class="subject-chevron"><i class="fa-solid fa-chevron-down"></i></span>
                 </div>
-                <div class="experiments-list">
-                    <a href="cards_kk.html" class="exp-link" data-id="cards_kk"
-                        onclick="trackVisit('cards_kk','Сөздік Карточкалары','cards_kk.html','🇰🇿')">
-                        <span class="exp-icon">🔤</span>
-                        <span class="exp-name" data-i18n="cards_kk">Сөздік Карточкалары</span>
-                        <span class="exp-visited-dot" id="dot-cards_kk"></span>
-                    </a>
-                    <a href="morphology.html" class="exp-link" data-id="morphology"
-                        onclick="trackVisit('morphology','Сөз Конструкторы','morphology.html','🇰🇿')">
-                        <span class="exp-icon">🏗️</span>
-                        <span class="exp-name" data-i18n="morphology">Сөз Конструкторы</span>
-                        <span class="exp-visited-dot" id="dot-morphology"></span>
-                    </a>
-                    <a href="grammar.html" class="exp-link" data-id="grammar"
-                        onclick="trackVisit('grammar','Грамматика','grammar.html','🇰🇿')">
-                        <span class="exp-icon">🧩</span>
-                        <span class="exp-name" data-i18n="grammar">Грамматика</span>
-                        <span class="exp-visited-dot" id="dot-grammar"></span>
-                    </a>
-                    <a href="phonetics_kk.html" class="exp-link" data-id="phonetics_kk"
-                        onclick="trackVisit('phonetics_kk','Дыбыстар','phonetics_kk.html','🇰🇿')">
-                        <span class="exp-icon">🗣️</span>
-                        <span class="exp-name" data-i18n="phonetics_kk">Дыбыстар</span>
-                        <span class="exp-visited-dot" id="dot-phonetics_kk"></span>
-                    </a>
+                <div class="experiments-list-wrap">
+                    <div class="experiments-list-inner">
+                        <div class="experiments-list">
+                            <a href="cards_kk.html" class="exp-link" data-id="cards_kk"
+                                onclick="trackVisit('cards_kk','Сөздік Карточкалары','cards_kk.html','🇰🇿')">
+                                <span class="exp-icon">🔤</span>
+                                <span class="exp-name" data-i18n="cards_kk">Сөздік Карточкалары</span>
+                                <span class="exp-visited-dot" id="dot-cards_kk"></span>
+                            </a>
+                            <a href="morphology.html" class="exp-link" data-id="morphology"
+                                onclick="trackVisit('morphology','Сөз Конструкторы','morphology.html','🇰🇿')">
+                                <span class="exp-icon">🏗️</span>
+                                <span class="exp-name" data-i18n="morphology">Сөз Конструкторы</span>
+                                <span class="exp-visited-dot" id="dot-morphology"></span>
+                            </a>
+                            <a href="grammar.html" class="exp-link" data-id="grammar"
+                                onclick="trackVisit('grammar','Грамматика','grammar.html','🇰🇿')">
+                                <span class="exp-icon">🧩</span>
+                                <span class="exp-name" data-i18n="grammar">Грамматика</span>
+                                <span class="exp-visited-dot" id="dot-grammar"></span>
+                            </a>
+                            <a href="phonetics_kk.html" class="exp-link" data-id="phonetics_kk"
+                                onclick="trackVisit('phonetics_kk','Дыбыстар','phonetics_kk.html','🇰🇿')">
+                                <span class="exp-icon">🗣️</span>
+                                <span class="exp-name" data-i18n="phonetics_kk">Дыбыстар</span>
+                                <span class="exp-visited-dot" id="dot-phonetics_kk"></span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- ENGLISH CARD -->
-            <div class="subject-card card-english" data-subject="english">
-                <div class="subject-header-small">
+            <div class="subject-card card-english is-collapsed" data-subject="english">
+                <div class="subject-header-small" onclick="toggleSubjectCard(this.closest('.subject-card'))">
                     <div class="subject-icon-small">🇬🇧</div>
                     <div class="subject-title-small" data-i18n="english">English</div>
+                    <span class="subject-count-badge">4 <span class="badge-unit" data-i18n="labsUnit">лаб</span></span>
+                    <span class="subject-chevron"><i class="fa-solid fa-chevron-down"></i></span>
                 </div>
-                <div class="experiments-list">
-                    <a href="cards_en.html" class="exp-link" data-id="cards_en"
-                        onclick="trackVisit('cards_en','Vocabulary Lab','cards_en.html','🇬🇧')">
-                        <span class="exp-icon">🗣️</span>
-                        <span class="exp-name" data-i18n="cards_en">Vocabulary Lab</span>
-                        <span class="exp-visited-dot" id="dot-cards_en"></span>
-                    </a>
-                    <a href="tenses.html" class="exp-link" data-id="tenses"
-                        onclick="trackVisit('tenses','Машина времен','tenses.html','🇬🇧')">
-                        <span class="exp-icon">⏳</span>
-                        <span class="exp-name" data-i18n="tenses">Машина времен</span>
-                        <span class="exp-visited-dot" id="dot-tenses"></span>
-                    </a>
-                    <a href="spelling.html" class="exp-link" data-id="spelling"
-                        onclick="trackVisit('spelling','Spelling Bee','spelling.html','🇬🇧')">
-                        <span class="exp-icon">🐝</span>
-                        <span class="exp-name" data-i18n="spelling">Spelling Bee</span>
-                        <span class="exp-visited-dot" id="dot-spelling"></span>
-                    </a>
-                    <a href="idioms.html" class="exp-link" data-id="idioms"
-                        onclick="trackVisit('idioms','Idiom Matcher','idioms.html','🇬🇧')">
-                        <span class="exp-icon">🎭</span>
-                        <span class="exp-name" data-i18n="idioms">Idiom Matcher</span>
-                        <span class="exp-visited-dot" id="dot-idioms"></span>
-                    </a>
+                <div class="experiments-list-wrap">
+                    <div class="experiments-list-inner">
+                        <div class="experiments-list">
+                            <a href="cards_en.html" class="exp-link" data-id="cards_en"
+                                onclick="trackVisit('cards_en','Vocabulary Lab','cards_en.html','🇬🇧')">
+                                <span class="exp-icon">🗣️</span>
+                                <span class="exp-name" data-i18n="cards_en">Vocabulary Lab</span>
+                                <span class="exp-visited-dot" id="dot-cards_en"></span>
+                            </a>
+                            <a href="tenses.html" class="exp-link" data-id="tenses"
+                                onclick="trackVisit('tenses','Машина времен','tenses.html','🇬🇧')">
+                                <span class="exp-icon">⏳</span>
+                                <span class="exp-name" data-i18n="tenses">Машина времен</span>
+                                <span class="exp-visited-dot" id="dot-tenses"></span>
+                            </a>
+                            <a href="spelling.html" class="exp-link" data-id="spelling"
+                                onclick="trackVisit('spelling','Spelling Bee','spelling.html','🇬🇧')">
+                                <span class="exp-icon">🐝</span>
+                                <span class="exp-name" data-i18n="spelling">Spelling Bee</span>
+                                <span class="exp-visited-dot" id="dot-spelling"></span>
+                            </a>
+                            <a href="idioms.html" class="exp-link" data-id="idioms"
+                                onclick="trackVisit('idioms','Idiom Matcher','idioms.html','🇬🇧')">
+                                <span class="exp-icon">🎭</span>
+                                <span class="exp-name" data-i18n="idioms">Idiom Matcher</span>
+                                <span class="exp-visited-dot" id="dot-idioms"></span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- BIOLOGY CARD -->
-            <div class="subject-card card-biology" style="--theme-color: #28a745;" data-subject="biology">
-                <div class="subject-header-small">
+            <div class="subject-card card-biology is-collapsed" style="--theme-color: #28a745;" data-subject="biology">
+                <div class="subject-header-small" onclick="toggleSubjectCard(this.closest('.subject-card'))">
                     <div class="subject-icon-small">🧬</div>
                     <div class="subject-title-small" data-i18n="biology">Биология</div>
+                    <span class="subject-count-badge">4 <span class="badge-unit" data-i18n="labsUnit">лаб</span></span>
+                    <span class="subject-chevron"><i class="fa-solid fa-chevron-down"></i></span>
                 </div>
-                <div class="experiments-list">
-                    <a href="biology.html" class="exp-link" data-id="biology"
-                        onclick="trackVisit('biology','Живая Клетка','biology.html','🧬')">
-                        <span class="exp-icon">🔬</span>
-                        <span class="exp-name" data-i18n="biolab">Живая Клетка</span>
-                        <span class="exp-visited-dot" id="dot-biology"></span>
-                    </a>
-                    <a href="photosynthesis.html" class="exp-link" data-id="photosynthesis"
-                        onclick="trackVisit('photosynthesis','Фотосинтез','photosynthesis.html','🧬')">
-                        <span class="exp-icon">🌱</span>
-                        <span class="exp-name" data-i18n="photosynthesis">Фотосинтез</span>
-                        <span class="exp-visited-dot" id="dot-photosynthesis"></span>
-                    </a>
-                    <a href="genetics.html" class="exp-link" data-id="genetics"
-                        onclick="trackVisit('genetics','Законы Менделя','genetics.html','🧬')">
-                        <span class="exp-icon">🫛</span>
-                        <span class="exp-name" data-i18n="genetics">Законы Менделя</span>
-                        <span class="exp-visited-dot" id="dot-genetics"></span>
-                    </a>
-                    <a href="anatomy.html" class="exp-link" data-id="anatomy"
-                        onclick="trackVisit('anatomy','Анатомия','anatomy.html','🧬')">
-                        <span class="exp-icon">👁️</span>
-                        <span class="exp-name" data-i18n="anatomy">Анатомия</span>
-                        <span class="exp-visited-dot" id="dot-anatomy"></span>
-                    </a>
+                <div class="experiments-list-wrap">
+                    <div class="experiments-list-inner">
+                        <div class="experiments-list">
+                            <a href="biology.html" class="exp-link" data-id="biology"
+                                onclick="trackVisit('biology','Живая Клетка','biology.html','🧬')">
+                                <span class="exp-icon">🔬</span>
+                                <span class="exp-name" data-i18n="biolab">Живая Клетка</span>
+                                <span class="exp-visited-dot" id="dot-biology"></span>
+                            </a>
+                            <a href="photosynthesis.html" class="exp-link" data-id="photosynthesis"
+                                onclick="trackVisit('photosynthesis','Фотосинтез','photosynthesis.html','🧬')">
+                                <span class="exp-icon">🌱</span>
+                                <span class="exp-name" data-i18n="photosynthesis">Фотосинтез</span>
+                                <span class="exp-visited-dot" id="dot-photosynthesis"></span>
+                            </a>
+                            <a href="genetics.html" class="exp-link" data-id="genetics"
+                                onclick="trackVisit('genetics','Законы Менделя','genetics.html','🧬')">
+                                <span class="exp-icon">🫛</span>
+                                <span class="exp-name" data-i18n="genetics">Законы Менделя</span>
+                                <span class="exp-visited-dot" id="dot-genetics"></span>
+                            </a>
+                            <a href="anatomy.html" class="exp-link" data-id="anatomy"
+                                onclick="trackVisit('anatomy','Анатомия','anatomy.html','🧬')">
+                                <span class="exp-icon">👁️</span>
+                                <span class="exp-name" data-i18n="anatomy">Анатомия</span>
+                                <span class="exp-visited-dot" id="dot-anatomy"></span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- TOOLS CARD — Таблица Менделеева -->
-            <div class="subject-card card-chemistry" style="--theme-color: #f0c040;" data-subject="chemistry">
-                <div class="subject-header-small">
+            <!-- CHEMISTRY CARD -->
+            <div class="subject-card card-chemistry is-collapsed" style="--theme-color: #f0c040;" data-subject="chemistry">
+                <div class="subject-header-small" onclick="toggleSubjectCard(this.closest('.subject-card'))">
                     <div class="subject-icon-small">⚗️</div>
-                    <div class="subject-title-small">Химия</div>
+                    <div class="subject-title-small" data-i18n="chemistry">Химия</div>
+                    <span class="subject-count-badge">4 <span class="badge-unit" data-i18n="labsUnit">лаб</span></span>
+                    <span class="subject-chevron"><i class="fa-solid fa-chevron-down"></i></span>
                 </div>
-                <div class="experiments-list">
-                    <a href="periodic.html" class="exp-link" data-id="periodic"
-                        onclick="trackVisit('periodic','Таблица Менделеева','periodic.html','⚗️')">
-                        <span class="exp-icon">🧪</span>
-                        <span class="exp-name" data-i18n="periodic">Таблица Менделеева</span>
-                        <span class="exp-visited-dot" id="dot-periodic"></span>
-                    </a>
-                    <a href="reactions.html" class="exp-link" data-id="reactions"
-                        onclick="trackVisit('reactions','Химические реакции','reactions.html','⚗️')">
-                        <span class="exp-icon">🧫</span>
-                        <span class="exp-name" data-i18n="reactions">Химические реакции</span>
-                        <span class="exp-visited-dot" id="dot-reactions"></span>
-                    </a>
-                    <a href="molecules.html" class="exp-link" data-id="molecules"
-                        onclick="trackVisit('molecules','Конструктор молекул','molecules.html','⚗️')">
-                        <span class="exp-icon">🔗</span>
-                        <span class="exp-name" data-i18n="molecules">Конструктор молекул</span>
-                        <span class="exp-visited-dot" id="dot-molecules"></span>
-                    </a>
-                    <a href="ph_scale.html" class="exp-link" data-id="ph_scale"
-                        onclick="trackVisit('ph_scale','Шкала pH','ph_scale.html','⚗️')">
-                        <span class="exp-icon">🍋</span>
-                        <span class="exp-name" data-i18n="ph_scale">Шкала pH</span>
-                        <span class="exp-visited-dot" id="dot-ph_scale"></span>
-                    </a>
+                <div class="experiments-list-wrap">
+                    <div class="experiments-list-inner">
+                        <div class="experiments-list">
+                            <a href="periodic.html" class="exp-link" data-id="periodic"
+                                onclick="trackVisit('periodic','Таблица Менделеева','periodic.html','⚗️')">
+                                <span class="exp-icon">🧪</span>
+                                <span class="exp-name" data-i18n="periodic">Таблица Менделеева</span>
+                                <span class="exp-visited-dot" id="dot-periodic"></span>
+                            </a>
+                            <a href="reactions.html" class="exp-link" data-id="reactions"
+                                onclick="trackVisit('reactions','Химические реакции','reactions.html','⚗️')">
+                                <span class="exp-icon">🧫</span>
+                                <span class="exp-name" data-i18n="reactions">Химические реакции</span>
+                                <span class="exp-visited-dot" id="dot-reactions"></span>
+                            </a>
+                            <a href="molecules.html" class="exp-link" data-id="molecules"
+                                onclick="trackVisit('molecules','Конструктор молекул','molecules.html','⚗️')">
+                                <span class="exp-icon">🔗</span>
+                                <span class="exp-name" data-i18n="molecules">Конструктор молекул</span>
+                                <span class="exp-visited-dot" id="dot-molecules"></span>
+                            </a>
+                            <a href="ph_scale.html" class="exp-link" data-id="ph_scale"
+                                onclick="trackVisit('ph_scale','Шкала pH','ph_scale.html','⚗️')">
+                                <span class="exp-icon">🍋</span>
+                                <span class="exp-name" data-i18n="ph_scale">Шкала pH</span>
+                                <span class="exp-visited-dot" id="dot-ph_scale"></span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- TOOLS CARD — Инструменты -->
-            <div class="subject-card card-tools" style="--theme-color: #00cba9;" data-subject="tools">
-                <div class="subject-header-small">
+            <!-- TOOLS CARD -->
+            <div class="subject-card card-tools is-collapsed" style="--theme-color: #00cba9;" data-subject="tools">
+                <div class="subject-header-small" onclick="toggleSubjectCard(this.closest('.subject-card'))">
                     <div class="subject-icon-small">🛠️</div>
-                    <div class="subject-title-small">Инструменты</div>
+                    <div class="subject-title-small" data-i18n="tools">Инструменты</div>
+                    <span class="subject-count-badge">5 <span class="badge-unit" data-i18n="labsUnit">лаб</span></span>
+                    <span class="subject-chevron"><i class="fa-solid fa-chevron-down"></i></span>
                 </div>
-                <div class="experiments-list">
-                    <a href="calculator.html" class="exp-link" data-id="calculator"
-                        onclick="trackVisit('calculator','Научный калькулятор','calculator.html','🧮')">
-                        <span class="exp-icon">🧮</span>
-                        <span class="exp-name">Научный калькулятор</span>
-                        <span class="exp-visited-dot" id="dot-calculator"></span>
-                    </a>
-                    <a href="converter.html" class="exp-link" data-id="converter"
-                        onclick="trackVisit('converter','Конвертер единиц','converter.html','⚖️')">
-                        <span class="exp-icon">⚖️</span>
-                        <span class="exp-name" data-i18n="converter">Конвертер единиц</span>
-                        <span class="exp-visited-dot" id="dot-converter"></span>
-                    </a>
-                    <a href="graphing.html" class="exp-link" data-id="graphing"
-                        onclick="trackVisit('graphing','Построение графиков','graphing.html','🛠️')">
-                        <span class="exp-icon">📈</span>
-                        <span class="exp-name" data-i18n="graphing">Построение графиков</span>
-                        <span class="exp-visited-dot" id="dot-graphing"></span>
-                    </a>
-                    <a href="stopwatch.html" class="exp-link" data-id="stopwatch"
-                        onclick="trackVisit('stopwatch','Секундомер','stopwatch.html','🛠️')">
-                        <span class="exp-icon">⏱️</span>
-                        <span class="exp-name" data-i18n="stopwatch">Секундомер</span>
-                        <span class="exp-visited-dot" id="dot-stopwatch"></span>
-                    </a>
-                    <a href="presentation.html" class="exp-link" data-id="presentation"
-                        onclick="trackVisit('presentation','Создание презентации','presentation.html','🖥️')">
-                        <span class="exp-icon">🖥️</span>
-                        <span class="exp-name">Создание презентации</span>
-                        <span class="exp-visited-dot" id="dot-presentation"></span>
-                    </a>
+                <div class="experiments-list-wrap">
+                    <div class="experiments-list-inner">
+                        <div class="experiments-list">
+                            <a href="calculator.html" class="exp-link" data-id="calculator"
+                                onclick="trackVisit('calculator','Научный калькулятор','calculator.html','🧮')">
+                                <span class="exp-icon">🧮</span>
+                                <span class="exp-name" data-i18n="calculator">Научный калькулятор</span>
+                                <span class="exp-visited-dot" id="dot-calculator"></span>
+                            </a>
+                            <a href="converter.html" class="exp-link" data-id="converter"
+                                onclick="trackVisit('converter','Конвертер единиц','converter.html','⚖️')">
+                                <span class="exp-icon">⚖️</span>
+                                <span class="exp-name" data-i18n="converter">Конвертер единиц</span>
+                                <span class="exp-visited-dot" id="dot-converter"></span>
+                            </a>
+                            <a href="graphing.html" class="exp-link" data-id="graphing"
+                                onclick="trackVisit('graphing','Построение графиков','graphing.html','🛠️')">
+                                <span class="exp-icon">📈</span>
+                                <span class="exp-name" data-i18n="graphing">Построение графиков</span>
+                                <span class="exp-visited-dot" id="dot-graphing"></span>
+                            </a>
+                            <a href="stopwatch.html" class="exp-link" data-id="stopwatch"
+                                onclick="trackVisit('stopwatch','Секундомер','stopwatch.html','🛠️')">
+                                <span class="exp-icon">⏱️</span>
+                                <span class="exp-name" data-i18n="stopwatch">Секундомер</span>
+                                <span class="exp-visited-dot" id="dot-stopwatch"></span>
+                            </a>
+                            <a href="presentation.html" class="exp-link" data-id="presentation"
+                                onclick="trackVisit('presentation','Создание презентации','presentation.html','🖥️')">
+                                <span class="exp-icon">🖥️</span>
+                                <span class="exp-name">Создание презентации</span>
+                                <span class="exp-visited-dot" id="dot-presentation"></span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+        </div>
 
 
 
@@ -651,6 +712,30 @@
             document.getElementById('ai-msgs').scrollTop = document.getElementById('ai-msgs').scrollHeight;
         }
     </script>
+
+    <!-- Mobile Bottom Navigation Dock -->
+    <nav class="mobile-bottom-dock" id="mobileBottomDock">
+        <a href="index.html" class="dock-item active">
+            <i class="fa-solid fa-house"></i>
+            <span data-i18n="dockHome">Главная</span>
+        </a>
+        <a href="subjects.html" class="dock-item">
+            <i class="fa-solid fa-book-open"></i>
+            <span data-i18n="dockSubjects">Предметы</span>
+        </a>
+        <button type="button" class="dock-item dock-ai-btn" onclick="toggleAI()" title="ИИ Помощник">
+            <div class="dock-ai-glow"><i class="fa-solid fa-robot"></i></div>
+            <span data-i18n="dockAI">ИИ Чат</span>
+        </button>
+        <a href="studio.html" class="dock-item">
+            <i class="fa-solid fa-gamepad"></i>
+            <span data-i18n="dockStudio">Игры</span>
+        </a>
+        <a href="presentation.html" class="dock-item">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span data-i18n="dockSlides">Слайды</span>
+        </a>
+    </nav>
 </body>
 
 </html>

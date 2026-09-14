@@ -36,7 +36,16 @@ const i18n = {
         noResults: 'Ничего не найдено',
         createGame: '🎓 Создать игру', aiName: 'Нейро-Ассистент', aiStatus: 'В сети • Готов помочь',
         aiHello: 'Привет! Я встроенный ИИ <b>Virtual Science Hub</b>. Если у вас есть вопросы по любой теме учебной программы или вам нужна помощь с навигацией по сайту — просто спросите меня!',
-        aiPlaceholder: 'Спроси о чем угодно...', aiThinking: 'Анализирую запрос...'
+        aiPlaceholder: 'Спроси о чем угодно...', aiThinking: 'Анализирую запрос...',
+        mobileSubjectPrompt: '📚 Выберите предмет для изучения:',
+        expandAll: 'Развернуть все',
+        collapseAll: 'Свернуть все',
+        labsUnit: 'лаб',
+        dockHome: 'Главная',
+        dockSubjects: 'Предметы',
+        dockAI: 'ИИ Чат',
+        dockStudio: 'Игры',
+        dockSlides: 'Слайды'
     },
     kk: {
         heroBadge: '🔬 Интерактивті зертханалар',
@@ -68,7 +77,16 @@ const i18n = {
         noResults: 'Ештеңе табылмады',
         createGame: '🎓 Ойын жасау', aiName: 'Нейро-Көмекші', aiStatus: 'Желіде • Көмекке дайын',
         aiHello: 'Сәлем! Мен <b>Virtual Science Hub</b> кіріктірілген ИИ-мын. Оқу бағдарламасы бойынша сұрақтарыңыз болса немесе сайтта навигация жасауға көмек керек болса — менен сұраңыз!',
-        aiPlaceholder: 'Кез келген нәрсені сұраңыз...', aiThinking: 'Сұрауды талдаудамын...'
+        aiPlaceholder: 'Кез келген нәрсені сұраңыз...', aiThinking: 'Сұрауды талдаудамын...',
+        mobileSubjectPrompt: '📚 Оқығыңыз келетін пәнді таңдаңыз:',
+        expandAll: 'Барлығын ашу',
+        collapseAll: 'Барлығын жабу',
+        labsUnit: 'зерт.',
+        dockHome: 'Басты',
+        dockSubjects: 'Пәндер',
+        dockAI: 'ИИ Чат',
+        dockStudio: 'Ойындар',
+        dockSlides: 'Слайдтар'
     },
     en: {
         heroBadge: '🔬 Interactive Laboratories',
@@ -100,7 +118,16 @@ const i18n = {
         noResults: 'No results found',
         createGame: '🎓 Create Game', aiName: 'Neuro-Assistant', aiStatus: 'Online • Ready to help',
         aiHello: 'Hello! I am the built-in AI of <b>Virtual Science Hub</b>. If you have questions on any curriculum topic or need help navigating the site — just ask me!',
-        aiPlaceholder: 'Ask me anything...', aiThinking: 'Analyzing request...'
+        aiPlaceholder: 'Ask me anything...', aiThinking: 'Analyzing request...',
+        mobileSubjectPrompt: '📚 Choose a subject to explore:',
+        expandAll: 'Expand all',
+        collapseAll: 'Collapse all',
+        labsUnit: 'labs',
+        dockHome: 'Home',
+        dockSubjects: 'Subjects',
+        dockAI: 'AI Chat',
+        dockStudio: 'Games',
+        dockSlides: 'Slides'
     }
 };
 
@@ -514,12 +541,20 @@ function highlightGrid(matchIds) {
             else link.classList.remove('search-highlight');
         });
         card.classList.toggle('search-hidden', !cardHasMatch);
+        if (cardHasMatch) {
+            // Auto expand card on mobile when search matches
+            card.classList.remove('is-collapsed');
+        }
     });
+    updateToggleAllButton();
 }
 
 function resetGrid() {
-    document.querySelectorAll('.subject-card').forEach(c => c.classList.remove('search-hidden'));
+    document.querySelectorAll('.subject-card').forEach(c => {
+        c.classList.remove('search-hidden');
+    });
     document.querySelectorAll('.exp-link').forEach(l => l.classList.remove('search-highlight'));
+    updateToggleAllButton();
 }
 
 document.addEventListener('click', (e) => {
@@ -527,6 +562,65 @@ document.addEventListener('click', (e) => {
         document.getElementById('searchResults').style.display = 'none';
     }
 });
+
+// ══════════════════════════════════════════
+//  MOBILE SUBJECT ACCORDION
+// ══════════════════════════════════════════
+function isMobileView() {
+    return window.innerWidth <= 768;
+}
+
+function updateToggleAllButton() {
+    const btn = document.getElementById('mobileToggleAllBtn');
+    const textEl = document.getElementById('toggleAllText');
+    if (!btn || !textEl) return;
+    
+    const visibleCards = Array.from(document.querySelectorAll('.subject-card')).filter(c => c.style.display !== 'none' && !c.classList.contains('search-hidden'));
+    if (!visibleCards.length) return;
+    
+    const hasCollapsed = visibleCards.some(c => c.classList.contains('is-collapsed'));
+    const t = i18n[currentLang] || i18n.kk;
+    textEl.textContent = hasCollapsed ? t.expandAll : t.collapseAll;
+}
+
+function toggleSubjectCard(cardEl) {
+    if (!cardEl) return;
+    
+    // Toggle state
+    const isNowCollapsed = cardEl.classList.toggle('is-collapsed');
+    
+    // If expanding on mobile, smoothly scroll into view if card top is above viewport
+    if (!isNowCollapsed && isMobileView()) {
+        setTimeout(() => {
+            const rect = cardEl.getBoundingClientRect();
+            if (rect.top < 70) {
+                window.scrollTo({
+                    top: window.scrollY + rect.top - 80,
+                    behavior: 'smooth'
+                });
+            }
+        }, 120);
+    }
+    
+    updateToggleAllButton();
+}
+
+function toggleAllSubjects() {
+    const visibleCards = Array.from(document.querySelectorAll('.subject-card')).filter(c => c.style.display !== 'none' && !c.classList.contains('search-hidden'));
+    if (!visibleCards.length) return;
+    
+    const hasCollapsed = visibleCards.some(c => c.classList.contains('is-collapsed'));
+    
+    visibleCards.forEach(card => {
+        if (hasCollapsed) {
+            card.classList.remove('is-collapsed');
+        } else {
+            card.classList.add('is-collapsed');
+        }
+    });
+    
+    updateToggleAllButton();
+}
 
 // ══════════════════════════════════════════
 //  LANGUAGE SWITCHER
@@ -543,9 +637,12 @@ function setLang(lang) {
             document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
             document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
         }
- } else {
+    } else {
         document.cookie = "googtrans=" + gtrans + "; path=/";
-    if (location.hostname) { document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/"; document.cookie = "googtrans=" + gtrans + "; domain=." + location.hostname + "; path=/"; }
+        if (location.hostname) { 
+            document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/"; 
+            document.cookie = "googtrans=" + gtrans + "; domain=." + location.hostname + "; path=/"; 
+        }
     }
 
     document.querySelectorAll('.lang-btn').forEach(btn => {
@@ -573,6 +670,11 @@ function setLang(lang) {
     document.getElementById('about3Title').textContent = t.about3Title;
     document.getElementById('about3Text').textContent = t.about3Text;
     document.getElementById('footerText').textContent = t.footerText;
+    
+    // Mobile prompts and dock translations
+    const mobileSubjectPromptEl = document.getElementById('mobileSubjectPrompt');
+    if (mobileSubjectPromptEl && t.mobileSubjectPrompt) mobileSubjectPromptEl.textContent = t.mobileSubjectPrompt;
+    
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.dataset.i18n;
         if (t[key]) el.innerHTML = t[key]; // use innerHTML for cases like aiHello with <b> tags
@@ -581,6 +683,8 @@ function setLang(lang) {
         const key = el.dataset.i18nPlaceholder;
         if (t[key]) el.placeholder = t[key];
     });
+    
+    updateToggleAllButton();
     updateRecent();
 }
 
@@ -637,10 +741,17 @@ function initCategoryTabs() {
                     card.style.animation = 'none';
                     void card.offsetWidth;
                     card.style.animation = 'cardFadeIn 0.3s ease forwards';
+                    
+                    // If user specifically filtered (not 'all'), auto-expand filtered cards on mobile
+                    if (filter !== 'all') {
+                        card.classList.remove('is-collapsed');
+                    }
                 } else {
                     card.style.display = 'none';
                 }
             });
+            
+            updateToggleAllButton();
         });
     });
 }
@@ -655,6 +766,7 @@ function init() {
     setLang(currentLang);
     const savedTheme = localStorage.getItem('vsh-theme') || 'dark';
     applyTheme(savedTheme);
+    updateToggleAllButton();
 }
 init();
 
