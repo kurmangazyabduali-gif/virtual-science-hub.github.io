@@ -1652,59 +1652,401 @@ input[type=checkbox] {
 }
 
 /* ══════════════════════════════════════════ */
-/*  RESPONSIVE — MOBILE                       */
+/*  COMPREHENSIVE MOBILE RESPONSIVE ENGINE    */
 /* ══════════════════════════════════════════ */
+@media (max-width: 900px) {
+    .dashboard-container {
+        padding: 1.25rem 1rem;
+    }
+    .dashboard-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+    }
+}
+
 @media (max-width: 768px) {
+    /* Navigation Bar */
     .top-nav {
-        padding: 0.7rem 1rem;
+        padding: 0.6rem 0.85rem;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        backdrop-filter: blur(20px);
     }
 
     .nav-title {
         display: none;
     }
 
+    .nav-actions {
+        gap: 6px;
+        flex-wrap: nowrap;
+    }
+
+    .nav-btn {
+        padding: 6px 10px;
+        font-size: 0.78rem;
+        min-height: 36px;
+        border-radius: 10px;
+    }
+
+    .nav-btn i {
+        font-size: 0.85rem;
+    }
+
+    .nav-btn-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+    }
+
+    .lang-switcher {
+        padding: 2px;
+        gap: 2px;
+    }
+
+    .lang-btn {
+        padding: 4px 6px;
+        font-size: 0.7rem;
+        border-radius: 6px;
+    }
+
+    /* Container & Header */
     .dashboard-container {
-        padding: 1rem;
+        padding: 1rem 0.85rem;
+    }
+
+    .dashboard-header {
+        padding: 1rem 0 0.5rem;
+        margin-bottom: 1.25rem;
     }
 
     .dashboard-header h1 {
-        font-size: 2rem;
-        letter-spacing: 1px;
+        font-size: clamp(1.85rem, 7vw, 2.5rem);
+        letter-spacing: 0.5px;
     }
 
+    .dashboard-header p {
+        font-size: 0.88rem;
+        margin-bottom: 1rem;
+    }
+
+    .hero-badge {
+        font-size: 0.72rem;
+        padding: 4px 12px;
+        margin-bottom: 0.75rem;
+    }
+
+    /* Stats Bar */
     .stats-bar {
         gap: 8px;
+        margin-bottom: 1.75rem;
     }
 
     .stat-chip {
         padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+
+    .stat-chip-value {
+        font-size: 1rem;
     }
 
     .stat-chip-label {
+        font-size: 0.72rem;
+    }
+
+    /* Showcase Cards */
+    .showcase-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-bottom: 1.75rem;
+    }
+
+    .showcase-card {
+        padding: 1.1rem;
+        gap: 12px;
+        border-radius: 16px;
+    }
+
+    .showcase-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 1.75rem;
+        border-radius: 12px;
+    }
+
+    .showcase-badge {
+        top: 10px;
+        right: 10px;
+        font-size: 0.65rem;
+        padding: 2px 8px;
+    }
+
+    .showcase-content h3 {
+        font-size: 1rem;
+        margin-bottom: 2px;
+    }
+
+    .showcase-content p {
+        font-size: 0.8rem;
+        line-height: 1.35;
+    }
+
+    /* Search Bar */
+    .search-wrapper {
+        margin: 0 auto 1.5rem;
+        width: 100%;
+    }
+
+    .search-bar {
+        padding: 11px 15px;
+        border-radius: 14px;
+        gap: 10px;
+    }
+
+    .search-input {
+        font-size: 16px; /* Prevents auto-zoom on iOS */
+    }
+
+    .search-input::placeholder {
+        font-size: 0.85rem;
+    }
+
+    .search-results {
+        max-height: 320px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 14px;
+    }
+
+    .search-result-item {
+        padding: 12px 14px;
+    }
+
+    /* Category Filter Tabs: Smooth Swipe Carousel */
+    .subject-filter-tabs {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        justify-content: flex-start;
+        padding: 6px 8px;
+        margin: 0 0 1.75rem 0;
+        border-radius: 14px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        gap: 6px;
+    }
+
+    .subject-filter-tabs::-webkit-scrollbar {
         display: none;
     }
 
+    .subj-tab {
+        padding: 8px 14px;
+        font-size: 0.8rem;
+        flex-shrink: 0;
+        border-radius: 10px;
+    }
+
+    /* Subject Cards Grid */
     .dashboard-grid {
         grid-template-columns: 1fr;
         gap: 16px;
+        padding-bottom: 70px;
+    }
+
+    .subject-card {
+        padding: 20px 16px;
+        border-radius: 20px;
+    }
+
+    .subject-header-small {
+        gap: 10px;
+        margin-bottom: 14px;
+    }
+
+    .subject-icon-small {
+        font-size: 1.6rem;
+    }
+
+    .subject-title-small {
+        font-size: 1.25rem;
+    }
+
+    .exp-link {
+        min-height: 48px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        font-size: 0.92rem;
+        touch-action: manipulation;
+    }
+
+    .exp-icon {
+        font-size: 1.2rem;
+        margin-right: 12px;
     }
 
     .about-grid {
         grid-template-columns: 1fr;
+        gap: 14px;
     }
 
-    .search-wrapper {
-        margin-bottom: 1.5rem;
+    /* Announcement Banner */
+    .announce-banner {
+        padding: 10px 14px;
+        border-radius: 12px;
+        margin-bottom: 1.25rem;
+    }
+
+    .announce-text {
+        font-size: 0.82rem;
+        line-height: 1.35;
+    }
+
+    /* Simulation & Lab Pages Mobile Responsiveness */
+    .glass-header {
+        padding: 0.75rem 1rem;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .glass-header h1 {
+        font-size: 1.15rem;
+    }
+
+    .glass-header .stats {
+        gap: 0.75rem;
+        font-size: 0.8rem;
+    }
+
+    .simulation-container {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        min-height: calc(100vh - 60px);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 10px;
+    }
+
+    .simulation-container canvas {
+        height: 50vh;
+        min-height: 260px;
+        border-radius: 14px;
+        flex-shrink: 0;
+    }
+
+    .glass-panel {
+        position: static;
+        width: 100%;
+        max-width: 100%;
+        border-radius: 16px;
+        margin-top: 1rem;
+        max-height: none;
+        padding: 1.25rem 1rem;
+    }
+
+    .presets-grid {
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        gap: 6px;
+    }
+
+    .buttons-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .btn {
+        min-height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        touch-action: manipulation;
+    }
+
+    input[type="text"],
+    input[type="search"],
+    input[type="number"],
+    select,
+    textarea {
+        font-size: 16px !important; /* Prevents auto zoom on iOS Safari */
     }
 }
 
 @media (max-width: 480px) {
+    /* Compact Header Buttons on Small Screens */
+    .top-nav {
+        padding: 0.5rem 0.65rem;
+    }
+
+    .nav-btn span {
+        display: none; /* Icon-only pills on extra small mobile */
+    }
+
+    .nav-btn {
+        padding: 7px 10px;
+        min-height: 34px;
+    }
+
+    .nav-btn i {
+        font-size: 0.95rem;
+        margin: 0;
+    }
+
+    /* 2x2 Stats Chip Grid */
     .stats-bar {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        width: 100%;
+        max-width: 320px;
+        margin: 0 auto 1.5rem;
+    }
+
+    .stat-chip {
+        padding: 8px 10px;
         justify-content: center;
     }
 
+    .stat-chip-label {
+        display: inline;
+        font-size: 0.72rem;
+    }
+
+    .dashboard-header h1 {
+        font-size: 1.85rem;
+    }
+
     .recent-chips {
-        gap: 8px;
+        gap: 6px;
+    }
+
+    .recent-chip {
+        padding: 6px 12px;
+        font-size: 0.78rem;
+    }
+
+    /* Mobile AI Floating Modal */
+    .ai-fab {
+        bottom: 1.25rem !important;
+        right: 1.25rem !important;
+        width: 50px !important;
+        height: 50px !important;
+        font-size: 20px !important;
+    }
+
+    .ai-modal {
+        bottom: 78px !important;
+        right: 0.75rem !important;
+        left: 0.75rem !important;
+        width: auto !important;
+        height: min(460px, calc(100vh - 100px)) !important;
+        border-radius: 18px !important;
+    }
+
+    .ai-input {
+        font-size: 16px !important; /* Prevents iOS auto zoom */
     }
 }
 

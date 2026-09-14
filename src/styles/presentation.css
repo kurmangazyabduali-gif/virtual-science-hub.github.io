@@ -945,32 +945,319 @@ html, body {
 @keyframes spin { to { transform: rotate(360deg); } }
 .icon-spin { animation: spin 1s linear infinite; }
 
-/* ── Responsive Adjustments ── */
-@media (max-width: 768px) {
-    #screen-prompt {
-        padding: 60px 14px 40px;
+/* ── Comprehensive Mobile & Tablet Responsive Engine ── */
+@media (max-width: 900px) {
+    html, body {
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
-    .back-link {
-        top: 14px; left: 14px;
-        font-size: 12px; padding: 6px 10px;
+
+    #screen-workspace {
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        height: auto;
+        min-height: 100vh;
+        position: relative;
     }
-    .hero-content {
-        margin-top: 10px;
-        gap: 12px;
+
+    #screen-workspace.active {
+        position: relative;
     }
-    .hero-title {
-        font-size: 24px;
-    }
-    .prompt-card {
-        padding: 16px 14px;
-    }
-    .workspace-header {
-        flex-wrap: wrap; padding: 10px 14px; gap: 8px;
-    }
-    .sidebar-editor {
-        width: 100%; height: auto;
-    }
+
     .workspace-body {
         flex-direction: column;
+        overflow: visible;
+        height: auto;
+    }
+
+    .preview-area {
+        order: -1;
+        padding: 16px 14px;
+        width: 100%;
+        min-height: auto;
+        background: #07070a;
+    }
+
+    .preview-stage-container {
+        max-width: 100%;
+        gap: 8px;
+    }
+
+    .slide-preview-wrapper {
+        width: 100%;
+        border-radius: 14px;
+    }
+
+    .sidebar-editor {
+        width: 100%;
+        height: auto;
+        overflow: visible;
+        border-right: none;
+        border-bottom: 1px solid var(--c-border);
+    }
+
+    .slide-edit-form {
+        overflow: visible;
+        padding: 16px 14px;
+    }
+}
+
+@media (max-width: 768px) {
+    #screen-prompt {
+        padding: 56px 12px 60px;
+        overflow-y: auto;
+    }
+
+    .back-link {
+        top: 12px;
+        left: 12px;
+        font-size: 12px;
+        padding: 6px 12px;
+        border-radius: 8px;
+    }
+
+    .hero-content {
+        width: 100%;
+        max-width: 100%;
+        margin-top: 6px;
+        gap: 12px;
+    }
+
+    .hero-badge {
+        font-size: 11px;
+        padding: 4px 12px;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .hero-title {
+        font-size: clamp(22px, 6vw, 32px);
+        line-height: 1.2;
+    }
+
+    .hero-sub {
+        font-size: 13px;
+        line-height: 1.45;
+    }
+
+    .prompt-card {
+        padding: 16px 12px;
+        gap: 12px;
+        border-radius: 16px;
+    }
+
+    .rag-source-card {
+        padding: 12px;
+        border-radius: 12px;
+    }
+
+    .rag-tabs {
+        gap: 4px;
+    }
+
+    .rag-tab {
+        padding: 5px 9px;
+        font-size: 11px;
+    }
+
+    .prompt-textarea,
+    .rag-textarea,
+    .rag-select,
+    .prompt-select,
+    .form-input,
+    .form-textarea,
+    .ws-title-input {
+        font-size: 16px !important; /* Prevents auto-zoom on iOS Safari */
+    }
+
+    .prompt-options {
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px 12px;
+    }
+
+    .option-group {
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .prompt-hints {
+        gap: 6px;
+    }
+
+    .hint-chip {
+        font-size: 11px;
+        padding: 5px 10px;
+    }
+
+    .template-picker-section {
+        padding: 12px 10px;
+    }
+
+    .template-grid {
+        grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
+        gap: 8px;
+        max-height: 220px;
+    }
+
+    .btn-generate {
+        padding: 14px 18px;
+        font-size: 15px;
+    }
+
+    .features-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        width: 100%;
+        text-align: left;
+    }
+
+    .feat-item {
+        font-size: 11.5px;
+    }
+
+    /* Workspace Header */
+    .workspace-header {
+        flex-wrap: wrap;
+        padding: 8px 10px;
+        gap: 8px;
+    }
+
+    .ws-btn-back {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+
+    .ws-title-container {
+        width: 100%;
+        order: 3;
+        max-width: 100%;
+    }
+
+    .ws-title-input {
+        font-size: 14px !important;
+        padding: 6px 10px;
+    }
+
+    .theme-style-badge {
+        font-size: 10px;
+        padding: 3px 8px;
+    }
+
+    .ws-actions {
+        order: 2;
+        display: flex;
+        gap: 6px;
+        overflow-x: auto;
+        padding-bottom: 2px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .ws-actions::-webkit-scrollbar {
+        display: none;
+    }
+
+    .btn-present,
+    .btn-pptx,
+    .btn-pdf {
+        padding: 7px 11px;
+        font-size: 11.5px;
+        flex-shrink: 0;
+    }
+
+    .slides-thumbnails-list {
+        padding: 10px 12px;
+        gap: 8px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .slide-thumb {
+        width: 72px;
+        height: 42px;
+        font-size: 10.5px;
+    }
+
+    .slide-controls-bar {
+        padding: 8px 12px;
+        gap: 6px;
+    }
+
+    .theme-picker-bar {
+        padding: 8px 12px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+
+    .theme-picker-header-ws {
+        width: 100%;
+    }
+
+    .ws-template-dropdown {
+        max-width: 100%;
+    }
+
+    /* Presenter Mode */
+    .presenter-stage {
+        width: 96vw;
+        height: calc(96vw * 9 / 16);
+        max-height: 80vh;
+        border-radius: 12px;
+    }
+
+    .presenter-card {
+        font-size: clamp(9px, 2.7vw, 16px) !important;
+        padding: 3.5% 4.5% !important;
+    }
+
+    .presenter-nav {
+        width: 44px;
+        height: 44px;
+        font-size: 16px;
+        background: rgba(255, 255, 255, 0.18);
+    }
+
+    .presenter-nav.prev {
+        left: 8px;
+    }
+
+    .presenter-nav.next {
+        right: 8px;
+    }
+
+    .presenter-close {
+        top: 12px;
+        right: 12px;
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    #screen-prompt {
+        padding: 50px 8px 50px;
+    }
+
+    .hero-title {
+        font-size: 20px;
+    }
+
+    .template-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .features-row {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+
+    .btn-present span,
+    .btn-pptx span,
+    .btn-pdf span {
+        display: none;
     }
 }

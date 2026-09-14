@@ -721,7 +721,7 @@ option {
     }
 
     .stage-wrap {
-        min-height: 520px;
+        min-height: 480px;
         padding: 12px;
     }
 
@@ -731,5 +731,57 @@ option {
 
     .ai-layout {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .stage-wrap {
+        min-height: 380px;
+        padding: 8px;
+    }
+
+    .slide-stage {
+        transform: scale(calc((100vw - 32px) / 960));
+        transform-origin: center;
+    }
+
+    .topbar {
+        padding: 8px 12px;
+        gap: 8px;
+    }
+
+    .title-group input,
+    .select-field,
+    .input-field,
+    textarea {
+        font-size: 16px !important; /* Prevents auto zoom on iOS */
+    }
+
+    .preview-slide {
+        width: 96vw;
+        height: calc(96vw * 9 / 16);
+    }
+
+    .quick-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .swatches {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .slide-stage {
+        transform: scale(calc((100vw - 16px) / 960));
+    }
+
+    .topbar-actions {
+        gap: 4px;
+    }
+
+    .tool-button {
+        padding: 0 8px;
+        font-size: 11.5px;
     }
 }
