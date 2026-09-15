@@ -634,11 +634,42 @@ input[type=checkbox] {
 }
 
 .dashboard-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     text-align: center;
     margin-bottom: 1.5rem;
     padding: 2.2rem 0 0.8rem 0;
     position: relative;
     z-index: 10;
+    width: 100%;
+}
+
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 6px 18px;
+    background: rgba(0, 243, 255, 0.08);
+    border: 1px solid rgba(0, 243, 255, 0.25);
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent-primary);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    margin: 0 auto 0.6rem auto;
+    box-shadow: 0 4px 15px rgba(0, 243, 255, 0.08);
+    transition: all 0.25s ease;
+}
+
+.hero-badge:hover {
+    background: rgba(0, 243, 255, 0.15);
+    border-color: rgba(0, 243, 255, 0.45);
+    box-shadow: 0 6px 20px rgba(0, 243, 255, 0.2);
+    transform: translateY(-2px);
 }
 
 .dashboard-header h1,
@@ -648,13 +679,14 @@ input[type=checkbox] {
     text-transform: uppercase;
     letter-spacing: 6px;
     line-height: 1.08;
-    margin: 0.8rem 0 0.8rem 0;
-    display: inline-flex;
+    margin: 0.4rem 0 0.8rem 0;
+    display: flex;
     align-items: baseline;
     justify-content: center;
     position: relative;
     user-select: none;
     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 100%;
 }
 
 .hero-title-designer:hover {
@@ -679,22 +711,6 @@ input[type=checkbox] {
     margin-left: 2px;
     filter: drop-shadow(0 0 25px rgba(0, 243, 255, 0.65)) drop-shadow(0 0 50px rgba(168, 85, 247, 0.5));
     position: relative;
-}
-
-.hero-title-dot {
-    background: linear-gradient(135deg, #00f3ff, #ec4899);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-weight: 950;
-    margin-left: 2px;
-    filter: drop-shadow(0 0 16px #00f3ff);
-    display: inline-block;
-    animation: pulseGlowDot 2.2s infinite ease-in-out;
-}
-
-@keyframes pulseGlowDot {
-    0%, 100% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 16px #00f3ff); }
-    50% { opacity: 0.55; transform: scale(1.25); filter: drop-shadow(0 0 28px #ec4899); }
 }
 
 /* GRID LAYOUT */
