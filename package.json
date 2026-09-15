@@ -2,7 +2,7 @@
   "name": "vsh-presentation",
   "version": "1.0.0",
   "type": "module",
-  "description": "Virtual Science Hub — AI Presentation Generator",
+  "description": "AshyqLab — Интерактивті виртуалды зертханалар платформасы",
   "scripts": {
     "start": "node server.js",
     "build": "echo 'Static build ready'"

@@ -4,9 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Virtual Science Hub — Виртуальные лабораторные работы</title>
+    <title>AshyqLab — Интерактивті виртуалды зертханалар</title>
     <meta name="description"
-        content="Интерактивный центр виртуальных лабораторных работ по физике, информатике, геометрии, казахскому и английскому языку и биологии.">
+        content="AshyqLab — Интерактивті виртуалды зертханалар орталығы. Физика, химия, биология, информатика және тілдер.">
+    <link rel="icon" type="image/png" href="assets/logo.png">
+    <link rel="apple-touch-icon" href="assets/logo.png">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
@@ -97,34 +99,12 @@
     <!-- ══════════════════════════════════════ -->
     <nav class="top-nav" id="topNav">
         <div class="nav-left">
-            <a href="index.html" class="nav-brand" title="Virtual Science Hub">
+            <a href="index.html" class="nav-brand" title="AshyqLab">
                 <span class="nav-logo">
-                    <svg viewBox="0 0 100 100" class="nav-logo-svg" width="36" height="36" style="width: 36px; height: 36px; max-width: 36px; max-height: 36px; display: inline-block; vertical-align: middle;">
-                        <defs>
-                            <linearGradient id="vshNavGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stop-color="#00f3ff" />
-                                <stop offset="50%" stop-color="#a855f7" />
-                                <stop offset="100%" stop-color="#bc13fe" />
-                            </linearGradient>
-                        </defs>
-                        <polygon points="50,6 90,28 90,72 50,94 10,72 10,28" 
-                                 fill="url(#vshNavGrad)" fill-opacity="0.15" 
-                                 stroke="url(#vshNavGrad)" stroke-width="3" 
-                                 stroke-linejoin="round" />
-                        <ellipse cx="50" cy="50" rx="38" ry="14" 
-                                 fill="none" stroke="#00f3ff" stroke-width="2" 
-                                 stroke-dasharray="8 4" transform="rotate(-30 50 50)" class="vsh-orbit-ring1" />
-                        <circle cx="82" cy="32" r="3.5" fill="#00f3ff" />
-                        <ellipse cx="50" cy="50" rx="38" ry="14" 
-                                 fill="none" stroke="#bc13fe" stroke-width="2" 
-                                 stroke-dasharray="6 3" transform="rotate(35 50 50)" class="vsh-orbit-ring2" />
-                        <circle cx="20" cy="36" r="3.5" fill="#bc13fe" />
-                        <text x="50" y="59" text-anchor="middle" font-family="'Roboto', sans-serif" 
-                              font-weight="900" font-size="28" fill="url(#vshNavGrad)">VSH</text>
-                    </svg>
+                    <img src="assets/logo.png" alt="AshyqLab" class="nav-logo-img">
                 </span>
                 <div class="nav-brand-text">
-                    <span class="nav-title">Virtual Science Hub</span>
+                    <span class="nav-title">Ashyq<span class="nav-title-accent">Lab</span></span>
                     <span class="nav-tagline">32 Interactive Labs</span>
                 </div>
             </a>
@@ -325,7 +305,7 @@
         <!-- ══════════════════════════════════════ -->
         <header class="dashboard-header">
             <div class="hero-badge" id="heroBadge">🔬 Интерактивные лаборатории</div>
-            <h1 id="heroTitle">Virtual Science Hub</h1>
+            <h1 id="heroTitle">AshyqLab</h1>
             <p id="heroSubtitle">Центр интерактивных лабораторных исследований</p>
 
             <!-- STATS BAR -->
@@ -789,7 +769,7 @@
 
         <!-- Footer -->
         <footer class="site-footer">
-            <p id="footerText">Virtual Science Hub • Виртуальные лабораторные работы • 2025</p>
+            <p id="footerText">AshyqLab • Интерактивті виртуалды зертханалар • 2025</p>
         </footer>
 
     </div>
@@ -811,7 +791,7 @@
             <button onclick="toggleAI()"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <div class="ai-messages" id="ai-msgs">
-            <div class="msg bot" data-i18n="aiHello">Привет! Я встроенный ИИ <b>Virtual Science Hub</b>. Если у вас есть вопросы по любой теме учебной программы или вам нужна помощь с навигацией по сайту — просто спросите меня!</div>
+            <div class="msg bot" data-i18n="aiHello">Сәлем! Мен <b>AshyqLab</b> кіріктірілген ИИ-мын. Оқу бағдарламасы немесе зертханалар бойынша сұрағыңыз болса — менен сұраңыз!</div>
         </div>
         <div class="ai-input-area">
             <input type="text" id="ai-input" class="ai-input" placeholder="Спроси о чем угодно..." data-i18n-placeholder="aiPlaceholder" onkeypress="if(event.key==='Enter') sendAIMsg()">
@@ -859,7 +839,7 @@
             document.getElementById('ai-msgs').appendChild(msgObj);
             document.getElementById('ai-msgs').scrollTop = document.getElementById('ai-msgs').scrollHeight;
             
-            const sysPrompt = "Тебя зовут Нейро-Ассистент. Ты умный образовательный ИИ-помощник на сайте 'Virtual Science Hub'. Отвечай на вопрос ученика: дружелюбно, очень кратко (2-3 предложения), используя HTML-теги <b> для выделения вместо маркдауна. Вопрос: " + txt;
+            const sysPrompt = "Тебя зовут Нейро-Ассистент. Ты умный образовательный ИИ-помощник на сайте 'AshyqLab'. Отвечай на вопрос ученика: дружелюбно, очень кратко (2-3 предложения), используя HTML-теги <b> для выделения вместо маркдауна. Вопрос: " + txt;
             let ans = await fetchGemini(sysPrompt);
             
             msgObj.innerHTML = ans.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
@@ -874,9 +854,9 @@
     <aside class="mobile-drawer" id="mobileDrawer" aria-hidden="true">
         <div class="drawer-header">
             <div class="drawer-brand">
-                <span class="drawer-logo">🚀</span>
+                <img src="assets/logo.png" alt="AshyqLab" class="drawer-logo-img">
                 <div class="drawer-brand-text">
-                    <span class="drawer-title">Virtual Science Hub</span>
+                    <span class="drawer-title">Ashyq<span class="nav-title-accent">Lab</span></span>
                     <span class="drawer-subtitle" data-i18n="drawerSub">Меню платформы</span>
                 </div>
             </div>

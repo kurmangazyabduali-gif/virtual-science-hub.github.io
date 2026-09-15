@@ -1,4 +1,4 @@
-// Simple static file server for Virtual Science Hub
+// Simple static file server for AshyqLab
 // Gemini API is called directly from the browser (no backend proxy needed)
 
 import express from 'express';

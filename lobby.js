@@ -1,5 +1,5 @@
 /**
- * Virtual Science Hub — Main Lobby Script
+ * AshyqLab — Main Lobby Script
  */
 
 // ══════════════════════════════════════════
@@ -19,7 +19,7 @@ const i18n = {
         about1Title: 'Цель проекта', about1Text: 'Интерактивные виртуальные лаборатории помогают ученикам понять сложные темы через практику и визуализацию.',
         about2Title: 'Как пользоваться', about2Text: 'Выберите предмет, откройте лабораторию и экспериментируйте! Все симуляции работают прямо в браузере без установки.',
         about3Title: 'Любое устройство', about3Text: 'Сайт адаптирован для компьютеров, планшетов и смартфонов. Учитесь где угодно и когда угодно.',
-        footerText: 'Virtual Science Hub • Виртуальные лабораторные работы • 2025',
+        footerText: 'AshyqLab • Интерактивные лабораторные работы • 2025',
         soon: 'Скоро',
         physics: 'Физика', informatics: 'Информатика', geometry: 'Геометрия',
         kazakh: 'Қазақ тілі', english: 'English', biology: 'Биология',
@@ -35,7 +35,7 @@ const i18n = {
         tabAll: '🌟 Все предметы (8)', tabExact: '⚛️ Точные науки', tabIT: '💻 IT & Информатика', tabNature: '🌿 Естествознание', tabLang: '🌐 Языки', tabTools: '🛠️ Инструменты',
         noResults: 'Ничего не найдено',
         createGame: '🎓 Создать игру', aiName: 'Нейро-Ассистент', aiStatus: 'В сети • Готов помочь',
-        aiHello: 'Привет! Я встроенный ИИ <b>Virtual Science Hub</b>. Если у вас есть вопросы по любой теме учебной программы или вам нужна помощь с навигацией по сайту — просто спросите меня!',
+        aiHello: 'Привет! Я встроенный ИИ <b>AshyqLab</b>. Если у вас есть вопросы по любой теме учебной программы или вам нужна помощь с навигацией по сайту — просто спросите меня!',
         aiPlaceholder: 'Спроси о чем угодно...', aiThinking: 'Анализирую запрос...',
         mobileSubjectPrompt: '📚 Выберите предмет для изучения:',
         expandAll: 'Развернуть все',
@@ -79,7 +79,7 @@ const i18n = {
         about1Title: 'Жобаның мақсаты', about1Text: 'Интерактивті виртуалды зертханалар оқушыларға күрделі тақырыптарды тәжірибе мен визуализация арқылы түсінуге көмектеседі.',
         about2Title: 'Қалай пайдалану керек', about2Text: 'Пәнді таңдаңыз, зертхананы ашыңыз және эксперимент жасаңыз! Барлық симуляциялар браузерде жұмыс істейді.',
         about3Title: 'Кез келген құрылғы', about3Text: 'Сайт компьютерлерге, планшеттерге және смартфондарға бейімделген.',
-        footerText: 'Virtual Science Hub • Виртуалды зертханалық жұмыстар • 2025',
+        footerText: 'AshyqLab • Интерактивті виртуалды зертханалық жұмыстар • 2025',
         soon: 'Жақында',
         physics: 'Физика', informatics: 'Информатика', geometry: 'Геометрия',
         kazakh: 'Қазақ тілі', english: 'English', biology: 'Биология',
@@ -95,7 +95,7 @@ const i18n = {
         tabAll: '🌟 Барлық пәндер (8)', tabExact: '⚛️ Нақты ғылымдар', tabIT: '💻 IT & Информатика', tabNature: '🌿 Жаратылыстану', tabLang: '🌐 Тілдер', tabTools: '🛠️ Құралдар',
         noResults: 'Ештеңе табылмады',
         createGame: '🎓 Ойын жасау', aiName: 'Нейро-Көмекші', aiStatus: 'Желіде • Көмекке дайын',
-        aiHello: 'Сәлем! Мен <b>Virtual Science Hub</b> кіріктірілген ИИ-мын. Оқу бағдарламасы бойынша сұрақтарыңыз болса немесе сайтта навигация жасауға көмек керек болса — менен сұраңыз!',
+        aiHello: 'Сәлем! Мен <b>AshyqLab</b> кіріктірілген ИИ-мын. Оқу бағдарламасы бойынша сұрақтарыңыз болса немесе сайтта навигация жасауға көмек керек болса — менен сұраңыз!',
         aiPlaceholder: 'Кез келген нәрсені сұраңыз...', aiThinking: 'Сұрауды талдаудамын...',
         mobileSubjectPrompt: '📚 Оқығыңыз келетін пәнді таңдаңыз:',
         expandAll: 'Барлығын ашу',
@@ -139,7 +139,7 @@ const i18n = {
         about1Title: 'Project Goal', about1Text: 'Interactive virtual labs help students understand complex topics through practice and visualization.',
         about2Title: 'How to Use', about2Text: 'Choose a subject, open a lab, and experiment! All simulations run directly in the browser.',
         about3Title: 'Any Device', about3Text: 'The site is optimized for computers, tablets & smartphones. Learn anywhere, anytime.',
-        footerText: 'Virtual Science Hub • Virtual Laboratory Works • 2025',
+        footerText: 'AshyqLab • Virtual Laboratory Works • 2025',
         soon: 'Soon',
         physics: 'Physics', informatics: 'Informatics', geometry: 'Geometry',
         kazakh: 'Kazakh Language', english: 'English', biology: 'Biology',
@@ -155,7 +155,7 @@ const i18n = {
         tabAll: '🌟 All Subjects (8)', tabExact: '⚛️ Exact Sciences', tabIT: '💻 IT & Informatics', tabNature: '🌿 Natural Sciences', tabLang: '🌐 Languages', tabTools: '🛠️ Tools',
         noResults: 'No results found',
         createGame: '🎓 Create Game', aiName: 'Neuro-Assistant', aiStatus: 'Online • Ready to help',
-        aiHello: 'Hello! I am the built-in AI of <b>Virtual Science Hub</b>. If you have questions on any curriculum topic or need help navigating the site — just ask me!',
+        aiHello: 'Hello! I am the built-in AI of <b>AshyqLab</b>. If you have questions on any curriculum topic or need help navigating the site — just ask me!',
         aiPlaceholder: 'Ask me anything...', aiThinking: 'Analyzing request...',
         mobileSubjectPrompt: '📚 Choose a subject to explore:',
         expandAll: 'Expand all',

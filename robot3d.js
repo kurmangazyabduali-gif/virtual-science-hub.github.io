@@ -1,5 +1,5 @@
 /**
- * Virtual Science Hub — High-Poly Interactive 3D Cyber Robot Background Engine
+ * AshyqLab — High-Poly Interactive 3D Cyber Robot Background Engine
  * Features: High-Poly Subdivided Geometries, 100% Crisp Unblurred Rendering, Side Position, Quantum Reactor, Energy Conduits & Smooth LERP
  */
 
