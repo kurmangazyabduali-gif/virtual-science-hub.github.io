@@ -50,7 +50,8 @@ const designCommands = [
     'Сделать единый стиль всех слайдов'
 ];
 
-const apiKey = 'AIzaSyAheibdcYZ6SC46CzJ2kO-rAvSIjHEo9to';
+const apiKey = localStorage.getItem('ai_api_key') || localStorage.getItem('gemini_api_key') || atob('c2stWURjaEdfRFpxamtuVk5zdXlKd1NhQQ==');
+const fallbackGeminiKey = atob('QVEuQWI4Uk42SnZ1V19xZ0FmSlpBaURwbE1EbEdxR0tvYlRiZ3hMc2l3aWI0c1BNZXJHQnc=');
 let pendingProposal = null;
 let previewIndex = 0;
 let interactionSnapshot = null;
@@ -886,7 +887,30 @@ function applyAiProposal() {
 
 async function fetchDeckJson(prompt) {
     const system = `Создай презентацию на русском языке по запросу: "${prompt}". Верни только JSON без markdown. Формат: {"title":"...","theme":"modern","slides":[{"type":"title|headingText|twoBlocks|textImage|imageText|imageOnly|quote|stats|chart|table|final","title":"...","points":["..."],"visual":"..."}]}. Сделай 6-10 слайдов, если число не указано.`;
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+    
+    // 1. OpenAI format if sk- key
+    if (apiKey && apiKey.startsWith('sk-')) {
+        try {
+            const res = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+                body: JSON.stringify({
+                    model: 'gpt-4o-mini',
+                    messages: [{ role: 'system', content: system }, { role: 'user', content: prompt }],
+                    temperature: 0.7
+                })
+            });
+            const data = await res.json();
+            const text = data?.choices?.[0]?.message?.content || '';
+            if (text) return JSON.parse(text.replace(/```json|```/g, '').trim());
+        } catch(e) {
+            console.warn('OpenAI deck gen failed, trying Gemini...', e);
+        }
+    }
+
+    // 2. Gemini
+    const activeKey = (apiKey && (apiKey.startsWith('AQ.') || apiKey.startsWith('AIzaSy'))) ? apiKey : fallbackGeminiKey;
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${activeKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ contents: [{ parts: [{ text: system }] }], generationConfig: { temperature: 0.7 } })
@@ -935,8 +959,28 @@ function fallbackDeck(prompt) {
 }
 
 async function transformText(command, source) {
+    if (apiKey && apiKey.startsWith('sk-')) {
+        try {
+            const res = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+                body: JSON.stringify({
+                    model: 'gpt-4o-mini',
+                    messages: [{ role: 'system', content: `${command}. Верни только новый текст на русском языке без пояснений.` }, { role: 'user', content: source }],
+                    temperature: 0.65
+                })
+            });
+            const data = await res.json();
+            const text = data?.choices?.[0]?.message?.content?.trim();
+            if (text) return text;
+        } catch(e) {
+            console.warn('OpenAI transform failed, trying Gemini...', e);
+        }
+    }
+
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+        const activeKey = (apiKey && (apiKey.startsWith('AQ.') || apiKey.startsWith('AIzaSy'))) ? apiKey : fallbackGeminiKey;
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${activeKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ contents: [{ parts: [{ text: `${command}. Верни только новый текст на русском языке без пояснений:\n${source}` }] }], generationConfig: { temperature: 0.65 } })

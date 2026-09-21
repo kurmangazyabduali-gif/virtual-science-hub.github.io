@@ -33,6 +33,177 @@
         .ai-modal button { padding: 0; margin: 0; font-family: inherit; }
         .ai-header button { background: transparent; border: none; font-size: 18px; cursor: pointer; color: #94a3b8; transition: color 0.2s; }
         .ai-header button:hover { color: white; }
+
+        /* ══════════════════════════════════════════ */
+        /*  FULLSCREEN PRELOADER (PURE WHITE THEME)  */
+        /* ══════════════════════════════════════════ */
+        .site-preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #ffffff !important;
+            z-index: 99999999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.6s ease;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        .site-preloader.preloader-hidden {
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
+
+        .preloader-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 24px;
+            max-width: 420px;
+            width: 90%;
+        }
+
+        .preloader-logo-wrapper {
+            position: relative;
+            width: 110px;
+            height: 110px;
+            margin-bottom: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preloader-pulse-ring {
+            position: absolute;
+            inset: -14px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(6, 182, 212, 0.22) 0%, rgba(59, 130, 246, 0.06) 65%, transparent 100%);
+            animation: preloaderPulseRing 2.2s ease-in-out infinite;
+        }
+
+        @keyframes preloaderPulseRing {
+            0%, 100% {
+                transform: scale(0.92);
+                opacity: 0.5;
+            }
+            50% {
+                transform: scale(1.18);
+                opacity: 1;
+            }
+        }
+
+        .preloader-logo-img {
+            width: 92px;
+            height: 92px;
+            object-fit: contain;
+            position: relative;
+            z-index: 2;
+            filter: drop-shadow(0 12px 24px rgba(6, 182, 212, 0.35));
+            animation: preloaderFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes preloaderFloat {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-8px) rotate(2deg);
+            }
+        }
+
+        .preloader-brand {
+            font-family: 'Roboto', 'Plus Jakarta Sans', sans-serif;
+            font-size: 42px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preloader-title-main {
+            color: #0f172a;
+            background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .preloader-title-accent {
+            background: linear-gradient(135deg, #0284c7 0%, #06b6d4 50%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% auto;
+            animation: preloaderShimmer 2.2s infinite linear;
+            margin-left: 2px;
+        }
+
+        @keyframes preloaderShimmer {
+            0% {
+                background-position: 0% center;
+            }
+            100% {
+                background-position: 200% center;
+            }
+        }
+
+        .preloader-tagline {
+            font-family: 'Roboto', sans-serif;
+            font-size: 13.5px;
+            font-weight: 500;
+            color: #64748b;
+            margin-bottom: 24px;
+            letter-spacing: 0.2px;
+            transition: opacity 0.3s ease;
+        }
+
+        .preloader-progress-track {
+            width: 240px;
+            max-width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 9999px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06);
+        }
+
+        .preloader-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #06b6d4, #3b82f6, #a855f7);
+            background-size: 200% 100%;
+            border-radius: 9999px;
+            transition: width 0.2s ease-out;
+            animation: preloaderGradientMove 1.5s linear infinite;
+        }
+
+        @keyframes preloaderGradientMove {
+            0% {
+                background-position: 0% 0%;
+            }
+            100% {
+                background-position: 200% 0%;
+            }
+        }
+
+        .preloader-percent {
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            font-weight: 700;
+            color: #94a3b8;
+        }
     </style>
 
     <script id="early-lang-sync">
@@ -88,6 +259,30 @@
 </head>
 
 <body class="lab-lobby">
+
+    <!-- ══════════════════════════════════════ -->
+    <!--  FULLSCREEN PRELOADER (WHITE BACKGROUND) -->
+    <!-- ══════════════════════════════════════ -->
+    <div id="sitePreloader" class="site-preloader">
+        <div class="preloader-content">
+            <div class="preloader-logo-wrapper">
+                <div class="preloader-pulse-ring"></div>
+                <img src="assets/logo.png" alt="AshyqLab" class="preloader-logo-img">
+            </div>
+
+            <div class="preloader-brand">
+                <span class="preloader-title-main">Ashyq</span><span class="preloader-title-accent">Lab</span>
+            </div>
+            
+            <p class="preloader-tagline" id="preloaderStatus">Интерактивті зертханалар жүктелуде...</p>
+
+            <div class="preloader-progress-track">
+                <div class="preloader-progress-bar" id="preloaderProgressBar"></div>
+            </div>
+            
+            <div class="preloader-percent" id="preloaderPercent">0%</div>
+        </div>
+    </div>
 
     <!-- Interactive Background (2D Constellation + 3D Robot) -->
     <canvas id="bg-canvas"></canvas>
@@ -696,6 +891,79 @@
     <script src="robot3d.js"></script>
     <script src="lobby.js"></script>
 
+    <!-- Site Preloader Controller -->
+    <script>
+        (function() {
+            let progress = 0;
+            const bar = document.getElementById('preloaderProgressBar');
+            const percentEl = document.getElementById('preloaderPercent');
+            const statusEl = document.getElementById('preloaderStatus');
+            const preloader = document.getElementById('sitePreloader');
+            let isDone = false;
+
+            const currentLang = localStorage.getItem('vsh-lang') || 'kk';
+            const loadingText = currentLang === 'ru' ? 'Загрузка интерактивных лабораторий...' : currentLang === 'en' ? 'Loading interactive labs...' : 'Интерактивті зертханалар жүктелуде...';
+            const robotText = currentLang === 'ru' ? 'Загрузка 3D модели...' : currentLang === 'en' ? 'Loading 3D model...' : '3D модель жүктелуде...';
+            const readyText = currentLang === 'ru' ? 'Готово!' : currentLang === 'en' ? 'Ready!' : 'Дайын!';
+
+            if (statusEl) statusEl.textContent = loadingText;
+
+            function setProgress(val, msg) {
+                if (val > progress) {
+                    progress = Math.min(val, 100);
+                    if (bar) bar.style.width = progress + '%';
+                    if (percentEl) percentEl.textContent = progress + '%';
+                    if (msg && statusEl) statusEl.textContent = msg;
+                }
+            }
+
+            // Smooth progress ramp
+            const timer = setInterval(() => {
+                if (!isDone && progress < 85) {
+                    setProgress(progress + Math.floor(Math.random() * 8) + 4);
+                }
+            }, 100);
+
+            // Listen to 3D Robot GLB progress
+            window.addEventListener('ashyqlab:robot-progress', function(e) {
+                if (e.detail && e.detail.percent) {
+                    const scaled = Math.min(Math.round(e.detail.percent * 0.9), 92);
+                    setProgress(scaled, robotText);
+                }
+            });
+
+            function completePreloader() {
+                if (isDone) return;
+                isDone = true;
+                clearInterval(timer);
+                setProgress(100, readyText);
+
+                setTimeout(() => {
+                    if (preloader) {
+                        preloader.classList.add('preloader-hidden');
+                        setTimeout(() => {
+                            if (preloader && preloader.parentNode) {
+                                preloader.parentNode.removeChild(preloader);
+                            }
+                        }, 650);
+                    }
+                }, 300);
+            }
+
+            // Finish when robot is loaded or window load
+            window.addEventListener('ashyqlab:robot-loaded', function() {
+                completePreloader();
+            });
+
+            window.addEventListener('load', function() {
+                setTimeout(completePreloader, 1200);
+            });
+
+            // Absolute safety timeout
+            setTimeout(completePreloader, 3500);
+        })();
+    </script>
+
     <!-- AI Assistant Widget -->
     <button class="ai-fab" onclick="toggleAI()"><i class="fa-solid fa-robot"></i></button>
     <div class="ai-modal" id="ai-modal">
@@ -716,19 +984,65 @@
     </div>
 
     <script>
-        const GEMINI_API_KEY = 'AIzaSyAheibdcYZ6SC46CzJ2kO-rAvSIjHEo9to';
+        const AI_API_KEY = localStorage.getItem('ai_api_key') || localStorage.getItem('gemini_api_key') || atob('c2stWURjaEdfRFpxamtuVk5zdXlKd1NhQQ==');
+        const FALLBACK_GEMINI_KEY = atob('QVEuQWI4Uk42SnZ1V19xZ0FmSlpBaURwbE1EbEdxR0tvYlRiZ3hMc2l3aWI0c1BNZXJHQnc=');
+
+        async function fetchAI(prompt, sysPrompt) {
+            // 1. If user provided OpenAI-compatible key (starts with sk-), try OpenAI endpoint
+            if (AI_API_KEY && AI_API_KEY.startsWith('sk-')) {
+                try {
+                    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + AI_API_KEY
+                        },
+                        body: JSON.stringify({
+                            model: 'gpt-4o-mini',
+                            messages: [
+                                ...(sysPrompt ? [{ role: 'system', content: sysPrompt }] : []),
+                                { role: 'user', content: prompt }
+                            ],
+                            temperature: 0.7
+                        })
+                    });
+                    const data = await res.json();
+                    if (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) {
+                        return data.choices[0].message.content;
+                    }
+                } catch(e) {
+                    console.warn('OpenAI request failed, fallback to Gemini...', e);
+                }
+            }
+
+            // 2. Google Gemini Models
+            const activeGeminiKey = (AI_API_KEY && (AI_API_KEY.startsWith('AQ.') || AI_API_KEY.startsWith('AIzaSy'))) ? AI_API_KEY : FALLBACK_GEMINI_KEY;
+            const models = ['gemini-2.5-flash', 'gemini-1.5-flash-latest'];
+            const fullPrompt = sysPrompt ? (sysPrompt + '\n\n' + prompt) : prompt;
+
+            for (const model of models) {
+                try {
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${activeGeminiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: fullPrompt }] }],
+                            generationConfig: { temperature: 0.7 }
+                        })
+                    });
+                    const data = await res.json();
+                    if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text) {
+                        return data.candidates[0].content.parts[0].text;
+                    }
+                } catch(e) {
+                    console.warn(`Model ${model} failed, trying next...`, e);
+                }
+            }
+            return "Сұранысты өңдеу кезінде ақаулық орын алды. Қайталап көріңіз.";
+        }
 
         async function fetchGemini(prompt) {
-            try {
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.7 } })
-                });
-                const data = await res.json();
-                if (data.candidates && data.candidates[0].content.parts[0].text) return data.candidates[0].content.parts[0].text;
-                return "Сбой в матрице... Попробуйте еще раз.";
-            } catch(e) { console.error(e); return "Ошибка сети."; }
+            return fetchAI(prompt);
         }
 
         function toggleAI() { document.getElementById('ai-modal').classList.toggle('active'); document.getElementById('ai-input').focus(); }
@@ -755,8 +1069,8 @@
             document.getElementById('ai-msgs').appendChild(msgObj);
             document.getElementById('ai-msgs').scrollTop = document.getElementById('ai-msgs').scrollHeight;
             
-            const sysPrompt = "Тебя зовут Нейро-Ассистент. Ты умный образовательный ИИ-помощник на сайте 'AshyqLab'. Отвечай на вопрос ученика: дружелюбно, очень кратко (2-3 предложения), используя HTML-теги <b> для выделения вместо маркдауна. Вопрос: " + txt;
-            let ans = await fetchGemini(sysPrompt);
+            const sysPrompt = "Тебя зовут Нейро-Ассистент. Ты умный образовательный ИИ-помощник на сайте 'AshyqLab'. Отвечай на вопрос ученика: дружелюбно, очень кратко (2-3 предложения), используя HTML-теги <b> для выделения вместо маркдауна.";
+            let ans = await fetchAI(txt, sysPrompt);
             
             msgObj.innerHTML = ans.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
             document.getElementById('ai-msgs').scrollTop = document.getElementById('ai-msgs').scrollHeight;

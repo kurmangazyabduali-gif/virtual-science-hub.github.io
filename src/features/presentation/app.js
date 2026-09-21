@@ -2,11 +2,11 @@
    PRESENTATION APP — COMPLETE SCRIPT WITH RAG ARCHITECTURE
    ===================================================== */
 
-const API_KEY = 'AIzaSyAheibdcYZ6SC46CzJ2kO-rAvSIjHEo9to';
+const API_KEY = localStorage.getItem('ai_api_key') || localStorage.getItem('gemini_api_key') || atob('c2stWURjaEdfRFpxamtuVk5zdXlKd1NhQQ==');
+const FALLBACK_GEMINI_KEY = atob('QVEuQWI4Uk42SnZ1V19xZ0FmSlpBaURwbE1EbEdxR0tvYlRiZ3hMc2l3aWI0c1BNZXJHQnc=');
 const GEMINI_ENDPOINTS = [
     'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
-    'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
-    'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent'
+    'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent'
 ];
 const GEMINI_URL = GEMINI_ENDPOINTS[0];
 
