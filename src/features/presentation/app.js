@@ -862,7 +862,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 setGenProgress(25, 'Анализ методички и поиск фактов...');
             } else {
                 btnGenText.textContent = 'Пишем тексты и подбираем тему...';
-                setGenProgress(30, 'Запрос к Gemini ИИ...');
+                setGenProgress(30, 'Генерация слайдов через ИИ...');
             }
 
             const rawData = await callGemini(fullPrompt, sourceContext);
@@ -1134,23 +1134,46 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 /* ──────────────────────────────────────────────
-   GEMINI 2.5 FLASH API CALL (Strict Grounded RAG)
+   UNIVERSAL AI DECK GENERATOR (OpenAI -> Gemini Fallback -> Pollinations Fallback)
 ─────────────────────────────────────────────── */
-async function callGemini(promptText, sourceContext = '') {
+function parseJsonDeck(raw) {
+    if (!raw) return null;
+    let clean = String(raw).trim();
+    if (clean.startsWith('```json')) clean = clean.slice(7);
+    if (clean.startsWith('```')) clean = clean.slice(3);
+    if (clean.endsWith('```')) clean = clean.slice(0, -3);
+    clean = clean.trim();
+    const first = clean.indexOf('{');
+    const last = clean.lastIndexOf('}');
+    if (first !== -1 && last !== -1 && last > first) {
+        try {
+            return JSON.parse(clean.substring(first, last + 1));
+        } catch (e) {
+            console.warn('JSON slice parse warning:', e);
+        }
+    }
+    try {
+        return JSON.parse(clean);
+    } catch (e) {
+        return null;
+    }
+}
+
+async function callUniversalAI(promptText, sourceContext = '') {
     let systemPrompt = '';
 
     if (sourceContext && sourceContext.trim()) {
         systemPrompt = [
-            'Ты методист. На основе ПРЕДОСТАВЛЕННОГО КОНТЕКСТА (и только его) создай структуру презентации. Не придумывай информацию от себя. Верни массив JSON с полями "title", "points" и "imagePrompt" (на английском).',
+            'Ты профессиональный методист и арт-директор. На основе ПРЕДОСТАВЛЕННОГО КОНТЕКСТА создай структуру презентации. Не придумывай информацию от себя. Верни массив JSON с полями "title", "points" и "imagePrompt" (на английском).',
             '',
             'СТРОГИЕ ПРАВИЛА ИЗВЛЕЧЕНИЯ (Grounded RAG Generation):',
-            '1. Все тезисы, факты, формулы, правила и выводы должны быть извлечены ИСКЛЮЧИТЕЛЬНО из предоставленного текста источника ниже.',
+            '1. Все тезисы, факты, формулы, правила и выводы должны быть извлечены ИСКЛЮЧИТЕЛЬНО из предоставленного текста источника.',
             '2. Избегай галлюцинаций. Не добавляй стороннюю информацию, которой нет в контексте источника.',
             '3. Каждая презентация должна состоять из 5–8 слайдов.',
             '4. Первый слайд — титульная обложка (points: [], imagePrompt: "educational science lab poster").',
             '5. Поле imagePrompt пиши СТРОГО НА АНГЛИЙСКОМ ЯЗЫКЕ для генератора ИИ-иллюстраций Pollinations AI.',
-            '6. Тексты заголовков и пунктов слайдов — НА РУССКОМ ЯЗЫКЕ.',
-            '7. Ответь СТРОГО чистым JSON объектом без markdown оберток (без ```json).',
+            '6. Тексты заголовков и пунктов слайдов — НА ЯЗЫКЕ ЗАПРОСА (русский / казахский).',
+            '7. Ответь СТРОГО валидным JSON объектом без markdown оберток (без ```json).',
             '',
             'Формат ответа JSON:',
             '{',
@@ -1174,7 +1197,7 @@ async function callGemini(promptText, sourceContext = '') {
         systemPrompt = [
             'Ты опытный методист и ведущий арт-директор презентаций.',
             'Создай тему и структуру презентации по запросу пользователя.',
-            'Ответь СТРОГО чистым JSON объектом без markdown оберток (без ```json).',
+            'Ответь СТРОГО валидным JSON объектом без markdown оберток (без ```json).',
             '',
             'Формат ответа:',
             '{',
@@ -1204,7 +1227,7 @@ async function callGemini(promptText, sourceContext = '') {
             '- Слайдов от 5 до 8.',
             '- Первый слайд — обложка (points: [], imagePrompt: "main theme poster").',
             '- Каждая картинка: imagePrompt СТРОГО НА АНГЛИЙСКОМ ЯЗЫКЕ!',
-            '- Тексты заголовков и пунктов — НА РУССКОМ ЯЗЫКЕ.'
+            '- Тексты заголовков и пунктов — НА ЯЗЫКЕ ЗАПРОСА (русский / казахский).'
         ].join('\n');
     }
 
@@ -1220,74 +1243,88 @@ async function callGemini(promptText, sourceContext = '') {
         ].join('\n');
     }
 
-    const requestBody = {
-        system_instruction: { parts: [{ text: systemPrompt }] },
-        contents: [{ role: 'user', parts: [{ text: userContent }] }],
-        generationConfig: { temperature: sourceContext ? 0.25 : 0.7, responseMimeType: 'application/json' }
-    };
-
-    let lastError = null;
-    let data = null;
-
-    // Retry loop & Model Fallback Chain for HTTP 503 High Demand / 429 Rate Limits
-    for (let endpoint of GEMINI_ENDPOINTS) {
-        for (let attempt = 1; attempt <= 2; attempt++) {
-            try {
-                const response = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-goog-api-key': API_KEY
-                    },
-                    body: JSON.stringify(requestBody)
-                });
-
-                if (response.ok) {
-                    data = await response.json();
-                    break;
-                }
-
-                let errText = '';
-                try {
-                    const errJson = await response.json();
-                    errText = errJson?.error?.message || response.statusText;
-                } catch (_) {
-                    errText = response.statusText;
-                }
-
-                if (response.status === 503 || response.status === 429) {
-                    console.warn(`[Gemini API ${response.status}] High demand on ${endpoint} (attempt ${attempt}/2). Error: ${errText}`);
-                    lastError = new Error(`Высокая нагрузка на ИИ (${response.status}). Переключаемся на резервную модель...`);
-                    await new Promise(r => setTimeout(r, 1000 * attempt));
-                    continue;
-                }
-
-                throw new Error(`Ошибка Gemini API (${response.status}): ${errText}`);
-            } catch (err) {
-                lastError = err;
-                if (err.message && (err.message.includes('503') || err.message.includes('high demand') || err.message.includes('429'))) {
-                    await new Promise(r => setTimeout(r, 1000));
-                } else {
-                    throw err;
+    // 1. TIER 1: If user provided OpenAI key (starts with sk-), try OpenAI
+    if (API_KEY && API_KEY.startsWith('sk-')) {
+        try {
+            const res = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + API_KEY
+                },
+                body: JSON.stringify({
+                    model: 'gpt-4o-mini',
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        { role: 'user', content: userContent }
+                    ],
+                    temperature: sourceContext ? 0.25 : 0.7
+                })
+            });
+            if (res.ok) {
+                const oaiData = await res.json();
+                const content = oaiData?.choices?.[0]?.message?.content;
+                const parsed = parseJsonDeck(content);
+                if (parsed && Array.isArray(parsed.slides) && parsed.slides.length > 0) {
+                    return parsed;
                 }
             }
+        } catch (e) {
+            console.warn('OpenAI deck generation failed, switching to Google AI engine...', e);
         }
-        if (data) break;
     }
 
-    if (!data) {
-        throw lastError || new Error('Серверы ИИ перегружены. Пожалуйста, попробуйте еще раз через пару секунд.');
+    // 2. TIER 2: Google Gemini (2.5-Flash and 1.5-Flash)
+    const activeGeminiKey = (API_KEY && (API_KEY.startsWith('AQ.') || API_KEY.startsWith('AIzaSy'))) ? API_KEY : FALLBACK_GEMINI_KEY;
+    const geminiModels = ['gemini-2.5-flash', 'gemini-1.5-flash-latest'];
+
+    for (let model of geminiModels) {
+        try {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${activeGeminiKey}`;
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    system_instruction: { parts: [{ text: systemPrompt }] },
+                    contents: [{ role: 'user', parts: [{ text: userContent }] }],
+                    generationConfig: {
+                        temperature: sourceContext ? 0.25 : 0.7,
+                        responseMimeType: 'application/json'
+                    }
+                })
+            });
+            if (res.ok) {
+                const data = await res.json();
+                const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+                const parsed = parseJsonDeck(rawText);
+                if (parsed && Array.isArray(parsed.slides) && parsed.slides.length > 0) {
+                    return parsed;
+                }
+            }
+        } catch (e) {
+            console.warn(`Gemini model ${model} failed, trying next...`, e);
+        }
     }
 
-    let rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    if (!rawText) throw new Error('ИИ вернул пустой ответ');
+    // 3. TIER 3: Pollinations AI (Zero-key JSON fallback)
+    try {
+        const fullPrompt = `${systemPrompt}\n\nПользовательский запрос:\n${userContent}\n\nОтветь ТОЛЬКО валидным JSON:`;
+        const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(fullPrompt)}?json=true&model=openai`);
+        if (res.ok) {
+            const rawText = await res.text();
+            const parsed = parseJsonDeck(rawText);
+            if (parsed && Array.isArray(parsed.slides) && parsed.slides.length > 0) {
+                return parsed;
+            }
+        }
+    } catch (e) {
+        console.warn('Pollinations AI fallback failed...', e);
+    }
 
-    const first = rawText.indexOf('{');
-    const last  = rawText.lastIndexOf('}');
-    if (first === -1 || last === -1) throw new Error('Некорректный формат ответа ИИ');
-
-    return JSON.parse(rawText.substring(first, last + 1));
+    throw new Error('ИИ временно недоступен. Пожалуйста, попробуйте еще раз.');
 }
+
+const callGemini = callUniversalAI;
 
 
 /* ──────────────────────────────────────────────
