@@ -4,9 +4,10 @@
    Strict Ministry of Education (ГОСО РК) Compliant
    ===================================================== */
 
-// Working Fallback Google AI key
+// Primary AI key provided by user for documentation generation
+const USER_POLLINATIONS_KEY = 'sk-YDchG_DZqjknVNsuyJwSaA';
 const FALLBACK_GEMINI_KEY = atob('QVEuQWI4Uk42SnZ1V19xZ0FmSlpBaURwbE1EbEdxR0tvYlRiZ3hMc2l3aWI0c1BNZXJHQnc=');
-const API_KEY = localStorage.getItem('vsh-api-key') || '';
+const API_KEY = localStorage.getItem('vsh-api-key') || USER_POLLINATIONS_KEY;
 
 // Document Categories & Types Database
 const DOC_TYPES_DB = {
@@ -440,69 +441,40 @@ async function callUniversalDocAI(params) {
 
     let rawHtml = '';
 
-    // 1. TIER 1: Google Gemini (2.5-Flash & 1.5-Flash)
-    const activeGeminiKey = (API_KEY && (API_KEY.startsWith('AQ.') || API_KEY.startsWith('AIzaSy'))) ? API_KEY : FALLBACK_GEMINI_KEY;
-    const geminiModels = ['gemini-2.5-flash', 'gemini-1.5-flash-latest', 'gemini-1.5-flash'];
-
-    for (let model of geminiModels) {
-        try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${activeGeminiKey}`;
-            const res = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    system_instruction: { parts: [{ text: systemPrompt }] },
-                    contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-                    generationConfig: {
-                        temperature: 0.3
-                    }
-                })
-            });
-            if (res.ok) {
-                const data = await res.json();
-                const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (text && text.trim().length > 50) {
-                    rawHtml = text;
-                    break;
-                }
+    // 1. TIER 1: Pollinations AI Engine (with key sk-YDchG_DZqjknVNsuyJwSaA)
+    const effectivePollinationsKey = (API_KEY && API_KEY.startsWith('sk-')) ? API_KEY : USER_POLLINATIONS_KEY;
+    try {
+        const res = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + effectivePollinationsKey
+            },
+            body: JSON.stringify({
+                model: 'openai',
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: userPrompt }
+                ],
+                temperature: 0.25
+            })
+        });
+        if (res.ok) {
+            const data = await res.json();
+            const text = data?.choices?.[0]?.message?.content;
+            if (text && text.trim().length > 50) {
+                rawHtml = text;
             }
-        } catch (e) {
-            console.warn(`Gemini model ${model} failed, trying next...`, e);
         }
+    } catch (e) {
+        console.warn('Pollinations chat completions failed, trying text endpoint...', e);
     }
 
-    // 2. TIER 2: OpenAI (if sk- key provided)
-    if (!rawHtml && API_KEY && API_KEY.startsWith('sk-')) {
-        try {
-            const res = await fetch('https://api.openai.com/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + API_KEY
-                },
-                body: JSON.stringify({
-                    model: 'gpt-4o-mini',
-                    messages: [
-                        { role: 'system', content: systemPrompt },
-                        { role: 'user', content: userPrompt }
-                    ],
-                    temperature: 0.3
-                })
-            });
-            if (res.ok) {
-                const oaiData = await res.json();
-                rawHtml = oaiData?.choices?.[0]?.message?.content;
-            }
-        } catch (e) {
-            console.warn('OpenAI doc fallback failed...', e);
-        }
-    }
-
-    // 3. TIER 3: Pollinations AI Zero-Key Fallback
+    // 1.1 Direct Pollinations Text Endpoint Fallback with key
     if (!rawHtml) {
         try {
             const fullPrompt = `${systemPrompt}\n\n${userPrompt}\n\nСформируй официальный HTML документ:`;
-            const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(fullPrompt)}?model=openai`);
+            const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(fullPrompt)}?key=${effectivePollinationsKey}&model=openai`);
             if (res.ok) {
                 const text = await res.text();
                 if (text && text.trim().length > 50) {
@@ -510,11 +482,44 @@ async function callUniversalDocAI(params) {
                 }
             }
         } catch (e) {
-            console.warn('Pollinations AI fallback failed...', e);
+            console.warn('Pollinations text endpoint failed, trying Gemini...', e);
         }
     }
 
-    // 4. TIER 4: Deterministic High-Grade Pedagogical Generator (Never fails!)
+    // 2. TIER 2: Google Gemini (2.5-Flash & 1.5-Flash)
+    if (!rawHtml) {
+        const activeGeminiKey = (API_KEY && (API_KEY.startsWith('AQ.') || API_KEY.startsWith('AIzaSy'))) ? API_KEY : FALLBACK_GEMINI_KEY;
+        const geminiModels = ['gemini-2.5-flash', 'gemini-1.5-flash-latest', 'gemini-1.5-flash'];
+
+        for (let model of geminiModels) {
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${activeGeminiKey}`;
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        system_instruction: { parts: [{ text: systemPrompt }] },
+                        contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
+                        generationConfig: {
+                            temperature: 0.3
+                        }
+                    })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (text && text.trim().length > 50) {
+                        rawHtml = text;
+                        break;
+                    }
+                }
+            } catch (e) {
+                console.warn(`Gemini model ${model} failed, trying next...`, e);
+            }
+        }
+    }
+
+    // 3. TIER 3: Deterministic High-Grade Pedagogical Generator (Never fails!)
     if (!rawHtml) {
         console.info('Using built-in deterministic pedagogical document generator');
         return generateDeterministicDocument(params);
