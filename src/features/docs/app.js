@@ -1,10 +1,9 @@
 /* =====================================================
    ASHYQDOC — OFFICIAL TEACHER DOCUMENTATION ENGINE JS
-   Multi-Tier AI Engine + Deterministic Table Structure
-   Strict Ministry of Education (ГОСО РК) Compliant
+   Deterministic Template Assembly + High-Grade AI Pipeline
+   Strict Kazakhstan Ministry of Education (ГОСО РК) Standard
    ===================================================== */
 
-// Primary AI key provided by user for documentation generation
 const USER_POLLINATIONS_KEY = 'sk-YDchG_DZqjknVNsuyJwSaA';
 const FALLBACK_GEMINI_KEY = atob('QVEuQWI4Uk42SnZ1V19xZ0FmSlpBaURwbE1EbEdxR0tvYlRiZ3hMc2l3aWI0c1BNZXJHQnc=');
 const API_KEY = localStorage.getItem('vsh-api-key') || USER_POLLINATIONS_KEY;
@@ -50,11 +49,11 @@ const TOPIC_CHIPS_PRESETS = {
         'Жұмыс, қуат және пайдалы әсер коэффициенті'
     ],
     'Химия': [
+        'Атомның құрылысы. Элементар бөлшектер',
         'Д.И. Менделеевтің периодтық заңы және атом құрылысы',
         'Бейорганикалық қосылыстардың негізгі кластары',
         'Химиялық байланыс түрлері: ковалентті және иондық',
-        'Бейтараптану реакциясы және ерітінділердің рН көрсеткіші',
-        'Металдардың белсенділік қатары және олардың қасиеттері'
+        'Бейтараптану реакциясы және ерітінділердің рН көрсеткіші'
     ],
     'Биология': [
         'Өсімдік және жануар жасушасының құрылысы',
@@ -220,7 +219,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function applyZoom() {
-        document.documentElement.style.setProperty('--doc-zoom', currentZoom);
+        a4DocumentPaper.style.zoom = currentZoom;
         zoomLevelText.textContent = `${Math.round(currentZoom * 100)}%`;
     }
 
@@ -229,7 +228,7 @@ document.addEventListener('DOMContentLoaded', function () {
         btnToggleStamp.addEventListener('click', () => {
             hasStamp = !hasStamp;
             btnToggleStamp.classList.toggle('active', hasStamp);
-            const schoolName = inputSchool.value.trim() || '«№ 1 мектеп-лицей» КММ';
+            const schoolName = cleanSchoolName(inputSchool.value.trim(), selectLanguage.value === 'Қазақша');
             const lang = selectLanguage.value;
 
             const existingStamp = a4DocumentPaper.querySelector('.doc-approval-stamp');
@@ -291,18 +290,19 @@ document.addEventListener('DOMContentLoaded', function () {
         const subject = selectSubject.value;
         const grade = selectGrade.value;
         const lang = selectLanguage.value;
-        const teacher = inputTeacher.value.trim() || (lang === 'Қазақша' ? 'Абдуғали К. М.' : 'Абдугали К. М.');
-        const school = inputSchool.value.trim() || (lang === 'Қазақша' ? '«№ 1 мектеп-лицей» КММ' : 'КГУ «Школа-лицей № 1»');
+        const isKazakh = lang === 'Қазақша';
+        const teacher = cleanTeacherName(inputTeacher.value.trim(), lang);
+        const school = cleanSchoolName(inputSchool.value.trim(), isKazakh);
 
         btnGenerate.disabled = true;
         btnGenIcon.className = 'fa-solid fa-spinner fa-spin';
         btnGenText.textContent = 'ИИ ресми құжатты түзуде...';
         genProgressBox.classList.remove('hidden');
-        setGenProgress(20, 'ГОСО талаптары бойынша кестелерді құру...');
-        docStatusText.textContent = 'ИИ құжатты генерациялауда...';
+        setGenProgress(20, 'ГОСО стандарты бойынша құрылымды талдау...');
+        docStatusText.textContent = 'ИИ құжатты қалыптастыруда...';
 
         try {
-            setGenProgress(45, `«${docTypeName}» құжатын қалыптастыру...`);
+            setGenProgress(45, `«${docTypeName}» құжатының мазмұны түзілуде...`);
             const htmlResult = await callUniversalDocAI({
                 category: activeCategory,
                 docTypeId,
@@ -315,8 +315,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 school
             });
 
-            setGenProgress(85, 'Кестелік құрылымды стандарттау және верстка...');
-            await sleep(250);
+            setGenProgress(85, 'Кестелер мен ресми реквизиттерді біріктіру...');
+            await sleep(200);
 
             // Insert generated document
             a4DocumentPaper.innerHTML = htmlResult;
@@ -409,466 +409,545 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
+function cleanSchoolName(name, isKazakh) {
+    let clean = String(name || '').trim();
+    clean = clean.replace(/^[«"'\s]+|[»"'\s]+$/g, '');
+    clean = clean.replace(/\s*КММ\s*$/i, '');
+    clean = clean.replace(/^КГУ\s*/i, '');
+    clean = clean.replace(/^[«"'\s]+|[»"'\s]+$/g, '');
+    if (!clean) clean = isKazakh ? '№ 1 мектеп-лицей' : 'Школа-лицей № 1';
+    return isKazakh ? `«${clean}» КММ` : `КГУ «${clean}»`;
+}
+
+function cleanTeacherName(name, lang) {
+    let clean = String(name || '').trim();
+    if (!clean) return lang === 'Қазақша' ? 'Абдуғали К. М.' : 'Абдугали К. М.';
+    return clean;
+}
+
 
 /* ──────────────────────────────────────────────
-   AI PROMPT BUILDER & DETERMINISTIC ENGINE
+   AI PROMPT & DETERMINISTIC BUILDER ENGINE
 ─────────────────────────────────────────────── */
 async function callUniversalDocAI(params) {
     const { category, docTypeId, docTypeName, subject, grade, lang, topic, teacher, school } = params;
-
     const isKazakh = lang === 'Қазақша';
     const isRussian = lang === 'Русский';
 
-    const systemPrompt = [
-        'Сен Қазақстан Республикасы Оқу-ағарту министрлігінің мемлекеттік жоғары санатты сарапшы-әдіскерісің.',
-        'Сенің міндетің — мұғалімге арналған ресми, мінсіз, толық мазмұнды педагогикалық құжатты ГОСО кестелік үлгісінде дайындау.',
-        'Жауапты ТЕК таза HTML түрінде қайтар (ешқандай markdown, ```html немесе түсіндірме мәтінсіз).',
-        'БАРЛЫҚ кестелер міндетті түрде берілген CSS кластарымен түзілуі тиіс: doc-table-meta, doc-table-steps, doc-table-rubric.',
-        `Құжаттың тілі СТРОГО: ${lang}!`
-    ].join('\n');
+    // 1. Prepare JSON prompt schema based on document type
+    const jsonSchemaInstruction = getDocJsonSchema(docTypeId, lang);
 
-    const userPrompt = [
-        `ТИП ДОКУМЕНТА: ${docTypeName} (${docTypeId})`,
-        `ПРЕДМЕТ: ${subject}`,
-        `КЛАСС: ${grade}`,
-        `ЯЗЫК: ${lang}`,
-        `ТЕМА / БӨЛІМ / ЦЕЛЬ: ${topic}`,
-        `ПЕДАГОГ: ${teacher}`,
-        `ОРГАНИЗАЦИЯ: ${school}`,
-        '',
-        'Сформируй идеальный, исчерпывающий, официальный документ в формате HTML с обязательными таблицами doc-table-meta и doc-table-steps.'
-    ].join('\n');
+    const systemPrompt = `Сен Қазақстан Республикасы Оқу-ағарту министрлігінің мемлекеттік жоғары санатты бас әдіскерісің.
+Міндетің — сұралған педагогикалық құжаттың мазмұнын терең, кәсіби және толық деңгейде толтырып, ТЕК JSON форматында қайтару.
+Ешқандай markdown немесе артық сөз жазба. ТЕК таза JSON қайтар.
+Тіл: ${lang}.
 
-    let rawHtml = '';
+${jsonSchemaInstruction}`;
 
-    // 1. TIER 1: Pollinations AI Engine (with key sk-YDchG_DZqjknVNsuyJwSaA)
-    const effectivePollinationsKey = (API_KEY && API_KEY.startsWith('sk-')) ? API_KEY : USER_POLLINATIONS_KEY;
-    try {
-        const res = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + effectivePollinationsKey
-            },
-            body: JSON.stringify({
-                model: 'openai',
-                messages: [
-                    { role: 'system', content: systemPrompt },
-                    { role: 'user', content: userPrompt }
-                ],
-                temperature: 0.25
-            })
-        });
-        if (res.ok) {
-            const data = await res.json();
-            const text = data?.choices?.[0]?.message?.content;
-            if (text && text.trim().length > 50) {
-                rawHtml = text;
-            }
-        }
-    } catch (e) {
-        console.warn('Pollinations chat completions failed, trying text endpoint...', e);
-    }
+    const userPrompt = `ПӘН: ${subject}
+СЫНЫП: ${grade}
+ТІЛ: ${lang}
+ҚҰЖАТ ТҮРІ: ${docTypeName} (${docTypeId})
+ТАҚЫРЫП / БӨЛІМ / МАҚСАТ: ${topic}
+ПЕДАГОГ: ${teacher}
+МЕКТЕП: ${school}`;
 
-    // 1.1 Direct Pollinations Text Endpoint Fallback with key
-    if (!rawHtml) {
+    let parsedData = null;
+
+    // TIER 1: Google Gemini with responseMimeType: 'application/json'
+    const activeGeminiKey = (API_KEY && (API_KEY.startsWith('AQ.') || API_KEY.startsWith('AIzaSy'))) ? API_KEY : FALLBACK_GEMINI_KEY;
+    const geminiModels = ['gemini-2.5-flash', 'gemini-1.5-flash-latest', 'gemini-1.5-flash'];
+
+    for (let model of geminiModels) {
         try {
-            const fullPrompt = `${systemPrompt}\n\n${userPrompt}\n\nСформируй официальный HTML документ:`;
-            const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(fullPrompt)}?key=${effectivePollinationsKey}&model=openai`);
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${activeGeminiKey}`;
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    system_instruction: { parts: [{ text: systemPrompt }] },
+                    contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
+                    generationConfig: {
+                        temperature: 0.2,
+                        responseMimeType: 'application/json'
+                    }
+                })
+            });
             if (res.ok) {
-                const text = await res.text();
-                if (text && text.trim().length > 50) {
-                    rawHtml = text;
+                const data = await res.json();
+                const rawJson = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (rawJson) {
+                    parsedData = safeParseJson(rawJson);
+                    if (parsedData) break;
                 }
             }
         } catch (e) {
-            console.warn('Pollinations text endpoint failed, trying Gemini...', e);
+            console.warn(`Gemini JSON model ${model} failed, trying next...`, e);
         }
     }
 
-    // 2. TIER 2: Google Gemini (2.5-Flash & 1.5-Flash)
-    if (!rawHtml) {
-        const activeGeminiKey = (API_KEY && (API_KEY.startsWith('AQ.') || API_KEY.startsWith('AIzaSy'))) ? API_KEY : FALLBACK_GEMINI_KEY;
-        const geminiModels = ['gemini-2.5-flash', 'gemini-1.5-flash-latest', 'gemini-1.5-flash'];
-
-        for (let model of geminiModels) {
-            try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${activeGeminiKey}`;
-                const res = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        system_instruction: { parts: [{ text: systemPrompt }] },
-                        contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-                        generationConfig: {
-                            temperature: 0.3
-                        }
-                    })
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-                    if (text && text.trim().length > 50) {
-                        rawHtml = text;
-                        break;
-                    }
-                }
-            } catch (e) {
-                console.warn(`Gemini model ${model} failed, trying next...`, e);
+    // TIER 2: Pollinations AI with user key
+    if (!parsedData) {
+        const effectivePollKey = (API_KEY && API_KEY.startsWith('sk-')) ? API_KEY : USER_POLLINATIONS_KEY;
+        try {
+            const promptText = `${systemPrompt}\n\nТапсырма:\n${userPrompt}\n\nҚайтар тек таза JSON:`;
+            const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(promptText)}?json=true&model=openai&key=${effectivePollKey}`);
+            if (res.ok) {
+                const rawText = await res.text();
+                parsedData = safeParseJson(rawText);
             }
+        } catch (e) {
+            console.warn('Pollinations JSON fallback failed...', e);
         }
     }
 
-    // 3. TIER 3: Deterministic High-Grade Pedagogical Generator (Never fails!)
-    if (!rawHtml) {
-        console.info('Using built-in deterministic pedagogical document generator');
-        return generateDeterministicDocument(params);
-    }
-
-    // Clean markdown wrappers and enforce 100% official HTML standards
-    const cleaned = cleanHtmlOutput(rawHtml);
-    return postProcessOfficialDocument(cleaned, params);
+    // TIER 3: Deterministic High-Precision Template Assembly
+    return renderDeterministicDocument(docTypeId, parsedData, params);
 }
 
-function cleanHtmlOutput(raw) {
-    let clean = String(raw).trim();
-    if (clean.startsWith('```html')) clean = clean.slice(7);
-    if (clean.startsWith('```htm')) clean = clean.slice(6);
-    if (clean.startsWith('```')) clean = clean.slice(3);
-    if (clean.endsWith('```')) clean = clean.slice(0, -3);
-    return clean.trim();
+function safeParseJson(str) {
+    try {
+        let clean = String(str).trim();
+        if (clean.startsWith('```json')) clean = clean.slice(7);
+        if (clean.startsWith('```')) clean = clean.slice(3);
+        if (clean.endsWith('```')) clean = clean.slice(0, -3);
+        clean = clean.trim();
+        return JSON.parse(clean);
+    } catch (e) {
+        return null;
+    }
 }
 
-/**
- * Ensures the output ALWAYS contains official tables, headers, and signature lines
- */
-function postProcessOfficialDocument(html, params) {
-    const { docTypeName, subject, grade, lang, topic, teacher, school } = params;
-    const isKazakh = lang === 'Қазақша';
-
-    let result = html;
-
-    // 1. Ensure Table classes exist
-    result = result.replace(/<table>/gi, '<table class="doc-table-steps">');
-    result = result.replace(/<table\s+border=["']?[0-9]*["']?>/gi, '<table class="doc-table-steps">');
-
-    // 2. Ensure Official Header block exists
-    if (!result.includes('doc-header-block') && !result.includes('doc-state-heading')) {
-        const stateHead = isKazakh ? 'ҚАЗАҚСТАН РЕСПУБЛИКАСЫ ОҚУ-АҒАРТУ МИНИСТРЛІГІ' : 'МИНИСТЕРСТВО ПРОСВЕЩЕНИЯ РЕСПУБЛИКИ КАЗАХСТАН';
-        const schoolHead = isKazakh ? `«${school}» КММ` : `КГУ «${school}»`;
-        const headerBlock = `
-            <div class="doc-header-block">
-                <div class="doc-state-heading">${stateHead}</div>
-                <div class="doc-school-heading">${schoolHead}</div>
-                <h1 class="doc-main-title">${docTypeName.toUpperCase()}</h1>
-            </div>
-        `;
-        result = headerBlock + result;
+function getDocJsonSchema(docTypeId, lang) {
+    if (docTypeId === 'sor' || docTypeId === 'soch' || docTypeId === 'cards_abc') {
+        return `JSON СХЕМА:
+{
+  "unit": "Бөлім атауы / Раздел",
+  "topic": "Тақырып / Тема",
+  "learningObjectives": "Оқу мақсаттары (кодтарымен)",
+  "thinkingLevel": "Ойлау дағдыларының деңгейі",
+  "duration": "20–25 минут",
+  "variant1": [
+    { "taskNumber": 1, "question": "1-тапсырма шарты", "score": 2 },
+    { "taskNumber": 2, "question": "2-тапсырма шарты", "score": 3 },
+    { "taskNumber": 3, "question": "3-тапсырма (есеп/тәжірибе) шарты", "score": 5 }
+  ],
+  "variant2": [
+    { "taskNumber": 1, "question": "1-тапсырма шарты", "score": 2 },
+    { "taskNumber": 2, "question": "2-тапсырма шарты", "score": 3 },
+    { "taskNumber": 3, "question": "3-тапсырма шарты", "score": 5 }
+  ],
+  "rubric": [
+    { "taskNumber": 1, "objective": "Оқу мақсаты", "descriptor": "Білім алушы:... сипаттайды", "score": 2 },
+    { "taskNumber": 2, "objective": "Оқу мақсаты", "descriptor": "Формуланы түрлендіреді және есептейді", "score": 3 },
+    { "taskNumber": 3, "objective": "Оқу мақсаты", "descriptor": "Тәжірибелік мәліметтерге талдау жасайды", "score": 5 }
+  ]
+}`;
     }
 
-    // 3. Ensure Signature block exists
-    if (!result.includes('doc-signature-row')) {
-        const sigBlock = isKazakh ? `
-            <div class="doc-signature-row">
-                <div class="sig-block">
-                    <span>Пән мұғалімі: _________________ (қолы)</span>
-                </div>
-                <div class="sig-block">
-                    <span>Тексерген оқу ісінің меңгерушісі: _________________</span>
-                </div>
-            </div>
-        ` : `
-            <div class="doc-signature-row">
-                <div class="sig-block">
-                    <span>Учитель-предметник: _________________ (подпись)</span>
-                </div>
-                <div class="sig-block">
-                    <span>Проверил зав. учебной частью: _________________</span>
-                </div>
-            </div>
-        `;
-        result = result + sigBlock;
+    if (docTypeId === 'lab_guide' || docTypeId === 'lab_worksheet' || docTypeId === 'practicum') {
+        return `JSON СХЕМА:
+{
+  "labNumber": "1",
+  "topic": "Зертханалық жұмыс тақырыбы",
+  "goal": "Жұмыстың мақсаты",
+  "equipment": "Құрал-жабдықтар мен реактивтер тізімі",
+  "safety": "Қауіпсіздік техникасы ережелері",
+  "theory": "Қысқаша теориялық түсінік және формулалар",
+  "steps": [
+    "1. Құралдарды жинау және тексеру",
+    "2. Өлшеулер жүргізу",
+    "3. Мәндерді кестеге енгізу және есептеу"
+  ],
+  "tableHeaders": ["№", "Шама атауы", "Өлшем бірлігі", "1-тәжірибе", "2-тәжірибе", "Орташа мән"],
+  "tableRows": [
+    ["1", "Кернеу (U)", "В", "2.0", "4.0", "3.0"],
+    ["2", "Ток күші (I)", "А", "0.4", "0.8", "0.6"]
+  ],
+  "questions": [
+    "1. Тәжірибе нәтижелерінен қандай қорытынды шығаруға болады?",
+    "2. Өлшеу қателіктерінің себептері неде?"
+  ]
+}`;
     }
 
-    return result;
+    // Default QMJ Schema
+    return `JSON СХЕМА:
+{
+  "unit": "Бөлім атауы / Раздел",
+  "topic": "Сабақтың тақырыбы",
+  "learningObjectives": "Оқу мақсаттары (кодтарымен, мысалы 8.1.2.5 — ...)",
+  "lessonObjectives": "Сабақтың мақсаттары (барлық, көпшілік, кейбір оқушылар үшін)",
+  "stages": [
+    {
+      "stageName": "1. Ұйымдастыру кезеңі",
+      "time": "0–5 мин",
+      "teacherAction": "Сәлемдесу, түгелдеу. Жағымды психологиялық ахуал. Қызығушылықты ояту («Миға шабуыл»)",
+      "studentAction": "Амандасады, сабаққа дайындалады, сұрақтарға жауап береді",
+      "assessment": "Формативті бағалау: «Жарайсың!» ауызша мадақтау. Слайд, тақта"
+    },
+    {
+      "stageName": "2. Жаңа білімді меңгеру",
+      "time": "5–25 мин",
+      "teacherAction": "Жаңа тақырыпты түсіндіру, формулалар мен анықтамаларды беру, демонстрация",
+      "studentAction": "Анықтамаларды дәптерге жазады, модельдерді талдайды, сұрақтарға жауап береді",
+      "assessment": "Дескриптор: Негізгі заңдылықты біледі (1 б); Формуланы қолданады (2 б)"
+    },
+    {
+      "stageName": "3. Практикалық бекіту",
+      "time": "25–38 мин",
+      "teacherAction": "Деңгейлік есептер ұсыну (А, В, С деңгейі), топтық және жұптық жұмыстарды бақылау",
+      "studentAction": "Деңгейлік есептерді шығарады, өзара салыстырады және тексереді",
+      "assessment": "Өзара бағалау: «Бағдаршам» әдісі. Тапсырма парақтары (3 балл)"
+    },
+    {
+      "stageName": "4. Қорытынды және Рефлексия",
+      "time": "38–45 мин",
+      "teacherAction": "Сабақты қорытындылау, бағалау, үй тапсырмасын беру (§15 оқу, №4 есеп)",
+      "studentAction": "«БББ» кестесі бойынша кері байланыс жасау, күнделікке үй жұмысын жазу",
+      "assessment": "Рефлексия парағы: өзін-өзі бағалау. Күнделік"
+    }
+  ],
+  "differentiation": "Қабілеті жоғары оқушыларға күрделі шығармашылық есептер. Қолдауды қажет ететін оқушыларға көмекші сызба-алгоритмдер.",
+  "safety": "Кабинеттегі қауіпсіздік ережелерін сақтау. Көз жаттығулары мен сергіту сәті."
+}`;
 }
 
-/**
- * Built-in Deterministic Generator according to official standard
- */
-function generateDeterministicDocument(params) {
-    const { docTypeId, docTypeName, subject, grade, lang, topic, teacher, school } = params;
+
+/* ──────────────────────────────────────────────
+   DETERMINISTIC OFFICIAL HTML RENDERERS
+─────────────────────────────────────────────── */
+function renderDeterministicDocument(docTypeId, data, params) {
+    const { category, docTypeName, subject, grade, lang, topic, teacher, school } = params;
     const isKazakh = lang === 'Қазақша';
     const isRussian = lang === 'Русский';
 
-    const stateHeading = isKazakh 
+    const stateHead = isKazakh 
         ? 'ҚАЗАҚСТАН РЕСПУБЛИКАСЫ ОҚУ-АҒАРТУ МИНИСТРЛІГІ' 
         : (isRussian ? 'МИНИСТЕРСТВО ПРОСВЕЩЕНИЯ РЕСПУБЛИКИ КАЗАХСТАН' : 'MINISTRY OF EDUCATION OF THE REPUBLIC OF KAZAKHSTAN');
 
-    const schoolHeading = isKazakh 
-        ? `«${school}» КММ` 
-        : (isRussian ? `КГУ «${school}»` : `School «${school}»`);
+    // 1. Assessment Documents (СОР / СОЧ / Карточки)
+    if (category === 'assess' || docTypeId === 'sor' || docTypeId === 'soch' || docTypeId === 'cards_abc') {
+        const v1 = data?.variant1 || [
+            { taskNumber: 1, question: `${topic} бойынша негізгі ұғымдар мен анықтамаларды жазыңыз.`, score: 2 },
+            { taskNumber: 2, question: `Берілген мәндерді пайдаланып, есепті шығарыңыз және формуланы түрлендіріңіз.`, score: 3 },
+            { taskNumber: 3, question: `Тәжірибелік мәліметтерге сүйене отырып, график құрыңыз және қорытынды жасаңыз.`, score: 5 }
+        ];
+        const v2 = data?.variant2 || [
+            { taskNumber: 1, question: `${topic} заңдылықтары мен шарттарын сипаттаңыз.`, score: 2 },
+            { taskNumber: 2, question: `Шамалар арасындағы тәуелділік графигін талдап, белгісіз мәнді есептеңіз.`, score: 3 },
+            { taskNumber: 3, question: `Эксперименттік есепті шешіп, салыстырмалы қателікті анықтаңыз.`, score: 5 }
+        ];
+        const rubric = data?.rubric || [
+            { taskNumber: 1, objective: data?.learningObjectives || 'Негізгі ұғымдарды меңгеру', descriptor: 'Негізгі анықтамаларды дұрыс көрсетеді', score: 2 },
+            { taskNumber: 2, objective: data?.learningObjectives || 'Формулаларды қолдану', descriptor: 'Формуланы дұрыс түрлендіріп, есептейді', score: 3 },
+            { taskNumber: 3, objective: data?.learningObjectives || 'Талдау және қорытынды', descriptor: 'Мәліметтерді талдап, дұрыс тұжырым жасайды', score: 5 }
+        ];
 
-    if (docTypeId === 'qmj' || docTypeId === 'tech_map' || docTypeId === 'open_lesson') {
-        if (isKazakh) {
-            return `
-                <div class="doc-header-block">
-                    <div class="doc-state-heading">${stateHeading}</div>
-                    <div class="doc-school-heading">${schoolHeading}</div>
-                    <h1 class="doc-main-title">${docTypeName.toUpperCase()}</h1>
+        let v1Html = v1.map(t => `<div class="test-item-block"><p class="test-q-text"><strong>${t.taskNumber}-тапсырма [${t.score} балл]:</strong> ${t.question}</p></div>`).join('');
+        let v2Html = v2.map(t => `<div class="test-item-block"><p class="test-q-text"><strong>${t.taskNumber}-тапсырма [${t.score} балл]:</strong> ${t.question}</p></div>`).join('');
+        let rubHtml = rubric.map(r => `<tr><td style="text-align:center;font-weight:bold;">${r.taskNumber}</td><td>${r.objective}</td><td>${r.descriptor}</td><td style="text-align:center;font-weight:bold;">${r.score}</td></tr>`).join('');
+
+        return `
+            <div class="doc-header-block">
+                <div class="doc-state-heading">${stateHead}</div>
+                <div class="doc-school-heading">${school}</div>
+                <h1 class="doc-main-title">${docTypeName.toUpperCase()}</h1>
+            </div>
+
+            <table class="doc-table-meta">
+                <tr>
+                    <td class="cell-label"><strong>Бөлім / Раздел:</strong></td>
+                    <td>${data?.unit || topic}</td>
+                    <td class="cell-label"><strong>Педагог:</strong></td>
+                    <td>${teacher}</td>
+                </tr>
+                <tr>
+                    <td class="cell-label"><strong>Пән / Сынып:</strong></td>
+                    <td>${subject} • ${grade}</td>
+                    <td class="cell-label"><strong>Орындау уақыты:</strong></td>
+                    <td>${data?.duration || '20–25 минут'}</td>
+                </tr>
+                <tr>
+                    <td class="cell-label"><strong>Оқу мақсаттары:</strong></td>
+                    <td colspan="3">${data?.learningObjectives || topic + ' бойынша білім мен дағдыларды тексеру'}</td>
+                </tr>
+                <tr>
+                    <td class="cell-label"><strong>Ойлау дағдылары:</strong></td>
+                    <td colspan="3">${data?.thinkingLevel || 'Білу, түсіну, қолдану және жоғары деңгей дағдылары'}</td>
+                </tr>
+            </table>
+
+            <h2 class="doc-section-title">1-нұсқа (Вариант 1)</h2>
+            ${v1Html}
+
+            <h2 class="doc-section-title">2-нұсқа (Вариант 2)</h2>
+            ${v2Html}
+
+            <h2 class="doc-section-title">Балл қою кестесі және дескрипторлар (Рубрикатор)</h2>
+            <table class="doc-table-rubric">
+                <thead>
+                    <tr>
+                        <th style="width:12%;">Тапсырма №</th>
+                        <th style="width:38%;">Оқу мақсаты</th>
+                        <th style="width:38%;">Дескриптор: Білім алушы</th>
+                        <th style="width:12%;">Балл</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rubHtml}
+                </tbody>
+            </table>
+
+            <div class="doc-signature-row">
+                <div class="sig-block">
+                    <span>Құрастырушы мұғалім: _________________ (${teacher})</span>
                 </div>
-
-                <table class="doc-table-meta">
-                    <tr>
-                        <td class="cell-label"><strong>Бөлім:</strong></td>
-                        <td>${topic.split(':')[0] || 'Негізгі оқу бөлімі'}</td>
-                        <td class="cell-label"><strong>Педагогтің Т.А.Ә.:</strong></td>
-                        <td>${teacher}</td>
-                    </tr>
-                    <tr>
-                        <td class="cell-label"><strong>Күні:</strong></td>
-                        <td>2026 жыл</td>
-                        <td class="cell-label"><strong>Сынып / Пән:</strong></td>
-                        <td>${grade} • ${subject}</td>
-                    </tr>
-                    <tr>
-                        <td class="cell-label"><strong>Сабақтың тақырыбы:</strong></td>
-                        <td colspan="3"><strong>${topic}</strong></td>
-                    </tr>
-                    <tr>
-                        <td class="cell-label"><strong>Оқу мақсаттары:</strong></td>
-                        <td colspan="3">${grade.replace(/[^0-9]/g, '') || '8'}.1.2 — тақырып бойынша негізгі ұғымдар мен формулаларды меңгеру, тәжірибелік есептер шығару және талдау жүргізу</td>
-                    </tr>
-                    <tr>
-                        <td class="cell-label"><strong>Сабақтың мақсаты:</strong></td>
-                        <td colspan="3"><strong>Барлығы:</strong> Тақырыптың теориялық негіздері мен заңдылықтарын біледі.<br><strong>Көпшілігі:</strong> Негізгі формулаларды қолданып, сапалық және есептік тапсырмаларды орындайды.<br><strong>Кейбіреулері:</strong> Құбылысты графиктер мен тәжірибелік мәліметтер негізінде терең талдайды.</td>
-                    </tr>
-                </table>
-
-                <h2 class="doc-section-title">Сабақтың барысы мен кезеңдері</h2>
-
-                <table class="doc-table-steps">
-                    <thead>
-                        <tr>
-                            <th style="width:16%;">Сабақтың кезеңі / Уақыты</th>
-                            <th style="width:34%;">Педагогтің әрекеті</th>
-                            <th style="width:34%;">Оқушының әрекеті</th>
-                            <th style="width:16%;">Бағалау / Ресурстар</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>1. Ұйымдастыру кезеңі</strong><br><span class="timing-badge">0–5 мин</span></td>
-                            <td>Оқушылармен сәлемдесу, түгелдеу. Жағымды психологиялық ахуал орнату. Өткен тақырыптар бойынша сұрақ-жауап ұйымдастыру («Миға шабуыл»).</td>
-                            <td>Мұғаліммен амандасады, сабаққа дайындалады. Қойылған сұрақтарға жауап беріп, сабақтың тақырыбы мен мақсатын анықтайды.</td>
-                            <td><strong>Формативті:</strong><br>«Жарайсың!» ауызша мадақтау.<br><em>Интерактивті тақта</em></td>
-                        </tr>
-                        <tr>
-                            <td><strong>2. Жаңа білімді меңгеру</strong><br><span class="timing-badge">5–25 мин</span></td>
-                            <td>«${topic}» тақырыбының негізгі ұғымдарын, формулаларын түсіндіреді. AshyqLab виртуалды зертханалық үлгілері мен сызбаларын көрсетеді.</td>
-                            <td>Жаңа ұғымдарды тыңдайды, формулалар мен анықтамаларды дәптерге жазады. Сұрақтар қойып, талқылауға қатысады.</td>
-                            <td><strong>Дескриптор:</strong><br>- Негізгі заңдылықты біледі;<br>- Өлшем бірліктерін дұрыс қолданады (2 балл).</td>
-                        </tr>
-                        <tr>
-                            <td><strong>3. Практикалық бекіту</strong><br><span class="timing-badge">25–38 мин</span></td>
-                            <td>Деңгейлік тапсырмалар ұсынады (A, B, C деңгейі). Топтық және жеке жұмыстарды бақылайды, қиналған оқушыларға бағыт-бағдар береді.</td>
-                            <td>Оқушылар деңгейлік есептерді шығарады, топта талқылайды, өзара жауаптарын салыстырып, тексеру жүргізеді.</td>
-                            <td><strong>Өзара бағалау:</strong><br>«Бағдаршам» әдісі.<br><em>Тапсырма парақтары (3 балл)</em></td>
-                        </tr>
-                        <tr>
-                            <td><strong>4. Қорытынды және Рефлексия</strong><br><span class="timing-badge">38–45 мин</span></td>
-                            <td>Сабақты қорытындылайды, мақсатқа жету деңгейін бағалайды. Үй тапсырмасын береді. Кері байланыс парақтарын жинайды.</td>
-                            <td>«БББ» (Білдім, Білгім келеді, Үйрендім) әдісі бойынша рефлексия жасайды. Күнделікке үй тапсырмасын жазады.</td>
-                            <td><strong>Рефлексия парағы:</strong><br>Өзін-өзі бағалау.<br><em>Күнделік</em></td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <h2 class="doc-section-title">Саралау және қауіпсіздік ережелері</h2>
-                <table class="doc-table-meta">
-                    <tr>
-                        <td class="cell-label"><strong>Саралау (Дифференциация):</strong></td>
-                        <td>Қабілеті жоғары оқушыларға күрделі шығармашылық есептер беріледі. Қолдауды қажет ететін оқушыларға көмекші алгоритмдік сызбалар мен формулалар ұсынылады.</td>
-                    </tr>
-                    <tr>
-                        <td class="cell-label"><strong>Денсаулық және қауіпсіздік:</strong></td>
-                        <td>Кабинеттегі қауіпсіздік ережелерін сақтау. Көз жаттығулары мен сергіту сәтін уақытылы орындау.</td>
-                    </tr>
-                </table>
-
-                <div class="doc-signature-row">
-                    <div class="sig-block">
-                        <span>Пән мұғалімі: _________________ (${teacher})</span>
-                    </div>
-                    <div class="sig-block">
-                        <span>Тексерген оқу ісінің меңгерушісі: _________________</span>
-                    </div>
+                <div class="sig-block">
+                    <span>Тексерген ӘБ жетекшісі: _________________</span>
                 </div>
-            `;
-        } else {
-            return `
-                <div class="doc-header-block">
-                    <div class="doc-state-heading">${stateHeading}</div>
-                    <div class="doc-school-heading">${schoolHeading}</div>
-                    <h1 class="doc-main-title">${docTypeName.toUpperCase()}</h1>
-                </div>
-
-                <table class="doc-table-meta">
-                    <tr>
-                        <td class="cell-label"><strong>Раздел:</strong></td>
-                        <td>${topic.split(':')[0] || 'Основной учебный раздел'}</td>
-                        <td class="cell-label"><strong>ФИО педагога:</strong></td>
-                        <td>${teacher}</td>
-                    </tr>
-                    <tr>
-                        <td class="cell-label"><strong>Дата:</strong></td>
-                        <td>2026 год</td>
-                        <td class="cell-label"><strong>Класс / Предмет:</strong></td>
-                        <td>${grade} • ${subject}</td>
-                    </tr>
-                    <tr>
-                        <td class="cell-label"><strong>Тема урока:</strong></td>
-                        <td colspan="3"><strong>${topic}</strong></td>
-                    </tr>
-                    <tr>
-                        <td class="cell-label"><strong>Цели обучения:</strong></td>
-                        <td colspan="3">${grade.replace(/[^0-9]/g, '') || '8'}.1.2 — применять теоретические законы и формулы при решении расчетных и качественных задач</td>
-                    </tr>
-                    <tr>
-                        <td class="cell-label"><strong>Цели урока:</strong></td>
-                        <td colspan="3"><strong>Все:</strong> Знают базовые понятия и формулы изучаемой темы.<br><strong>Большинство:</strong> Умеют применять полученные знания при решении типовых задач.<br><strong>Некоторые:</strong> Способны анализировать графические зависимости и решать задачи повышенной сложности.</td>
-                    </tr>
-                </table>
-
-                <h2 class="doc-section-title">Ход и этапы урока</h2>
-
-                <table class="doc-table-steps">
-                    <thead>
-                        <tr>
-                            <th style="width:16%;">Этап урока / Время</th>
-                            <th style="width:34%;">Действия педагога</th>
-                            <th style="width:34%;">Действия учащихся</th>
-                            <th style="width:16%;">Оценивание / Ресурсы</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>1. Организационный этап</strong><br><span class="timing-badge">0–5 мин</span></td>
-                            <td>Приветствие учащихся, проверка готовности к уроку. Актуализация опорных знаний методом фронтального опроса («Мозговой штурм»).</td>
-                            <td>Приветствуют учителя, включаются в деловой ритм. Отвечают на вопросы, формулируют тему и цель урока.</td>
-                            <td><strong>Формативное:</strong><br>Словесная похвала.<br><em>Интерактивная доска</em></td>
-                        </tr>
-                        <tr>
-                            <td><strong>2. Изучение нового материала</strong><br><span class="timing-badge">5–25 мин</span></td>
-                            <td>Объяснение темы «${topic}». Демонстрация интерактивных симуляций AshyqLab, вывод ключевых расчетных формул и физических величин.</td>
-                            <td>Слушают объяснение, ведут записи в тетрадях, анализируют графики и схемы, задают уточняющие вопросы.</td>
-                            <td><strong>Дескрипторы:</strong><br>- Знает формулировку закона;<br>- Применяет единицы измерения (2 балла).</td>
-                        </tr>
-                        <tr>
-                            <td><strong>3. Первичное закрепление</strong><br><span class="timing-badge">25–38 мин</span></td>
-                            <td>Организация разноуровневой работы (уровни A, B, C). Консультирование учащихся, индивидуальная поддержка при затруднениях.</td>
-                            <td>Выполняют дифференцированные задания, работают в парах/группах, производят вычисления и взаимопроверку.</td>
-                            <td><strong>Взаимооценивание:</strong><br>Метод «Светофор».<br><em>Карточки с заданиями (3 балла)</em></td>
-                        </tr>
-                        <tr>
-                            <td><strong>4. Итоги и рефлексия</strong><br><span class="timing-badge">38–45 мин</span></td>
-                            <td>Подведение итогов урока, оценка степени достижения целей. Инструктаж по выполнению домашнего задания.</td>
-                            <td>Заполняют лист рефлексии (прием «Знаю - Хочу узнать - Узнал»). Записывают домашнее задание в дневники.</td>
-                            <td><strong>Лист рефлексии:</strong><br>Самооценка.<br><em>Дневник</em></td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <h2 class="doc-section-title">Дифференциация и техника безопасности</h2>
-                <table class="doc-table-meta">
-                    <tr>
-                        <td class="cell-label"><strong>Дифференциация:</strong></td>
-                        <td>Учащимся с высокой мотивацией предлагаются нестандартные комбинированные задачи. Учащимся, требующим поддержки, предоставляются опорные алгоритмические карточки.</td>
-                    </tr>
-                    <tr>
-                        <td class="cell-label"><strong>Охрана здоровья и ТБ:</strong></td>
-                        <td>Соблюдение правил безопасной работы в кабинете. Проведение физкультминутки и гимнастики для глаз.</td>
-                    </tr>
-                </table>
-
-                <div class="doc-signature-row">
-                    <div class="sig-block">
-                        <span>Учитель-предметник: _________________ (${teacher})</span>
-                    </div>
-                    <div class="sig-block">
-                        <span>Проверил зав. учебной частью: _________________</span>
-                    </div>
-                </div>
-            `;
-        }
+            </div>
+        `;
     }
 
-    // Default generic official template for other categories (assess, labs, class, reports)
+    // 2. Laboratory Documents
+    if (category === 'labs' || docTypeId === 'lab_guide' || docTypeId === 'lab_worksheet' || docTypeId === 'practicum') {
+        const steps = data?.steps || [
+            '1. Құрал-жабдықтарды тексеріп, схема бойынша жинаңыз.',
+            '2. Тізбекке ток көзін қосып, өлшеу құралдарының көрсеткіштерін жазып алыңыз.',
+            '3. Тәжірибені 3 рет қайталап, орташа мәнін есептеңіз.',
+            '4. Есептеу формуласы бойынша белгісіз шаманы тауып, қателікті анықтаңыз.'
+        ];
+        const stepsHtml = steps.map(s => `<p style="margin-bottom:4pt;">${s}</p>`).join('');
+
+        const headers = data?.tableHeaders || ['№', 'Шама атауы', 'Өлшем бірлігі', '1-тәжірибе', '2-тәжірибе', '3-тәжірибе', 'Орташа мән'];
+        const thHtml = headers.map(h => `<th>${h}</th>`).join('');
+
+        const rows = data?.tableRows || [
+            ['1', 'Кернеу (U)', 'В', '2.0', '4.0', '6.0', '4.0'],
+            ['2', 'Ток күші (I)', 'А', '0.2', '0.4', '0.6', '0.4'],
+            ['3', 'Кедергі (R)', 'Ом', '10.0', '10.0', '10.0', '10.0']
+        ];
+        const rowsHtml = rows.map(r => `<tr>${r.map(c => `<td style="text-align:center;">${c}</td>`).join('')}</tr>`).join('');
+
+        const questions = data?.questions || [
+            '1. Өлшенген шамалар арасында қандай тәуелділік байқалады?',
+            '2. Тәжірибе нәтижесінің теориялық формуламен сәйкестігін түсіндіріңіз.'
+        ];
+        const qHtml = questions.map(q => `<p style="margin-bottom:4pt;">${q}</p>`).join('');
+
+        return `
+            <div class="doc-header-block">
+                <div class="doc-state-heading">${stateHead}</div>
+                <div class="doc-school-heading">${school}</div>
+                <h1 class="doc-main-title">${docTypeName.toUpperCase()}</h1>
+            </div>
+
+            <table class="doc-table-meta">
+                <tr>
+                    <td class="cell-label"><strong>Пән / Сынып:</strong></td>
+                    <td>${subject} • ${grade}</td>
+                    <td class="cell-label"><strong>Педагог:</strong></td>
+                    <td>${teacher}</td>
+                </tr>
+                <tr>
+                    <td class="cell-label"><strong>Жұмыс тақырыбы:</strong></td>
+                    <td colspan="3"><strong>${data?.topic || topic}</strong></td>
+                </tr>
+                <tr>
+                    <td class="cell-label"><strong>Жұмыс мақсаты:</strong></td>
+                    <td colspan="3">${data?.goal || topic + ' құбылысын эксперименттік түрде зерттеу және заңдылықтарды анықтау'}</td>
+                </tr>
+                <tr>
+                    <td class="cell-label"><strong>Құрал-жабдықтар:</strong></td>
+                    <td colspan="3">${data?.equipment || 'Зертханалық құралдар, өлшеу аспаптары, қосу сымдары, ток көзі, нұсқаулық парақ'}</td>
+                </tr>
+                <tr>
+                    <td class="cell-label"><strong>Қауіпсіздік техникасы:</strong></td>
+                    <td colspan="3">${data?.safety || 'Құралдармен жұмыс кезінде қауіпсіздік ережелерін қатаң сақтау, ток көзін тек мұғалімнің рұқсатымен қосу.'}</td>
+                </tr>
+            </table>
+
+            <h2 class="doc-section-title">Теориялық түсінік және формулалар</h2>
+            <p style="margin-bottom:8pt;">${data?.theory || topic + ' құбылысын сипаттайтын негізгі формулалар мен физикалық заңдылықтар.'}</p>
+
+            <h2 class="doc-section-title">Жұмыс барысы</h2>
+            ${stepsHtml}
+
+            <h2 class="doc-section-title">Өлшеулер мен есептеулер кестесі</h2>
+            <table class="doc-table-steps">
+                <thead>
+                    <tr>${thHtml}</tr>
+                </thead>
+                <tbody>
+                    ${rowsHtml}
+                </tbody>
+            </table>
+
+            <h2 class="doc-section-title">Қорытынды және бақылау сұрақтары</h2>
+            ${qHtml}
+            <div style="border-bottom:1px dashed #666; margin-top:20pt; padding-bottom:4pt;">Оқушының қорытындысы: __________________________________________________________________</div>
+
+            <div class="doc-signature-row">
+                <div class="sig-block">
+                    <span>Пән мұғалімі: _________________ (${teacher})</span>
+                </div>
+                <div class="sig-block">
+                    <span>Бағасы: ______ (қолы)</span>
+                </div>
+            </div>
+        `;
+    }
+
+    // 3. Official Short-term Lesson Plan (ҚМЖ / КСП) — Strict 4-column Standard
+    const rawStages = data?.stages || [];
+    const stages = rawStages.length >= 3 ? rawStages : [
+        {
+            stageName: isKazakh ? '1. Ұйымдастыру кезеңі' : '1. Организационный этап',
+            time: '0–5 мин',
+            teacherAction: isKazakh 
+                ? 'Оқушылармен сәлемдесу, түгелдеу. Жағымды психологиялық ахуал орнату. «Миға шабуыл» әдісі арқылы қызығушылықты ояту: өткен тақырыптар бойынша сұрақтар қою.'
+                : 'Приветствие учащихся, проверка готовности к уроку. Актуализация опорных знаний методом фронтального опроса («Мозговой штурм»).',
+            studentAction: isKazakh
+                ? 'Мұғаліммен амандасады, сабаққа дайындалады. Қойылған сұрақтарға белсенді жауап беріп, сабақтың тақырыбы мен мақсатын анықтайды.'
+                : 'Приветствуют учителя, включаются в учебный процесс. Отвечают на вопросы, формулируют тему и цели урока.',
+            assessment: isKazakh
+                ? 'Формативті бағалау: «Жарайсың!» ауызша мадақтау. Интерактивті тақта, презентация'
+                : 'Формативное оценивание: Словесная похвала. Интерактивная доска, слайды'
+        },
+        {
+            stageName: isKazakh ? '2. Жаңа білімді меңгеру' : '2. Изучение нового материала',
+            time: '5–25 мин',
+            teacherAction: isKazakh
+                ? `«${topic}» тақырыбының негізгі ұғымдарын, заңдылықтары мен формулаларын түсіндіреді. AshyqLab виртуалды зертханалық үлгілері мен сызбаларын интерактивті тақтада көрсетеді.`
+                : `Объяснение темы «${topic}». Демонстрация интерактивных симуляций AshyqLab, вывод ключевых формул, анализ физических величин и единиц измерения.`,
+            studentAction: isKazakh
+                ? 'Жаңа ұғымдарды зейін қойып тыңдайды, негізгі формулалар мен анықтамаларды дәптерге жазады. Сұрақтар қойып, талдауға қатысады.'
+                : 'Слушают объяснение, ведут структурированный конспект, анализируют графики и схемы, задают уточняющие вопросы.',
+            assessment: isKazakh
+                ? 'Дескриптор: Негізгі ұғымдар мен анықтамаларды біледі (1 б); Формуланы дұрыс қолданады (2 б).'
+                : 'Дескрипторы: Знает формулировку закона (1 б); Правильно применяет единицы измерения (2 б).'
+        },
+        {
+            stageName: isKazakh ? '3. Практикалық бекіту' : '3. Первичное закрепление',
+            time: '25–38 мин',
+            teacherAction: isKazakh
+                ? 'Деңгейлік тапсырмалар ұсынады (А, В, С деңгейі). Топтық және жұптық жұмыстарды үйлестіреді. Қиналған оқушыларға бағыт-бағдар береді.'
+                : 'Организация разноуровневой практической работы (уровни A, B, C). Консультирование учащихся, индивидуальная поддержка при затруднениях.',
+            studentAction: isKazakh
+                ? 'Оқушылар деңгейлік есептерді өз бетінше және жұпта орындайды. Формулаларды түрлендіріп, есептеулер жүргізеді, өзара жауаптарын тексереді.'
+                : 'Выполняют дифференцированные задания, производят расчеты, проверяют решения в парах по готовым критериям.',
+            assessment: isKazakh
+                ? 'Өзара бағалау: «Бағдаршам» әдісі. Тапсырма парақтары (3 балл)'
+                : 'Взаимооценивание: Метод «Светофор». Раздаточные карточки (3 балла)'
+        },
+        {
+            stageName: isKazakh ? '4. Қорытынды және Рефлексия' : '4. Итоги и рефлексия',
+            time: '38–45 мин',
+            teacherAction: isKazakh
+                ? 'Сабақты қорытындылайды, оқу мақсаттарына жету деңгейін бағалайды. Үй тапсырмасын береді. Кері байланыс парақтарын жинайды.'
+                : 'Подведение итогов урока, оценка степени достижения учебных целей. Инструктаж по выполнению домашнего задания.',
+            studentAction: isKazakh
+                ? '«БББ» (Білдім, Білгім келеді, Үйрендім) әдісі бойынша рефлексия жасайды. Үй жұмысын күнделікке жазып алады.'
+                : 'Заполняют лист рефлексии (прием «Знаю - Хочу узнать - Узнал»). Записывают домашнее задание в дневники.',
+            assessment: isKazakh
+                ? 'Рефлексия парағы: өзін-өзі бағалау. Күнделік'
+                : 'Лист рефлексии: самооценка. Дневник'
+        }
+    ];
+
+    const stagesRowsHtml = stages.map(s => `
+        <tr>
+            <td><strong>${s.stageName || s.stage}</strong><br><span class="timing-badge">${s.time || ''}</span></td>
+            <td>${s.teacherAction || ''}</td>
+            <td>${s.studentAction || ''}</td>
+            <td>${s.assessment || ''}</td>
+        </tr>
+    `).join('');
+
+    const unitText = data?.unit || (topic.includes(':') ? topic.split(':')[0] : (isKazakh ? 'Негізгі оқу бөлімі' : 'Основной раздел'));
+    const topicText = data?.topic || topic;
+    const learningObj = data?.learningObjectives || (grade.replace(/[^0-9]/g, '') || '8') + '.1.2 — ' + (isKazakh ? topic + ' бойынша негізгі ұғымдар мен формулаларды меңгеру және қолдану' : 'применять основные понятия и формулы по теме ' + topic);
+    const lessonObj = data?.lessonObjectives || (isKazakh 
+        ? `<strong>Барлығы:</strong> Тақырыптың теориялық негіздерін біледі.<br><strong>Көпшілігі:</strong> Негізгі формулаларды есеп шығаруда қолданады.<br><strong>Кейбіреулері:</strong> Құбылысты талдап, күрделі есептерді шешеді.`
+        : `<strong>Все:</strong> Знают базовые понятия и формулы темы.<br><strong>Большинство:</strong> Умеют применять знания при решении типовых задач.<br><strong>Некоторые:</strong> Способны анализировать графики и решать задачи повышенной сложности.`);
+
+    const diffText = data?.differentiation || (isKazakh 
+        ? 'Қабілеті жоғары оқушыларға шығармашылық күрделі есептер ұсынылады. Қолдауды қажет ететін оқушыларға дайын сызба-үлгілер мен көмек беріледі.'
+        : 'Учащимся с высокой мотивацией предлагаются комбинированные задачи. Учащимся, требующим поддержки, предоставляются опорные карточки.');
+
+    const safetyText = data?.safety || (isKazakh
+        ? 'Кабинеттегі қауіпсіздік техникасы ережелерін сақтау. Көз жаттығулары мен сергіту сәті.'
+        : 'Соблюдение правил техники безопасности в кабинете. Проведение физкультминутки и гимнастики для глаз.');
+
     return `
         <div class="doc-header-block">
-            <div class="doc-state-heading">${stateHeading}</div>
-            <div class="doc-school-heading">${schoolHeading}</div>
-            <h1 class="doc-main-title">${docTypeName.toUpperCase()}</h1>
+            <div class="doc-state-heading">${stateHead}</div>
+            <div class="doc-school-heading">${school}</div>
+            <h1 class="doc-main-title">${isKazakh ? 'ҚЫСҚА МЕРЗІМДІ САБАҚ ЖОСПАРЫ (ҚМЖ)' : 'КРАТКОСРОЧНЫЙ ПЛАН УРОКА (КСП)'}</h1>
         </div>
 
         <table class="doc-table-meta">
             <tr>
-                <td class="cell-label"><strong>Пән / Предмет:</strong></td>
-                <td>${subject}</td>
-                <td class="cell-label"><strong>Сынып / Класс:</strong></td>
-                <td>${grade}</td>
-            </tr>
-            <tr>
-                <td class="cell-label"><strong>Педагог:</strong></td>
+                <td class="cell-label"><strong>${isKazakh ? 'Бөлім:' : 'Раздел:'}</strong></td>
+                <td>${unitText}</td>
+                <td class="cell-label"><strong>${isKazakh ? 'Педагогтің Т.А.Ә.:' : 'ФИО педагога:'}</strong></td>
                 <td>${teacher}</td>
-                <td class="cell-label"><strong>Оқу жылы / Дата:</strong></td>
-                <td>2025–2026 оқу жылы</td>
             </tr>
             <tr>
-                <td class="cell-label"><strong>Тақырыбы / Раздел:</strong></td>
-                <td colspan="3"><strong>${topic}</strong></td>
+                <td class="cell-label"><strong>${isKazakh ? 'Күні:' : 'Дата:'}</strong></td>
+                <td>2026 жыл</td>
+                <td class="cell-label"><strong>${isKazakh ? 'Сынып / Пән:' : 'Класс / Предмет:'}</strong></td>
+                <td>${grade} • ${subject}</td>
+            </tr>
+            <tr>
+                <td class="cell-label"><strong>${isKazakh ? 'Сабақтың тақырыбы:' : 'Тема урока:'}</strong></td>
+                <td colspan="3"><strong>${topicText}</strong></td>
+            </tr>
+            <tr>
+                <td class="cell-label"><strong>${isKazakh ? 'Оқу мақсаттары:' : 'Цели обучения:'}</strong></td>
+                <td colspan="3">${learningObj}</td>
+            </tr>
+            <tr>
+                <td class="cell-label"><strong>${isKazakh ? 'Сабақтың мақсаты:' : 'Цели урока:'}</strong></td>
+                <td colspan="3">${lessonObj}</td>
             </tr>
         </table>
 
-        <h2 class="doc-section-title">${isKazakh ? '1. Тапсырмалар мазмұны мен құрылымы' : '1. Содержание и структура заданий'}</h2>
-        
-        <table class="doc-table-rubric">
+        <h2 class="doc-section-title">${isKazakh ? 'Сабақтың барысы мен кезеңдері' : 'Ход и этапы урока'}</h2>
+
+        <table class="doc-table-steps">
             <thead>
                 <tr>
-                    <th style="width:12%;">№</th>
-                    <th style="width:48%;">${isKazakh ? 'Тапсырма шарты' : 'Условие задания'}</th>
-                    <th style="width:25%;">${isKazakh ? 'Дескриптор' : 'Дескриптор'}</th>
-                    <th style="width:15%;">${isKazakh ? 'Балл' : 'Баллы'}</th>
+                    <th style="width:16%;">${isKazakh ? 'Сабақтың кезеңі / Уақыты' : 'Этап урока / Время'}</th>
+                    <th style="width:34%;">${isKazakh ? 'Педагогтің әрекеті' : 'Действия педагога'}</th>
+                    <th style="width:34%;">${isKazakh ? 'Оқушының әрекеті' : 'Действия учащихся'}</th>
+                    <th style="width:16%;">${isKazakh ? 'Бағалау / Ресурстар' : 'Оценивание / Ресурсы'}</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td style="text-align:center;">1</td>
-                    <td>${topic} бойынша негізгі ұғымдар мен терминдердің анықтамасын жазыңыз.</td>
-                    <td>Негізгі анықтамаларды дұрыс көрсетеді.</td>
-                    <td style="text-align:center;">2 балл</td>
-                </tr>
-                <tr>
-                    <td style="text-align:center;">2</td>
-                    <td>Берілген шамалардың байланысын сипаттайтын формуланы пайдаланып, есептеулер жүргізіңіз.</td>
-                    <td>Формуланы түрлендіреді және дұрыс есептейді.</td>
-                    <td style="text-align:center;">3 балл</td>
-                </tr>
-                <tr>
-                    <td style="text-align:center;">3</td>
-                    <td>Тәжірибелік немесе графикалық мәліметтерге сүйене отырып, қорытынды жасаңыз.</td>
-                    <td>Мәліметтерді талдап, дұрыс тұжырым жасайды.</td>
-                    <td style="text-align:center;">5 балл</td>
-                </tr>
+                ${stagesRowsHtml}
             </tbody>
+        </table>
+
+        <h2 class="doc-section-title">${isKazakh ? 'Саралау және қауіпсіздік ережелері' : 'Дифференциация и безопасность'}</h2>
+        <table class="doc-table-meta">
+            <tr>
+                <td class="cell-label"><strong>${isKazakh ? 'Саралау (Дифференциация):' : 'Дифференциация:'}</strong></td>
+                <td>${diffText}</td>
+            </tr>
+            <tr>
+                <td class="cell-label"><strong>${isKazakh ? 'Денсаулық және қауіпсіздік:' : 'Охрана здоровья и ТБ:'}</strong></td>
+                <td>${safetyText}</td>
+            </tr>
         </table>
 
         <div class="doc-signature-row">
             <div class="sig-block">
-                <span>Құрастырушы педагог: _________________ (${teacher})</span>
+                <span>${isKazakh ? 'Пән мұғалімі:' : 'Учитель-предметник:'} _________________ (${teacher})</span>
             </div>
             <div class="sig-block">
-                <span>Әдістемелік бірлестік жетекшісі: _________________</span>
+                <span>${isKazakh ? 'Тексерген оқу ісінің меңгерушісі:' : 'Проверил зав. учебной частью:'} _________________</span>
             </div>
         </div>
     `;

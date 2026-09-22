@@ -580,17 +580,19 @@ html, body {
     flex: 1;
     overflow-y: auto;
     overflow-x: auto;
-    padding: 24px 16px 60px;
+    padding: 30px 20px 180px;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
     background: #090d16;
+    min-height: 0;
 }
 .a4-stage-scroller::-webkit-scrollbar {
     width: 8px;
     height: 8px;
 }
 .a4-stage-scroller::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.18);
     border-radius: 4px;
 }
 
@@ -600,22 +602,23 @@ html, body {
 .a4-sheet {
     width: 210mm;
     min-height: 297mm;
+    height: auto;
+    overflow: visible;
+    display: block;
     background: #ffffff;
     color: #000000;
-    padding: 20mm 20mm 20mm;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(0, 0, 0, 0.1);
+    padding: 20mm 20mm 25mm;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(0, 0, 0, 0.1);
     border-radius: 0;
     font-family: 'Times New Roman', Times, serif;
     font-size: 12pt;
     line-height: 1.35;
     outline: none;
-    transform-origin: top center;
-    transform: scale(var(--doc-zoom));
-    transition: transform 0.15s ease-out;
+    margin: 0 auto 60px;
     user-select: text;
 }
 .a4-sheet:focus {
-    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.7), 0 0 0 2px #2563eb;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.8), 0 0 0 2px #2563eb;
 }
 
 /* Approval Stamp ("БЕКІТЕМІН / УТВЕРЖДАЮ") */
