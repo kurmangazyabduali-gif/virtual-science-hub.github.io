@@ -1,7 +1,7 @@
 /* =====================================================
-   ASHYQDOC — AI TEACHER DOCUMENTATION ENGINE JS
-   Multi-Tier AI Generation (OpenAI / Gemini / Pollinations)
-   DOCX & PDF Export + Live Editable A4 Paper Canvas
+   ASHYQDOC — OFFICIAL TEACHER DOCUMENTATION ENGINE JS
+   Multi-Tier AI Engine + Deterministic Table Structure
+   Strict Ministry of Education (ГОСО РК) Compliant
    ===================================================== */
 
 // Encoded fallback key
@@ -140,8 +140,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnExportPdf     = document.getElementById('btn-export-pdf');
     const btnPrintDoc      = document.getElementById('btn-print-doc');
     const btnCopyDoc       = document.getElementById('btn-copy-doc');
+    const btnZoomIn        = document.getElementById('btn-zoom-in');
+    const btnZoomOut       = document.getElementById('btn-zoom-out');
+    const zoomLevelText    = document.getElementById('zoom-level-text');
+    const btnToggleStamp   = document.getElementById('btn-toggle-stamp');
 
     let activeCategory = 'plans';
+    let currentZoom = 1.0;
+    let hasStamp = false;
 
     // ── Category Tab Switcher ──
     categoryTabs.forEach(tab => {
@@ -197,11 +203,85 @@ document.addEventListener('DOMContentLoaded', function () {
     renderDocTypesSelect();
     renderTopicChips();
 
+    // ── Zoom Stepper ──
+    if (btnZoomIn && btnZoomOut && zoomLevelText) {
+        btnZoomIn.addEventListener('click', () => {
+            if (currentZoom < 1.3) {
+                currentZoom = +(currentZoom + 0.1).toFixed(1);
+                applyZoom();
+            }
+        });
+        btnZoomOut.addEventListener('click', () => {
+            if (currentZoom > 0.7) {
+                currentZoom = +(currentZoom - 0.1).toFixed(1);
+                applyZoom();
+            }
+        });
+    }
+
+    function applyZoom() {
+        document.documentElement.style.setProperty('--doc-zoom', currentZoom);
+        zoomLevelText.textContent = `${Math.round(currentZoom * 100)}%`;
+    }
+
+    // ── Stamp Toggle Switch ──
+    if (btnToggleStamp) {
+        btnToggleStamp.addEventListener('click', () => {
+            hasStamp = !hasStamp;
+            btnToggleStamp.classList.toggle('active', hasStamp);
+            const schoolName = inputSchool.value.trim() || '«№ 1 мектеп-лицей» КММ';
+            const lang = selectLanguage.value;
+
+            const existingStamp = a4DocumentPaper.querySelector('.doc-approval-stamp');
+            if (hasStamp) {
+                if (!existingStamp) {
+                    const stampDiv = document.createElement('div');
+                    stampDiv.className = 'doc-approval-stamp';
+                    if (lang === 'Русский') {
+                        stampDiv.innerHTML = `
+                            <div class="stamp-content">
+                                <div class="stamp-title">УТВЕРЖДАЮ:</div>
+                                <div>Директор ${schoolName}</div>
+                                <div>___________ / _________________ /</div>
+                                <div>«___» _____________ 2026 г.</div>
+                            </div>
+                        `;
+                    } else if (lang === 'English') {
+                        stampDiv.innerHTML = `
+                            <div class="stamp-content">
+                                <div class="stamp-title">APPROVED BY:</div>
+                                <div>Principal of ${schoolName}</div>
+                                <div>___________ / _________________ /</div>
+                                <div>Date: «___» _____________ 2026</div>
+                            </div>
+                        `;
+                    } else {
+                        stampDiv.innerHTML = `
+                            <div class="stamp-content">
+                                <div class="stamp-title">БЕКІТЕМІН:</div>
+                                <div>${schoolName} директоры</div>
+                                <div>___________ / _________________ /</div>
+                                <div>«___» _____________ 2026 ж.</div>
+                            </div>
+                        `;
+                    }
+                    a4DocumentPaper.insertBefore(stampDiv, a4DocumentPaper.firstChild);
+                    showToast('«БЕКІТЕМІН» грифі құжатқа қосылды', 'info');
+                }
+            } else {
+                if (existingStamp) {
+                    existingStamp.remove();
+                    showToast('«БЕКІТЕМІН» грифі өшірілді', 'info');
+                }
+            }
+        });
+    }
+
     // ── Generate Button Click ──
     btnGenerate.addEventListener('click', async function() {
         const topic = inputTopic.value.trim();
         if (!topic) {
-            showToast('Пожалуйста, введите тему или цель урока', 'error');
+            showToast('Сабақтың тақырыбын немесе оқу мақсатын енгізіңіз', 'error');
             inputTopic.focus();
             return;
         }
@@ -211,18 +291,18 @@ document.addEventListener('DOMContentLoaded', function () {
         const subject = selectSubject.value;
         const grade = selectGrade.value;
         const lang = selectLanguage.value;
-        const teacher = inputTeacher.value.trim() || 'Пән мұғалімі';
-        const school = inputSchool.value.trim() || '«№ 1 мектеп-лицей» КММ';
+        const teacher = inputTeacher.value.trim() || (lang === 'Қазақша' ? 'Абдуғали К. М.' : 'Абдугали К. М.');
+        const school = inputSchool.value.trim() || (lang === 'Қазақша' ? '«№ 1 мектеп-лицей» КММ' : 'КГУ «Школа-лицей № 1»');
 
         btnGenerate.disabled = true;
         btnGenIcon.className = 'fa-solid fa-spinner fa-spin';
-        btnGenText.textContent = 'ИИ формирует официальный документ...';
+        btnGenText.textContent = 'ИИ ресми құжатты түзуде...';
         genProgressBox.classList.remove('hidden');
-        setGenProgress(20, 'Анализ методических требований ГОСО/МОН...');
-        docStatusText.textContent = 'Генерация документа через ИИ...';
+        setGenProgress(20, 'ГОСО талаптары бойынша кестелерді модельдеу...');
+        docStatusText.textContent = 'ИИ құжатты генерациялауда...';
 
         try {
-            setGenProgress(45, `Генерация «${docTypeName}»...`);
+            setGenProgress(45, `«${docTypeName}» құжатын қалыптастыру...`);
             const htmlResult = await callUniversalDocAI({
                 category: activeCategory,
                 docTypeId,
@@ -235,30 +315,70 @@ document.addEventListener('DOMContentLoaded', function () {
                 school
             });
 
-            setGenProgress(85, 'Форматирование таблиц и верстка A4...');
+            setGenProgress(85, 'Кестелік құрылымды стандарттау және верстка...');
             await sleep(250);
 
+            // Insert generated document
             a4DocumentPaper.innerHTML = htmlResult;
+
+            // Re-apply stamp if active
+            if (hasStamp) {
+                const existingStamp = a4DocumentPaper.querySelector('.doc-approval-stamp');
+                if (!existingStamp) {
+                    const stampDiv = document.createElement('div');
+                    stampDiv.className = 'doc-approval-stamp';
+                    if (lang === 'Русский') {
+                        stampDiv.innerHTML = `
+                            <div class="stamp-content">
+                                <div class="stamp-title">УТВЕРЖДАЮ:</div>
+                                <div>Директор ${school}</div>
+                                <div>___________ / _________________ /</div>
+                                <div>«___» _____________ 2026 г.</div>
+                            </div>
+                        `;
+                    } else if (lang === 'English') {
+                        stampDiv.innerHTML = `
+                            <div class="stamp-content">
+                                <div class="stamp-title">APPROVED BY:</div>
+                                <div>Principal of ${school}</div>
+                                <div>___________ / _________________ /</div>
+                                <div>Date: «___» _____________ 2026</div>
+                            </div>
+                        `;
+                    } else {
+                        stampDiv.innerHTML = `
+                            <div class="stamp-content">
+                                <div class="stamp-title">БЕКІТЕМІН:</div>
+                                <div>${school} директоры</div>
+                                <div>___________ / _________________ /</div>
+                                <div>«___» _____________ 2026 ж.</div>
+                            </div>
+                        `;
+                    }
+                    a4DocumentPaper.insertBefore(stampDiv, a4DocumentPaper.firstChild);
+                }
+            }
+
             updateDocTitleBadge();
-            docStatusText.textContent = `Документ готов: ${docTypeName}`;
-            setGenProgress(100, '✅ Документ готов к печати и скачиванию!');
-            showToast('Официальный документ успешно сгенерирован!', 'success');
+            docStatusText.textContent = `Құжат дайын: ${docTypeName}`;
+            setGenProgress(100, '✅ Ресми құжат толығымен әзірленді!');
+            showToast('Ресми педагогикалық құжат сәтті қалыптастырылды!', 'success');
 
         } catch (err) {
             console.error('[Doc Gen Error]', err);
-            showToast(err.message || 'Ошибка генерации документа', 'error');
-            docStatusText.textContent = 'Ошибка генерации';
+            showToast(err.message || 'Құжатты жасау кезінде қате орын алды', 'error');
+            docStatusText.textContent = 'Генерация қатесі';
         } finally {
             btnGenerate.disabled = false;
-            btnGenIcon.className = 'fa-solid fa-wand-magic-sparkles';
-            btnGenText.textContent = 'Сгенерировать официальный документ';
+            btnGenIcon.className = 'fa-solid fa-file-circle-check';
+            btnGenText.textContent = 'Ресми құжатты қалыптастыру';
             setTimeout(() => genProgressBox.classList.add('hidden'), 2500);
         }
     });
 
     // ── Action Buttons Handlers ──
 
-    // 1. Export to Microsoft Word (.doc)
+    // 1. Export to Microsoft Word (.docx / .doc)
     btnExportDocx.addEventListener('click', function() {
         exportToWord(a4DocumentPaper, selectDocType.options[selectDocType.selectedIndex].text, selectSubject.value);
     });
@@ -277,9 +397,9 @@ document.addEventListener('DOMContentLoaded', function () {
     btnCopyDoc.addEventListener('click', function() {
         const text = a4DocumentPaper.innerText;
         navigator.clipboard.writeText(text).then(() => {
-            showToast('Текст документа скопирован в буфер обмена!', 'success');
+            showToast('Құжат мәтіні буферге көшірілді!', 'success');
         }).catch(() => {
-            showToast('Не удалось скопировать текст', 'error');
+            showToast('Мәтінді көшіру мүмкін болмады', 'error');
         });
     });
 
@@ -291,7 +411,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 /* ──────────────────────────────────────────────
-   AI PROMPT BUILDER & MULTI-TIER ENGINE
+   AI PROMPT BUILDER & DETERMINISTIC FORMATTER
 ─────────────────────────────────────────────── */
 async function callUniversalDocAI(params) {
     const { category, docTypeId, docTypeName, subject, grade, lang, topic, teacher, school } = params;
@@ -299,33 +419,233 @@ async function callUniversalDocAI(params) {
     const isKazakh = lang === 'Қазақша';
     const isEnglish = lang === 'English';
 
+    // System instruction enforcing strict official Ministry of Education table layouts
     const systemPrompt = [
-        'Ты ведущий государственный методист и эксперт Министерства просвещения.',
-        'Твоя задача — составить ПОЛНОСТЬЮ готовый, профессиональный, подробный официальный документ для учителя.',
-        'Ответь СТРОГО чистым семантическим HTML-кодом без markdown-оберток (без ```html и без ```).',
+        'Сен Қазақстан Республикасы Оқу-ағарту министрлігінің мемлекеттік жоғары санатты сарапшы-әдіскерісің.',
+        'Сенің міндетің — мұғалімге арналған ресми, мінсіз, толық мазмұнды педагогикалық құжатты СТРОГО бекітілген ГОСО кестелік үлгісінде дайындау.',
         '',
-        'ТРЕБОВАНИЯ К ОФОРМЛЕНИЮ HTML:',
-        '1. Используй официальную структуру с таблицами: <table class="doc-table-meta">, <table class="doc-table-steps">, <table class="doc-table-rubric">.',
-        '2. В шапке документа обязательно размести <div class="doc-header-block"> с указанием Министерства, школы, типа документа и названия темы.',
-        '3. Для каждого этапа урока (КСП) пиши ПОДРОБНЫЕ действия педагога, действия учащихся, формативное оценивание и дескрипторы.',
-        '4. Для СОР/СОЧ создавай 2 полноценных варианта с заданиями разного уровня (А, В, С) + детальную таблицу дескрипторов и баллов (рубрикатор).',
-        '5. Для лабораторных — таблицы измерений, ТБ, формулы, ход работы и контрольные вопросы.',
-        '6. Для характеристик — подробные разделы (успеваемость, поведение, психоэмоциональные качества, олимпиады, рекомендации).',
-        '7. Внизу документа обязательно добавь <div class="doc-signature-row"> с местом для подписи учителя и завуча.',
-        `8. Весь текст документа пиши СТРОГО на языке: ${lang}!`
+        'МАҢЫЗДЫ ТАЛАПТАР:',
+        '1. Жауапты ТЕК таза семантикалық HTML түрінде қайтар (ешқандай markdown, ```html немесе түсіндірме мәтінсіз).',
+        '2. БАРЛЫҚ кестелер міндетті түрде берілген CSS кластарымен түзілуі тиіс:',
+        '   - <table class="doc-table-meta"> — құжаттың жоғарғы төлқұжаты (Бөлім, Пән, Сынып, Тақырып, Оқу мақсаттары, Сабақ мақсаты)',
+        '   - <table class="doc-table-steps"> — сабақтың кезеңдері бойынша 4 бағаннан тұратын кесте',
+        '   - <table class="doc-table-rubric"> — балл қою кестесі және дескрипторлар',
+        '3. ЕШҚАШАН кестелерді жай тізіммен (ul/li) немесе жай параграфтармен алмастырма! Құжаттың негізгі бөлігі КЕСТЕДЕН тұруы керек.',
+        '4. ҚМЖ / КСП үшін сабақ кезеңдері кестесінде 4 нақты баған болсын:',
+        '   <th>Сабақтың кезеңі / Уақыты</th> (16%) | <th>Педагогтің әрекеті</th> (34%) | <th>Оқушының әрекеті</th> (34%) | <th>Бағалау / Ресурстар</th> (16%)',
+        '   Кезеңдер: 1. Ұйымдастыру кезеңі (0–5 мин), 2. Жаңа білімді меңгеру (5–25 мин), 3. Практикалық бекіту (25–38 мин), 4. Қорытынды және Рефлексия (38–45 мин).',
+        '5. БЖБ / СОР және ТЖБ / СОЧ үшін: төлқұжат кестесі + 1-нұсқа және 2-нұсқа тапсырмалары + толық рубрикатор кестесі (Тапсырма № | Оқу мақсаты | Дескриптор | Балл).',
+        '6. Зертханалық жұмыс үшін: мақсаты, құралдары, ТБ ережелері, жұмыс барысы, өлшеулер мен есептеулер кестесі, бақылау сұрақтары.',
+        '7. Соңында міндетті түрде <div class="doc-signature-row"> қол қою орнын қалдыр.',
+        `8. Құжаттың тілі СТРОГО: ${lang}!`
     ].join('\n');
+
+    // Exemplar skeleton injected into prompt
+    const exemplarGuide = isKazakh ? `
+ҮЛГІ ҚҰРЫЛЫМ (ОСЫ ФОРМАТТЫ 100% САҚТА):
+<div class="doc-header-block">
+    <div class="doc-state-heading">ҚАЗАҚСТАН РЕСПУБЛИКАСЫ ОҚУ-АҒАРТУ МИНИСТРЛІГІ</div>
+    <div class="doc-school-heading">«${school}» КММ</div>
+    <h1 class="doc-main-title">${docTypeName.toUpperCase()}</h1>
+</div>
+
+<table class="doc-table-meta">
+    <tr>
+        <td class="cell-label"><strong>Бөлім:</strong></td>
+        <td>[Бөлім атауы]</td>
+        <td class="cell-label"><strong>Педагогтің Т.А.Ә.:</strong></td>
+        <td>${teacher}</td>
+    </tr>
+    <tr>
+        <td class="cell-label"><strong>Күні:</strong></td>
+        <td>2026 жыл</td>
+        <td class="cell-label"><strong>Сынып / Пән:</strong></td>
+        <td>${grade} • ${subject}</td>
+    </tr>
+    <tr>
+        <td class="cell-label"><strong>Сабақтың тақырыбы:</strong></td>
+        <td colspan="3"><strong>[Нақты тақырып]</strong></td>
+    </tr>
+    <tr>
+        <td class="cell-label"><strong>Оқу мақсаттары:</strong></td>
+        <td colspan="3">[ГОСО стандарты бойынша нақты кодпен мақсаттар, мысалы: 8.4.2.5 — ...]</td>
+    </tr>
+    <tr>
+        <td class="cell-label"><strong>Сабақтың мақсаты:</strong></td>
+        <td colspan="3">[Барлық оқушылар, көпшілігі, кейбір оқушылар үшін мақсаттар]</td>
+    </tr>
+</table>
+
+<h2 class="doc-section-title">Сабақтың барысы мен кезеңдері</h2>
+
+<table class="doc-table-steps">
+    <thead>
+        <tr>
+            <th style="width:16%;">Сабақтың кезеңі / Уақыты</th>
+            <th style="width:34%;">Педагогтің әрекеті</th>
+            <th style="width:34%;">Оқушының әрекеті</th>
+            <th style="width:16%;">Бағалау / Ресурстар</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>1. Ұйымдастыру кезеңі</strong><br><span class="timing-badge">0–5 мин</span></td>
+            <td>...толық сипаттама...</td>
+            <td>...толық сипаттама...</td>
+            <td><strong>Формативті бағалау:</strong><br>...дескриптор, ресурстар...</td>
+        </tr>
+        <tr>
+            <td><strong>2. Жаңа білімді меңгеру</strong><br><span class="timing-badge">5–25 мин</span></td>
+            <td>...теория, формулалар, демонстрация...</td>
+            <td>...талдау, конспект, сұрақтар...</td>
+            <td><strong>Дескриптор:</strong><br>...</td>
+        </tr>
+        <tr>
+            <td><strong>3. Практикалық бекіту</strong><br><span class="timing-badge">25–38 мин</span></td>
+            <td>...деңгейлік тапсырмалар А, В, С...</td>
+            <td>...есептер шығару, тәжірибе...</td>
+            <td><strong>Өзара бағалау:</strong><br>...</td>
+        </tr>
+        <tr>
+            <td><strong>4. Қорытынды және Рефлексия</strong><br><span class="timing-badge">38–45 мин</span></td>
+            <td>...кері байланыс, үй тапсырмасы...</td>
+            <td>...рефлексия, күнделік...</td>
+            <td><strong>Рефлексия парағы</strong></td>
+        </tr>
+    </tbody>
+</table>
+
+<h2 class="doc-section-title">Саралау және қауіпсіздік ережелері</h2>
+<table class="doc-table-meta">
+    <tr>
+        <td class="cell-label"><strong>Саралау (Дифференциация):</strong></td>
+        <td>...толық жазылсын...</td>
+    </tr>
+    <tr>
+        <td class="cell-label"><strong>Денсаулық және қауіпсіздік:</strong></td>
+        <td>...толық жазылсын...</td>
+    </tr>
+</table>
+
+<div class="doc-signature-row">
+    <div class="sig-block">
+        <span>Пән мұғалімі: _________________ (қолы)</span>
+    </div>
+    <div class="sig-block">
+        <span>Тексерген оқу ісінің меңгерушісі: _________________</span>
+    </div>
+</div>
+` : `
+ОБРАЗЕЦ СТРУКТУРЫ (СОБЛЮДАЙ ЭТОТ ФОРМАТ НА 100%):
+<div class="doc-header-block">
+    <div class="doc-state-heading">МИНИСТЕРСТВО ПРОСВЕЩЕНИЯ РЕСПУБЛИКИ КАЗАХСТАН</div>
+    <div class="doc-school-heading">КГУ «${school}»</div>
+    <h1 class="doc-main-title">${docTypeName.toUpperCase()}</h1>
+</div>
+
+<table class="doc-table-meta">
+    <tr>
+        <td class="cell-label"><strong>Раздел:</strong></td>
+        <td>[Название раздела]</td>
+        <td class="cell-label"><strong>ФИО педагога:</strong></td>
+        <td>${teacher}</td>
+    </tr>
+    <tr>
+        <td class="cell-label"><strong>Дата:</strong></td>
+        <td>2026 год</td>
+        <td class="cell-label"><strong>Класс / Предмет:</strong></td>
+        <td>${grade} • ${subject}</td>
+    </tr>
+    <tr>
+        <td class="cell-label"><strong>Тема урока:</strong></td>
+        <td colspan="3"><strong>[Тема урока]</strong></td>
+    </tr>
+    <tr>
+        <td class="cell-label"><strong>Цели обучения:</strong></td>
+        <td colspan="3">[Цели по ГОСО с кодами, например: 8.4.2.5 — ...]</td>
+    </tr>
+    <tr>
+        <td class="cell-label"><strong>Цели урока:</strong></td>
+        <td colspan="3">[Цели для всех, большинства и некоторых учащихся]</td>
+    </tr>
+</table>
+
+<h2 class="doc-section-title">Ход и этапы урока</h2>
+
+<table class="doc-table-steps">
+    <thead>
+        <tr>
+            <th style="width:16%;">Этап урока / Время</th>
+            <th style="width:34%;">Действия педагога</th>
+            <th style="width:34%;">Действия учащихся</th>
+            <th style="width:16%;">Оценивание / Ресурсы</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>1. Организационный этап</strong><br><span class="timing-badge">0–5 мин</span></td>
+            <td>...подробные действия...</td>
+            <td>...подробные действия...</td>
+            <td><strong>Формативное:</strong><br>...ресурсы...</td>
+        </tr>
+        <tr>
+            <td><strong>2. Изучение нового материала</strong><br><span class="timing-badge">5–25 мин</span></td>
+            <td>...теория, формулы, объяснение...</td>
+            <td>...конспект, ответы, анализ...</td>
+            <td><strong>Дескриптор:</strong><br>...</td>
+        </tr>
+        <tr>
+            <td><strong>3. Первичное закрепление</strong><br><span class="timing-badge">25–38 мин</span></td>
+            <td>...разноуровневые задания А, В, С...</td>
+            <td>...решение задач, практика...</td>
+            <td><strong>Взаимооценивание:</strong><br>...</td>
+        </tr>
+        <tr>
+            <td><strong>4. Итоги и рефлексия</strong><br><span class="timing-badge">38–45 мин</span></td>
+            <td>...подведение итогов, ДЗ...</td>
+            <td>...самооценка, запись ДЗ...</td>
+            <td><strong>Лист рефлексии</strong></td>
+        </tr>
+    </tbody>
+</table>
+
+<h2 class="doc-section-title">Дифференциация и техника безопасности</h2>
+<table class="doc-table-meta">
+    <tr>
+        <td class="cell-label"><strong>Дифференциация:</strong></td>
+        <td>...подробно...</td>
+    </tr>
+    <tr>
+        <td class="cell-label"><strong>Охрана здоровья и ТБ:</strong></td>
+        <td>...правила ТБ...</td>
+    </tr>
+</table>
+
+<div class="doc-signature-row">
+    <div class="sig-block">
+        <span>Учитель-предметник: _________________ (подпись)</span>
+    </div>
+    <div class="sig-block">
+        <span>Проверил зав. учебной частью: _________________</span>
+    </div>
+</div>
+`;
 
     const userPrompt = [
         `ТИП ДОКУМЕНТА: ${docTypeName} (${docTypeId})`,
         `ПРЕДМЕТ: ${subject}`,
         `КЛАСС / АУДИТОРИЯ: ${grade}`,
         `ЯЗЫК ДОКУМЕНТА: ${lang}`,
-        `ТЕМА / ЦЕЛИ ОБУЧЕНИЯ / ЗАДАЧА: ${topic}`,
+        `ТЕМА / ЦЕЛИ ОБУЧЕНИЯ / БӨЛІМ: ${topic}`,
         `ПЕДАГОГ: ${teacher}`,
         `ОРГАНИЗАЦИЯ: ${school}`,
         '',
-        'Сформируй идеальный, исчерпывающий, официальный документ в формате HTML.'
+        exemplarGuide,
+        '',
+        'Құжатты жоғарыдағы үлгіні негізге ала отырып, мазмұнын терең әрі кәсіби деңгейде толтырып, дайын ресми HTML форматында қайтар.'
     ].join('\n');
+
+    let rawHtml = '';
 
     // 1. TIER 1: OpenAI (if sk- key provided)
     if (API_KEY && API_KEY.startsWith('sk-')) {
@@ -342,15 +662,12 @@ async function callUniversalDocAI(params) {
                         { role: 'system', content: systemPrompt },
                         { role: 'user', content: userPrompt }
                     ],
-                    temperature: 0.3
+                    temperature: 0.25
                 })
             });
             if (res.ok) {
                 const oaiData = await res.json();
-                const content = oaiData?.choices?.[0]?.message?.content;
-                if (content && content.includes('<')) {
-                    return cleanHtmlOutput(content);
-                }
+                rawHtml = oaiData?.choices?.[0]?.message?.content;
             }
         } catch (e) {
             console.warn('OpenAI doc generation failed, fallback to Gemini...', e);
@@ -358,66 +675,126 @@ async function callUniversalDocAI(params) {
     }
 
     // 2. TIER 2: Google Gemini (2.5-Flash & 1.5-Flash)
-    const activeGeminiKey = (API_KEY && (API_KEY.startsWith('AQ.') || API_KEY.startsWith('AIzaSy'))) ? API_KEY : FALLBACK_GEMINI_KEY;
-    const models = ['gemini-2.5-flash', 'gemini-1.5-flash-latest'];
+    if (!rawHtml) {
+        const activeGeminiKey = (API_KEY && (API_KEY.startsWith('AQ.') || API_KEY.startsWith('AIzaSy'))) ? API_KEY : FALLBACK_GEMINI_KEY;
+        const models = ['gemini-2.5-flash', 'gemini-1.5-flash-latest'];
 
-    for (let model of models) {
-        try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${activeGeminiKey}`;
-            const res = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    system_instruction: { parts: [{ text: systemPrompt }] },
-                    contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-                    generationConfig: {
-                        temperature: 0.3
-                    }
-                })
-            });
-            if (res.ok) {
-                const data = await res.json();
-                const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (rawText && rawText.includes('<')) {
-                    return cleanHtmlOutput(rawText);
+        for (let model of models) {
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${activeGeminiKey}`;
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        system_instruction: { parts: [{ text: systemPrompt }] },
+                        contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
+                        generationConfig: {
+                            temperature: 0.25
+                        }
+                    })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    rawHtml = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (rawHtml) break;
                 }
+            } catch (e) {
+                console.warn(`Gemini doc model ${model} failed, trying next...`, e);
             }
-        } catch (e) {
-            console.warn(`Gemini doc model ${model} failed, trying next...`, e);
         }
     }
 
     // 3. TIER 3: Pollinations AI Zero-Key Fallback
-    try {
-        const fullPrompt = `${systemPrompt}\n\n${userPrompt}\n\nОтветь ТОЛЬКО чистым HTML кодом:`;
-        const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(fullPrompt)}?model=openai`);
-        if (res.ok) {
-            const rawText = await res.text();
-            if (rawText && rawText.includes('<')) {
-                return cleanHtmlOutput(rawText);
+    if (!rawHtml) {
+        try {
+            const fullPrompt = `${systemPrompt}\n\n${userPrompt}\n\nОтветь ТОЛЬКО валидным HTML кодом документа:`;
+            const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(fullPrompt)}?model=openai`);
+            if (res.ok) {
+                rawHtml = await res.text();
             }
+        } catch (e) {
+            console.warn('Pollinations doc fallback failed...', e);
         }
-    } catch (e) {
-        console.warn('Pollinations doc fallback failed...', e);
     }
 
-    throw new Error('ИИ временно недоступен. Пожалуйста, попробуйте еще раз.');
+    if (!rawHtml) {
+        throw new Error('ИИ жүйесі уақытша қолжетімсіз. Қайта көріңіз.');
+    }
+
+    // Clean markdown wrappers and enforce 100% official HTML standards
+    const cleaned = cleanHtmlOutput(rawHtml);
+    return postProcessOfficialDocument(cleaned, params);
 }
 
 function cleanHtmlOutput(raw) {
     let clean = String(raw).trim();
     if (clean.startsWith('```html')) clean = clean.slice(7);
+    if (clean.startsWith('```htm')) clean = clean.slice(6);
     if (clean.startsWith('```')) clean = clean.slice(3);
     if (clean.endsWith('```')) clean = clean.slice(0, -3);
     return clean.trim();
 }
 
+/**
+ * Ensures the output ALWAYS contains official tables, headers, and signature lines
+ */
+function postProcessOfficialDocument(html, params) {
+    const { docTypeName, subject, grade, lang, topic, teacher, school } = params;
+    const isKazakh = lang === 'Қазақша';
+
+    let result = html;
+
+    // 1. Ensure Table classes exist
+    result = result.replace(/<table>/gi, '<table class="doc-table-steps">');
+    result = result.replace(/<table\s+border=["']?[0-9]*["']?>/gi, '<table class="doc-table-steps">');
+
+    // 2. Ensure Official Header block exists
+    if (!result.includes('doc-header-block') && !result.includes('doc-state-heading')) {
+        const stateHead = isKazakh ? 'ҚАЗАҚСТАН РЕСПУБЛИКАСЫ ОҚУ-АҒАРТУ МИНИСТРЛІГІ' : 'МИНИСТЕРСТВО ПРОСВЕЩЕНИЯ РЕСПУБЛИКИ КАЗАХСТАН';
+        const schoolHead = isKazakh ? `«${school}» КММ` : `КГУ «${school}»`;
+        const headerBlock = `
+            <div class="doc-header-block">
+                <div class="doc-state-heading">${stateHead}</div>
+                <div class="doc-school-heading">${schoolHead}</div>
+                <h1 class="doc-main-title">${docTypeName.toUpperCase()}</h1>
+            </div>
+        `;
+        result = headerBlock + result;
+    }
+
+    // 3. Ensure Signature block exists
+    if (!result.includes('doc-signature-row')) {
+        const sigBlock = isKazakh ? `
+            <div class="doc-signature-row">
+                <div class="sig-block">
+                    <span>Пән мұғалімі: _________________ (қолы)</span>
+                </div>
+                <div class="sig-block">
+                    <span>Тексерген оқу ісінің меңгерушісі: _________________</span>
+                </div>
+            </div>
+        ` : `
+            <div class="doc-signature-row">
+                <div class="sig-block">
+                    <span>Учитель-предметник: _________________ (подпись)</span>
+                </div>
+                <div class="sig-block">
+                    <span>Проверил зав. учебной частью: _________________</span>
+                </div>
+            </div>
+        `;
+        result = result + sigBlock;
+    }
+
+    return result;
+}
+
 
 /* ──────────────────────────────────────────────
-   EXPORT UTILITIES (WORD .DOC & PDF)
+   EXPORT UTILITIES (WORD .DOCX & PDF)
 ─────────────────────────────────────────────── */
 function exportToWord(element, docTitle, subject) {
-    showToast('Формирование файла Microsoft Word (.doc)...', 'info');
+    showToast('Microsoft Word (.doc) файлы дайындалуда...', 'info');
     
     const contentHtml = element.innerHTML;
     const filename = `${docTitle} - ${subject}.doc`.replace(/[/\\?%*:|"<>]/g, '-');
@@ -428,19 +805,32 @@ function exportToWord(element, docTitle, subject) {
             <meta charset='utf-8'>
             <title>${docTitle}</title>
             <style>
-                body { font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.4; color: #000; }
-                table { width: 100%; border-collapse: collapse; margin-bottom: 12pt; font-size: 10.5pt; }
-                th, td { border: 1pt solid #444; padding: 5pt 6pt; vertical-align: top; }
+                @page Section1 {
+                    size: 595.3pt 841.9pt; /* A4 */
+                    margin: 42.5pt 42.5pt 42.5pt 56.7pt; /* 1.5cm / 2cm */
+                    mso-header-margin: 35.4pt;
+                    mso-footer-margin: 35.4pt;
+                    mso-paper-source: 0;
+                }
+                div.Section1 { page: Section1; }
+                body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.35; color: #000; }
+                table { width: 100%; border-collapse: collapse; margin-bottom: 12pt; font-size: 10.5pt; font-family: 'Times New Roman', serif; }
+                th, td { border: 1pt solid #000; padding: 5pt 6pt; vertical-align: top; }
                 th { background-color: #f2f2f2; font-weight: bold; text-align: center; }
-                h1 { font-size: 15pt; font-weight: bold; text-align: center; text-transform: uppercase; margin-bottom: 12pt; }
-                h2 { font-size: 12pt; font-weight: bold; margin-top: 14pt; margin-bottom: 6pt; border-bottom: 1pt solid #ccc; }
+                h1 { font-size: 14pt; font-weight: bold; text-align: center; text-transform: uppercase; margin-bottom: 12pt; }
+                h2 { font-size: 12pt; font-weight: bold; margin-top: 14pt; margin-bottom: 6pt; border-bottom: 1pt solid #000; padding-bottom: 2pt; }
+                .cell-label { background-color: #f9f9f9; width: 22%; font-weight: bold; }
                 .doc-header-block { text-align: center; margin-bottom: 14pt; }
-                .doc-state-heading { font-size: 10pt; font-weight: bold; text-transform: uppercase; }
-                .doc-signature-row { margin-top: 24pt; width: 100%; }
+                .doc-state-heading { font-size: 11pt; font-weight: bold; text-transform: uppercase; }
+                .doc-school-heading { font-size: 11pt; font-weight: bold; }
+                .doc-signature-row { margin-top: 24pt; width: 100%; display: flex; justify-content: space-between; }
+                .doc-approval-stamp { width: 100%; text-align: right; margin-bottom: 14pt; font-size: 11pt; }
             </style>
         </head>
         <body>
-            ${contentHtml}
+            <div class="Section1">
+                ${contentHtml}
+            </div>
         </body>
         </html>
     `;
@@ -454,15 +844,15 @@ function exportToWord(element, docTitle, subject) {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    showToast(`Файл Word "${filename}" успешно скачан!`, 'success');
+    showToast(`Word құжаты «${filename}» сәтті жүктелді!`, 'success');
 }
 
 async function exportToPdf(element, docTitle, subject) {
-    showToast('Подготовка официального PDF документа...', 'info');
+    showToast('Ресми PDF құжаты әзірленуде...', 'info');
     const filename = `${docTitle} - ${subject}.pdf`.replace(/[/\\?%*:|"<>]/g, '-');
 
     const opt = {
-        margin: [12, 12, 12, 12],
+        margin: [15, 15, 15, 15],
         filename: filename,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true, logging: false },
@@ -471,10 +861,10 @@ async function exportToPdf(element, docTitle, subject) {
 
     try {
         await html2pdf().set(opt).from(element).save();
-        showToast(`PDF "${filename}" успешно сохранен!`, 'success');
+        showToast(`PDF құжаты «${filename}» сақталды!`, 'success');
     } catch (e) {
         console.error('[PDF Export Error]', e);
-        showToast('Ошибка при скачивании PDF: ' + e.message, 'error');
+        showToast('PDF сақтау қатесі: ' + e.message, 'error');
     }
 }
 

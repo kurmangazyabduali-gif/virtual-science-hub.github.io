@@ -4,29 +4,31 @@
     <link rel="icon" type="image/png" href="assets/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Педагогическая Документация — AshyqLab</title>
+    <title>AI Педагогикалық Құжаттама — AshyqDoc | AshyqLab</title>
     
-    <!-- Fonts & Icons -->
+    <!-- Professional Executive Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Merriweather:wght@300;400;700;900&family=Urbanist:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     
-    <!-- Export Libraries (html2pdf for PDF & FileSaver) -->
+    <!-- Export Libraries (html2pdf for PDF) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <link rel="stylesheet" href="./src/styles/docs.css">
 </head>
 <body class="docs-app">
 
-    <!-- Top Navigation Bar -->
+    <!-- ══════════════════════════════════════════ -->
+    <!--  OFFICIAL TOP NAVIGATION BAR               -->
+    <!-- ══════════════════════════════════════════ -->
     <header class="docs-header">
         <div class="header-left">
-            <a href="index.html" class="nav-brand">
+            <a href="index.html" class="nav-brand" title="AshyqLab Басты бетке">
                 <img src="assets/logo.png" alt="AshyqLab" class="brand-logo">
                 <div class="brand-info">
                     <span class="brand-title">Ashyq<span class="brand-accent">Doc</span></span>
-                    <span class="brand-badge">AI Педагог 2026</span>
+                    <span class="brand-seal"><i class="fa-solid fa-shield-halved"></i> МЕМЛЕКЕТТІК СТАНДАРТ (ГОСО РК)</span>
                 </div>
             </a>
         </div>
@@ -35,42 +37,49 @@
         <div class="header-center">
             <div class="doc-status-pill" id="doc-status-pill">
                 <span class="status-dot"></span>
-                <span id="doc-status-text">Готов к генерации документа</span>
+                <span id="doc-status-text">Жүйе дайын • Құжат баптауларын таңдаңыз</span>
             </div>
         </div>
 
         <div class="header-right">
-            <a href="presentation.html" class="header-link-btn" title="AI Презентации">
-                <i class="fa-solid fa-wand-magic-sparkles"></i> <span>AI Презентации</span>
+            <a href="presentation.html" class="header-link-btn" title="AI Презентациялар">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> <span>AI Презентациялар</span>
             </a>
-            <a href="index.html" class="header-link-btn primary" title="На главную">
-                <i class="fa-solid fa-house"></i> <span>Главная</span>
+            <a href="index.html" class="header-link-btn primary" title="Басты бетке өту">
+                <i class="fa-solid fa-house"></i> <span>Басты бетке</span>
             </a>
         </div>
     </header>
 
-    <!-- Main Workspace Container -->
+    <!-- ══════════════════════════════════════════ -->
+    <!--  MAIN SPLIT WORKSPACE                      -->
+    <!-- ══════════════════════════════════════════ -->
     <div class="docs-main-container">
 
-        <!-- LEFT PANEL: DOCUMENT GENERATOR & CONFIGURATOR -->
+        <!-- LEFT PANEL: OFFICIAL CONFIGURATOR -->
         <aside class="docs-sidebar">
+            <div class="sidebar-header-bar">
+                <span class="panel-heading"><i class="fa-solid fa-sliders"></i> Құжат параметрлері</span>
+                <span class="academic-year-badge">2025–2026 оқу жылы</span>
+            </div>
+
             <div class="sidebar-scroll-wrapper">
                 
                 <!-- Category Tabs Selector -->
                 <div class="config-section">
-                    <label class="section-label"><i class="fa-solid fa-folder-tree"></i> Категория документа:</label>
+                    <label class="section-label"><i class="fa-solid fa-folder-tree"></i> Құжат санаты:</label>
                     <div class="category-tabs" id="category-tabs">
                         <button type="button" class="cat-tab active" data-category="plans">
-                            <i class="fa-solid fa-book-bookmark"></i> Учебные планы
+                            <i class="fa-solid fa-book-bookmark"></i> Оқу жоспарлары
                         </button>
                         <button type="button" class="cat-tab" data-category="assess">
-                            <i class="fa-solid fa-file-circle-check"></i> Оценивание
+                            <i class="fa-solid fa-file-circle-check"></i> Бағалау (БЖБ/ТЖБ)
                         </button>
                         <button type="button" class="cat-tab" data-category="labs">
-                            <i class="fa-solid fa-flask-vial"></i> Лабораторные
+                            <i class="fa-solid fa-flask-vial"></i> Зертханалық
                         </button>
                         <button type="button" class="cat-tab" data-category="class">
-                            <i class="fa-solid fa-chalkboard-user"></i> Классный рук.
+                            <i class="fa-solid fa-chalkboard-user"></i> Тәрбие жұмысы
                         </button>
                         <button type="button" class="cat-tab" data-category="reports">
                             <i class="fa-solid fa-chart-column"></i> Аналитика
@@ -81,7 +90,7 @@
                 <!-- Document Type Selector -->
                 <div class="config-section">
                     <label for="select-doc-type" class="section-label">
-                        <i class="fa-solid fa-file-lines"></i> Тип документа:
+                        <i class="fa-solid fa-file-lines"></i> Құжат түрі (Үлгісі):
                     </label>
                     <select id="select-doc-type" class="docs-select">
                         <!-- Populated by JavaScript according to category -->
@@ -91,53 +100,52 @@
                 <!-- Subject, Grade & Language Grid -->
                 <div class="config-grid-3">
                     <div class="config-group">
-                        <label for="select-subject" class="group-label">Предмет:</label>
+                        <label for="select-subject" class="group-label">Пән (Предмет):</label>
                         <select id="select-subject" class="docs-select-sm">
-                            <option value="Физика">⚛️ Физика</option>
-                            <option value="Химия">🧪 Химия</option>
-                            <option value="Биология">🌿 Биология</option>
-                            <option value="Математика">📐 Математика</option>
-                            <option value="Алгебра">📊 Алгебра</option>
-                            <option value="Геометрия">📏 Геометрия</option>
-                            <option value="Информатика">💻 Информатика</option>
-                            <option value="Қазақ тілі">🇰🇿 Қазақ тілі</option>
-                            <option value="Қазақ әдебиеті">📜 Қазақ әдебиеті</option>
-                            <option value="Русский язык">🇷🇺 Русский язык</option>
-                            <option value="Русская литература">📖 Литература</option>
-                            <option value="Ағылшын тілі (English)">🇬🇧 English</option>
-                            <option value="Қазақстан тарихы">🏛️ Қазақстан тарихы</option>
-                            <option value="Дүниежүзі тарихы">🌍 Дүниежүзі тарихы</option>
-                            <option value="География">🗺️ География</option>
-                            <option value="Жаратылыстану">🌱 Жаратылыстану</option>
+                            <option value="Физика">Физика</option>
+                            <option value="Химия">Химия</option>
+                            <option value="Биология">Биология</option>
+                            <option value="Математика">Математика</option>
+                            <option value="Алгебра">Алгебра</option>
+                            <option value="Геометрия">Геометрия</option>
+                            <option value="Информатика">Информатика</option>
+                            <option value="Қазақ тілі">Қазақ тілі</option>
+                            <option value="Қазақ әдебиеті">Қазақ әдебиеті</option>
+                            <option value="Русский язык">Русский язык</option>
+                            <option value="Русская литература">Литература</option>
+                            <option value="Ағылшын тілі (English)">English</option>
+                            <option value="Қазақстан тарихы">Қазақстан тарихы</option>
+                            <option value="Дүниежүзі тарихы">Дүниежүзі тарихы</option>
+                            <option value="География">География</option>
+                            <option value="Жаратылыстану">Жаратылыстану</option>
                         </select>
                     </div>
 
                     <div class="config-group">
-                        <label for="select-grade" class="group-label">Класс / Курс:</label>
+                        <label for="select-grade" class="group-label">Сынып (Класс):</label>
                         <select id="select-grade" class="docs-select-sm">
-                            <option value="1 класс">1 класс</option>
-                            <option value="2 класс">2 класс</option>
-                            <option value="3 класс">3 класс</option>
-                            <option value="4 класс">4 класс</option>
-                            <option value="5 класс">5 класс</option>
-                            <option value="6 класс">6 класс</option>
-                            <option value="7 класс" selected>7 класс</option>
-                            <option value="8 класс">8 класс</option>
-                            <option value="9 класс">9 класс</option>
-                            <option value="10 класс">10 класс</option>
-                            <option value="11 класс">11 класс</option>
-                            <option value="1 курс колледжа">1 курс колледжа</option>
-                            <option value="2 курс колледжа">2 курс колледжа</option>
-                            <option value="ВУЗ / Бакалавриат">ВУЗ / Бакалавриат</option>
+                            <option value="1-сынып">1-сынып</option>
+                            <option value="2-сынып">2-сынып</option>
+                            <option value="3-сынып">3-сынып</option>
+                            <option value="4-сынып">4-сынып</option>
+                            <option value="5-сынып">5-сынып</option>
+                            <option value="6-сынып">6-сынып</option>
+                            <option value="7-сынып" selected>7-сынып</option>
+                            <option value="8-сынып">8-сынып</option>
+                            <option value="9-сынып">9-сынып</option>
+                            <option value="10-сынып">10-сынып</option>
+                            <option value="11-сынып">11-сынып</option>
+                            <option value="1 курс колледж">1 курс колледж</option>
+                            <option value="2 курс колледж">2 курс колледж</option>
                         </select>
                     </div>
 
                     <div class="config-group">
-                        <label for="select-language" class="group-label">Язык документа:</label>
+                        <label for="select-language" class="group-label">Құжат тілі:</label>
                         <select id="select-language" class="docs-select-sm">
-                            <option value="Қазақша" selected>🇰🇿 Қазақша</option>
-                            <option value="Русский">🇷🇺 Русский</option>
-                            <option value="English">🇬🇧 English</option>
+                            <option value="Қазақша" selected>Қазақша</option>
+                            <option value="Русский">Русский</option>
+                            <option value="English">English</option>
                         </select>
                     </div>
                 </div>
@@ -145,34 +153,34 @@
                 <!-- Topic / Learning Goals Input -->
                 <div class="config-section">
                     <label for="input-topic" class="section-label">
-                        <i class="fa-solid fa-pen-nib"></i> Тема урока / Цели обучения / Запрос:
+                        <i class="fa-solid fa-pen-nib"></i> Сабақ тақырыбы / Оқу мақсаты / Бөлім:
                     </label>
                     <textarea 
                         id="input-topic" 
                         class="docs-textarea" 
                         rows="3" 
-                        placeholder="Например: «Закон Ома для участка цепи: расчет силы тока и сопротивления», «Строение растительной клетки и фотосинтез», «Квадратные уравнения и теорема Виета»..."
+                        placeholder="Мысалы: «Тізбек бөлігі үшін Ом заңы: кернеу мен кедергіні есептеу», «Өсімдік жасушасының құрылысы және фотосинтез», «Квадрат теңдеулер және Виет теоремасы»..."
                     ></textarea>
                 </div>
 
                 <!-- Quick Inspiration Chips -->
                 <div class="config-section">
-                    <label class="section-label-sm"><i class="fa-solid fa-sparkles"></i> Быстрые примеры тем:</label>
+                    <label class="section-label-sm"><i class="fa-solid fa-bolt"></i> Ұсынылатын тақырыптар:</label>
                     <div class="topic-chips" id="topic-chips">
                         <!-- Populated by JS -->
                     </div>
                 </div>
 
-                <!-- Dynamic Extra Parameters (Teacher Name, Options count, Student Name etc.) -->
+                <!-- Official Credentials Parameters -->
                 <div class="config-section" id="extra-params-container">
                     <div class="config-grid-2">
                         <div class="config-group">
-                            <label for="input-teacher-name" class="group-label">ФИО Педагога (опционально):</label>
+                            <label for="input-teacher-name" class="group-label">Педагогтің Т.А.Ә. (ФИО):</label>
                             <input type="text" id="input-teacher-name" class="docs-input" placeholder="Абдуғали К. М." />
                         </div>
                         <div class="config-group">
-                            <label for="input-school-name" class="group-label">Школа / Лицей:</label>
-                            <input type="text" id="input-school-name" class="docs-input" placeholder="№ 1 мектеп-лицей" />
+                            <label for="input-school-name" class="group-label">Білім беру ұйымы (Мектеп):</label>
+                            <input type="text" id="input-school-name" class="docs-input" placeholder="«№ 1 мектеп-лицей» КММ" />
                         </div>
                     </div>
                 </div>
@@ -180,15 +188,15 @@
                 <!-- Generate Action Button & Progress Bar -->
                 <div class="generate-section">
                     <button id="btn-generate-doc" class="btn-generate-doc">
-                        <i class="fa-solid fa-wand-magic-sparkles" id="btn-gen-icon"></i>
-                        <span id="btn-gen-text">Сгенерировать официальный документ</span>
+                        <i class="fa-solid fa-file-circle-check" id="btn-gen-icon"></i>
+                        <span id="btn-gen-text">Ресми құжатты қалыптастыру</span>
                     </button>
 
                     <div id="gen-progress" class="gen-progress-box hidden">
                         <div class="gen-progress-track">
                             <div id="gen-progress-fill" class="gen-progress-fill"></div>
                         </div>
-                        <span id="gen-progress-label" class="gen-progress-label">Формируем структуру по стандартам ГОСО...</span>
+                        <span id="gen-progress-label" class="gen-progress-label">ГОСО стандартына сәйкес кестелер түзілуде...</span>
                     </div>
                 </div>
 
@@ -198,40 +206,54 @@
         <!-- RIGHT PANEL: A4 PAPER DOCUMENT VIEWER & EDITOR -->
         <main class="docs-stage">
             
-            <!-- Document Action Toolbar -->
+            <!-- Document Action Toolbar (Executive Ribbon) -->
             <div class="doc-toolbar">
                 <div class="toolbar-left">
                     <span class="doc-title-badge" id="preview-doc-title">
                         <i class="fa-solid fa-file-lines"></i> Қысқа мерзімді сабақ жоспары (ҚМЖ)
                     </span>
-                    <span class="edit-hint-badge"><i class="fa-solid fa-pencil"></i> Можно редактировать прямо в тексте</span>
+                    <span class="edit-hint-badge"><i class="fa-solid fa-pencil"></i> Тікелей өңдеу режимі қосулы</span>
+                </div>
+
+                <div class="toolbar-center">
+                    <!-- Zoom Stepper -->
+                    <div class="zoom-stepper">
+                        <button type="button" id="btn-zoom-out" class="zoom-btn" title="Кішірейту"><i class="fa-solid fa-minus"></i></button>
+                        <span id="zoom-level-text" class="zoom-text">100%</span>
+                        <button type="button" id="btn-zoom-in" class="zoom-btn" title="Үлкейту"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+
+                    <!-- Stamp Toggle Switch -->
+                    <button type="button" id="btn-toggle-stamp" class="toolbar-pill-btn" title="«БЕКІТЕМІН» грифін қосу/өшіру">
+                        <i class="fa-solid fa-stamp"></i> <span>«БЕКІТЕМІН» грифі</span>
+                    </button>
                 </div>
 
                 <div class="toolbar-right">
                     <!-- Word DOCX Export -->
-                    <button id="btn-export-docx" class="tool-btn docx" title="Скачать в Microsoft Word (.doc)">
-                        <i class="fa-solid fa-file-word"></i> <span>Скачать Word</span>
+                    <button id="btn-export-docx" class="tool-btn docx" title="Microsoft Word (.docx / .doc) форматында жүктеу">
+                        <i class="fa-solid fa-file-word"></i> <span>Word (.docx)</span>
                     </button>
 
                     <!-- PDF Export -->
-                    <button id="btn-export-pdf" class="tool-btn pdf" title="Скачать в формате PDF">
-                        <i class="fa-solid fa-file-pdf"></i> <span>Скачать PDF</span>
+                    <button id="btn-export-pdf" class="tool-btn pdf" title="PDF форматында сақтау">
+                        <i class="fa-solid fa-file-pdf"></i> <span>PDF</span>
                     </button>
 
                     <!-- Print Button -->
-                    <button id="btn-print-doc" class="tool-btn print" title="Печать документа (Ctrl+P)">
-                        <i class="fa-solid fa-print"></i> <span>Печать</span>
+                    <button id="btn-print-doc" class="tool-btn print" title="Құжатты басып шығару (Ctrl+P)">
+                        <i class="fa-solid fa-print"></i> <span>Басып шығару</span>
                     </button>
 
                     <!-- Copy Text Button -->
-                    <button id="btn-copy-doc" class="tool-btn copy" title="Скопировать весь текст">
-                        <i class="fa-solid fa-copy"></i> <span>Копировать</span>
+                    <button id="btn-copy-doc" class="tool-btn copy" title="Мәтінді көшіру">
+                        <i class="fa-solid fa-copy"></i> <span>Көшіру</span>
                     </button>
                 </div>
             </div>
 
             <!-- A4 Document Paper Container -->
-            <div class="a4-stage-scroller">
+            <div class="a4-stage-scroller" id="a4-stage-scroller">
                 <div class="a4-sheet" id="a4-document-paper" contenteditable="true" spellcheck="false">
                     <!-- Default Initial Starter Template (Rendered on load) -->
                     <div class="doc-header-block">
