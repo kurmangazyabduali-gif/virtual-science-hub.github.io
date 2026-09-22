@@ -227,6 +227,20 @@
                         <i class="fa-solid fa-pen-to-square"></i> Редактор слайда <span id="active-slide-num">1</span>
                     </h3>
 
+                    <!-- Поле: Выбор макета слайда (7 WOW-архетипов) -->
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-layer-group"></i> Макет слайда (WOW Archetype):</label>
+                        <div class="slide-layout-picker" id="slide-layout-picker">
+                            <button type="button" class="layout-opt-btn" data-layout="cover" title="Кинематографичная обложка"><i class="fa-solid fa-clapperboard"></i> Обложка</button>
+                            <button type="button" class="layout-opt-btn" data-layout="stat" title="Крупная метрика / Закон"><i class="fa-solid fa-chart-simple"></i> Метрика</button>
+                            <button type="button" class="layout-opt-btn" data-layout="steps" title="Пошаговый процесс"><i class="fa-solid fa-stairs"></i> Шаги</button>
+                            <button type="button" class="layout-opt-btn" data-layout="compare" title="Сравнение VS"><i class="fa-solid fa-code-compare"></i> Сравнение</button>
+                            <button type="button" class="layout-opt-btn" data-layout="cards-grid" title="Bento сетка карточек"><i class="fa-solid fa-table-cells-large"></i> Bento</button>
+                            <button type="button" class="layout-opt-btn" data-layout="insight" title="Инсайт / Цитата"><i class="fa-solid fa-quote-left"></i> Инсайт</button>
+                            <button type="button" class="layout-opt-btn" data-layout="split-left" title="Классический сплит"><i class="fa-solid fa-table-columns"></i> Сплит</button>
+                        </div>
+                    </div>
+
                     <!-- Поле: Заголовок -->
                     <div class="form-group">
                         <label for="edit-slide-title">Заголовок слайда:</label>
@@ -236,7 +250,15 @@
                     <!-- Поле: Тезисы -->
                     <div class="form-group">
                         <label for="edit-slide-points">Тезисы (каждый пункт с новой строки):</label>
-                        <textarea id="edit-slide-points" class="form-textarea" rows="5" placeholder="Введите тезисы..."></textarea>
+                        <textarea id="edit-slide-points" class="form-textarea" rows="4" placeholder="Введите тезисы..."></textarea>
+                    </div>
+
+                    <!-- Поле: Шпаргалка спикера (Speaker Notes) -->
+                    <div class="form-group">
+                        <label for="edit-speaker-notes">
+                            <i class="fa-solid fa-microphone-lines"></i> Шпаргалка спикера (тезисы речи):
+                        </label>
+                        <textarea id="edit-speaker-notes" class="form-textarea" rows="3" placeholder="Что сказать на этом слайде (подсказка для выступления)..."></textarea>
                     </div>
 
                     <!-- Поле: Промпт для картинки + Кнопки -->
@@ -283,6 +305,10 @@
             <i class="fa-solid fa-xmark"></i> Esc
         </button>
 
+        <button id="btn-toggle-notes" class="presenter-notes-btn" title="Показать/скрыть шпаргалку спикера (N)">
+            <i class="fa-solid fa-microphone"></i> Шпаргалка спикера (N)
+        </button>
+
         <button id="btn-prev-slide" class="presenter-nav prev" title="Предыдущий слайд (⬅)">
             <i class="fa-solid fa-chevron-left"></i>
         </button>
@@ -296,7 +322,25 @@
             </div>
         </div>
 
+        <!-- Выдвижная панель шпаргалки спикера -->
+        <div id="presenter-notes-drawer" class="presenter-notes-drawer hidden">
+            <div class="presenter-notes-header">
+                <i class="fa-solid fa-microphone-lines"></i>
+                <span>Шпаргалка спикера для слайда:</span>
+            </div>
+            <div id="presenter-notes-content" class="presenter-notes-content">
+                Тезисы для выступления появятся здесь...
+            </div>
+        </div>
+
         <div class="presenter-footer">
+            <div class="presenter-shortcuts-hint">
+                <span>Пробел / ⬅ ➡ : Навигация</span>
+                <span>•</span>
+                <span>N : Шпаргалка</span>
+                <span>•</span>
+                <span>Esc : Выход</span>
+            </div>
             <span id="presenter-counter">Слайд 1 из 7</span>
             <div class="presenter-progress-bar">
                 <div id="presenter-progress-fill" class="presenter-progress-fill"></div>

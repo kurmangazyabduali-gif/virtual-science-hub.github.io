@@ -702,50 +702,110 @@ html, body {
     position: relative; background: #111;
 }
 
+/* ── Layout Archetype Picker in Sidebar ── */
+.slide-layout-picker {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-top: 4px;
+}
+.layout-opt-btn {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--c-border);
+    border-radius: 8px;
+    padding: 6px 4px;
+    color: var(--c-text-muted);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+.layout-opt-btn i { font-size: 13px; }
+.layout-opt-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+.layout-opt-btn.active {
+    background: linear-gradient(135deg, rgba(124, 109, 246, 0.25), rgba(56, 189, 248, 0.25));
+    border-color: var(--c-accent);
+    color: #fff;
+    box-shadow: 0 0 10px rgba(124, 109, 246, 0.3);
+}
+
 /* ──────────────────────────────────────────────
    DYNAMIC SLIDE CARD STYLING & WOW ARCHETYPES
 ─────────────────────────────────────────────── */
 .slide-card {
     width: 100%; height: 100%;
     position: relative; overflow: hidden;
-    display: flex; flex-direction: column; padding: 3.5% 4.5%;
+    display: flex; flex-direction: column; padding: 3% 4% 2.5%;
     font-size: clamp(10px, 1.55vw, 17px);
     background-color: var(--slide-bg, #0b0f19);
     color: var(--slide-text, #94a3b8);
     font-family: 'Inter', sans-serif;
     transition: background-color 0.3s, color 0.3s;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 0);
+    background-size: 24px 24px;
 }
 
 /* Ambient dynamic backdrops */
 .slide-card::before {
     content: ''; position: absolute;
-    width: 500px; height: 500px;
-    top: -200px; right: -150px;
+    width: 550px; height: 550px;
+    top: -220px; right: -180px;
     background: radial-gradient(circle, var(--slide-accent, #38bdf8) 0%, transparent 65%);
-    opacity: 0.16; filter: blur(50px);
+    opacity: 0.18; filter: blur(55px);
     border-radius: 50%; pointer-events: none; z-index: 1;
 }
 
 .slide-card::after {
     content: ''; position: absolute;
-    width: 350px; height: 350px;
-    bottom: -150px; left: -100px;
+    width: 400px; height: 400px;
+    bottom: -180px; left: -120px;
     background: radial-gradient(circle, var(--slide-accent, #818cf8) 0%, transparent 65%);
-    opacity: 0.1; filter: blur(40px);
+    opacity: 0.12; filter: blur(45px);
     border-radius: 50%; pointer-events: none; z-index: 1;
 }
 
-/* Top decorative ribbon */
+/* Top decorative luminous ribbon */
 .slide-top-ribbon {
-    position: absolute; top: 0; left: 0; right: 0; height: 4px;
-    background: linear-gradient(90deg, var(--slide-accent, #38bdf8), #818cf8, transparent);
+    position: absolute; top: 0; left: 0; right: 0; height: 3.5px;
+    background: linear-gradient(90deg, var(--slide-accent, #38bdf8), #818cf8, #a855f7, transparent);
+    box-shadow: 0 0 12px var(--slide-accent, #38bdf8);
     z-index: 10;
 }
 
-/* Slide Header */
+/* Slide HUD Header */
 .slide-card-header {
-    margin-bottom: 2%; width: 100%; text-align: left;
+    margin-bottom: 1.6%; width: 100%; text-align: left;
     position: relative; z-index: 2; display: flex; flex-direction: column; gap: 4px;
+}
+
+.slide-hud-tag {
+    align-self: flex-start;
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 0.70em; font-weight: 800; letter-spacing: 1.2px;
+    text-transform: uppercase; color: var(--slide-accent, #38bdf8);
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    padding: 3px 11px; border-radius: 99px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+.hud-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--slide-accent, #38bdf8);
+    box-shadow: 0 0 8px var(--slide-accent, #38bdf8);
+    animation: hudPulse 2s infinite ease-in-out;
+}
+@keyframes hudPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.4); opacity: 0.5; }
 }
 
 .slide-category-pill {
@@ -760,19 +820,44 @@ html, body {
 
 .slide-card-title {
     font-family: 'Urbanist', 'Inter', sans-serif;
-    font-size: 2.1em; font-weight: 900; line-height: 1.18;
+    font-size: 2.1em; font-weight: 900; line-height: 1.16;
     letter-spacing: -0.5px; color: var(--title-color, #f8fafc);
 }
 
 .slide-title-divider {
-    height: 3px; width: 50px; margin-top: 4px;
-    background: var(--slide-accent, #38bdf8);
+    height: 3px; width: 45px; margin-top: 3px;
+    background: linear-gradient(90deg, var(--slide-accent, #38bdf8), transparent);
     border-radius: 99px; opacity: 0.9;
 }
 
 .slide-card-body {
     flex: 1; display: flex; gap: 3.5%; width: 100%; align-items: stretch;
     position: relative; z-index: 2; overflow: hidden;
+}
+
+/* Slide HUD Footer with Pagination Track */
+.slide-card-footer {
+    width: 100%; display: flex; align-items: center; justify-content: space-between;
+    padding-top: 8px; margin-top: auto; position: relative; z-index: 2;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+.slide-footer-brand {
+    font-size: 0.64em; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--slide-text, #64748b);
+    display: inline-flex; align-items: center; gap: 5px;
+}
+.slide-footer-brand i { color: var(--slide-accent, #38bdf8); }
+.slide-pagination-dots {
+    display: flex; gap: 5px; align-items: center;
+}
+.slide-dot-item {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15); transition: all 0.2s;
+}
+.slide-dot-item.active {
+    width: 18px; border-radius: 99px;
+    background: var(--slide-accent, #38bdf8);
+    box-shadow: 0 0 8px var(--slide-accent, #38bdf8);
 }
 
 /* Universal Image Container with Floating Meta Tag */
@@ -784,7 +869,8 @@ html, body {
 .slide-img-container {
     width: 100%; height: 100%; border-radius: 20px; overflow: hidden;
     border: 1px solid var(--tile-border, rgba(255,255,255,0.12));
-    box-shadow: 0 16px 36px rgba(0,0,0,0.3); background: var(--tile-bg, rgba(30,41,59,0.5));
+    box-shadow: 0 16px 36px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.15);
+    background: var(--tile-bg, rgba(30,41,59,0.5));
     position: relative; display: flex; align-items: center; justify-content: center;
 }
 
@@ -803,18 +889,18 @@ html, body {
 
 .slide-img-meta-tag {
     position: absolute; bottom: 10px; right: 10px;
-    background: rgba(0,0,0,0.65); backdrop-filter: blur(6px);
-    border: 1px solid rgba(255,255,255,0.15);
-    padding: 3px 8px; border-radius: 6px;
+    background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 3px 9px; border-radius: 6px;
     font-size: 0.65em; font-weight: 700; color: #fff;
-    display: flex; align-items: center; gap: 4px; z-index: 4;
+    display: flex; align-items: center; gap: 5px; z-index: 4;
 }
 
 /* ──────────────────────────────────────────────
    1. COVER HERO CINEMA LAYOUT (.layout-cover)
 ─────────────────────────────────────────────── */
 .slide-card.layout-cover {
-    padding: 3% 4%;
+    padding: 3% 4% 2.5%;
 }
 .slide-cover-cinema {
     width: 100%; height: 100%; display: flex; gap: 3.5%; align-items: stretch;
@@ -823,23 +909,23 @@ html, body {
     flex: 1.15; background: var(--tile-bg, rgba(255,255,255,0.05));
     border: 1px solid var(--tile-border, rgba(255,255,255,0.12));
     border-radius: 24px; padding: 4.5% 5%;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.25);
-    backdrop-filter: blur(12px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15);
+    backdrop-filter: blur(14px);
     display: flex; flex-direction: column; justify-content: space-between;
 }
 .slide-cover-hero-tile .slide-card-title {
-    font-size: 2.6em; line-height: 1.12; font-weight: 900;
+    font-size: 2.5em; line-height: 1.12; font-weight: 900;
 }
 .slide-cover-desc {
-    font-size: 1.1em; line-height: 1.55; color: var(--slide-text, #94a3b8);
+    font-size: 1.05em; line-height: 1.55; color: var(--slide-text, #94a3b8);
     font-weight: 500; margin-top: 0.8em;
 }
 .slide-cover-footer-tags {
-    display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 1.2em;
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 1.2em;
 }
 .slide-cover-tag {
     display: inline-flex; align-items: center; gap: 6px;
-    font-size: 0.78em; font-weight: 700; padding: 5px 12px; border-radius: 99px;
+    font-size: 0.74em; font-weight: 700; padding: 4px 11px; border-radius: 99px;
     background: rgba(255,255,255,0.06); border: 1px solid var(--tile-border, rgba(255,255,255,0.12));
     color: var(--slide-text, #e2e8f0);
 }
@@ -854,33 +940,34 @@ html, body {
     flex: 1.15; display: flex; flex-direction: column; justify-content: space-between;
     background: var(--tile-bg, rgba(255,255,255,0.05));
     border: 1px solid var(--tile-border, rgba(255,255,255,0.12));
-    border-radius: 24px; padding: 4% 5%; backdrop-filter: blur(12px);
+    border-radius: 24px; padding: 4% 5%; backdrop-filter: blur(14px);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.12);
 }
 .slide-stat-badge {
     align-self: flex-start; display: inline-flex; align-items: center; gap: 6px;
-    font-size: 0.75em; font-weight: 800; text-transform: uppercase;
+    font-size: 0.73em; font-weight: 800; text-transform: uppercase;
     color: var(--slide-accent, #38bdf8); background: rgba(56,189,248,0.12);
     border: 1px solid rgba(56,189,248,0.3); padding: 4px 12px; border-radius: 99px;
 }
 .slide-stat-number-box {
-    margin: 0.4em 0;
+    margin: 0.3em 0;
 }
 .slide-stat-number {
     font-family: 'Urbanist', 'Inter', sans-serif;
-    font-size: 3.4em; font-weight: 900; line-height: 1.0;
+    font-size: 3.3em; font-weight: 900; line-height: 1.0;
     color: var(--slide-accent, #38bdf8);
-    text-shadow: 0 0 35px rgba(56,189,248,0.4);
+    text-shadow: 0 0 35px rgba(56,189,248,0.45);
     letter-spacing: -1px;
 }
 .slide-stat-label {
-    font-size: 1.2em; font-weight: 800; color: var(--title-color, #f8fafc); margin-top: 4px;
+    font-size: 1.15em; font-weight: 800; color: var(--title-color, #f8fafc); margin-top: 4px;
 }
 .slide-stat-bullets {
-    list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 0.5em;
+    list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 0.4em;
 }
 .slide-stat-bullets li {
     display: flex; align-items: flex-start; gap: 8px;
-    font-size: 0.95em; line-height: 1.5; color: var(--slide-text, #94a3b8);
+    font-size: 0.94em; line-height: 1.5; color: var(--slide-text, #94a3b8);
 }
 .slide-stat-bullets li::before {
     content: '✦'; color: var(--slide-accent, #38bdf8); font-size: 0.9em; font-weight: 800; margin-top: 0.1em;
@@ -893,19 +980,21 @@ html, body {
     flex-direction: column; gap: 12px; justify-content: center;
 }
 .slide-steps-row {
-    display: flex; gap: 14px; width: 100%; height: 100%; align-items: stretch;
+    display: flex; gap: 14px; width: 100%; height: 100%; align-items: stretch; position: relative;
 }
 .slide-step-card {
     flex: 1; background: var(--tile-bg, rgba(255,255,255,0.05));
     border: 1px solid var(--tile-border, rgba(255,255,255,0.12));
     border-radius: 20px; padding: 4% 4%;
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(14px);
     display: flex; flex-direction: column; justify-content: flex-start; gap: 8px;
     position: relative; overflow: hidden;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.12);
 }
 .slide-step-card::after {
-    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-    background: var(--slide-accent, #38bdf8); opacity: 0.8;
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3.5px;
+    background: var(--slide-accent, #38bdf8); opacity: 0.9;
+    box-shadow: 0 0 10px var(--slide-accent, #38bdf8);
 }
 .slide-step-num-pill {
     width: 36px; height: 36px; border-radius: 12px;
@@ -918,28 +1007,29 @@ html, body {
     font-size: 1.1em; font-weight: 800; color: var(--title-color, #f8fafc); margin-top: 4px; line-height: 1.3;
 }
 .slide-step-desc {
-    font-size: 0.92em; line-height: 1.55; color: var(--slide-text, #94a3b8);
+    font-size: 0.90em; line-height: 1.55; color: var(--slide-text, #94a3b8);
 }
 
 /* ──────────────────────────────────────────────
    4. SIDE-BY-SIDE COMPARISON LAYOUT (.layout-compare)
 ─────────────────────────────────────────────── */
 .slide-card.layout-compare .slide-card-body {
-    flex-direction: row; gap: 16px;
+    flex-direction: row; gap: 14px; position: relative; align-items: stretch;
 }
 .slide-compare-col {
     flex: 1; background: var(--tile-bg, rgba(255,255,255,0.05));
     border: 1px solid var(--tile-border, rgba(255,255,255,0.12));
     border-radius: 22px; padding: 4% 5%;
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(14px);
     display: flex; flex-direction: column; gap: 12px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.12);
 }
 .slide-compare-header {
     display: flex; align-items: center; justify-content: space-between;
     padding-bottom: 8px; border-bottom: 1px solid var(--tile-border, rgba(255,255,255,0.08));
 }
 .slide-compare-badge {
-    font-size: 0.75em; font-weight: 800; text-transform: uppercase;
+    font-size: 0.74em; font-weight: 800; text-transform: uppercase;
     padding: 3px 10px; border-radius: 99px; letter-spacing: 0.5px;
 }
 .slide-compare-badge.left {
@@ -948,14 +1038,19 @@ html, body {
 .slide-compare-badge.right {
     background: rgba(168,85,247,0.15); color: #a855f7; border: 1px solid rgba(168,85,247,0.3);
 }
-.slide-compare-title {
-    font-size: 1.2em; font-weight: 800; color: var(--title-color, #f8fafc);
+.slide-compare-vs-badge {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 38px; height: 38px; border-radius: 50%;
+    background: #0f172a; border: 2px solid var(--slide-accent, #38bdf8);
+    color: var(--slide-accent, #38bdf8); font-size: 11px; font-weight: 900;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 18px rgba(56,189,248,0.4); z-index: 10;
 }
 .slide-compare-list {
     list-style: none; display: flex; flex-direction: column; gap: 10px;
 }
 .slide-compare-list li {
-    display: flex; align-items: flex-start; gap: 8px; font-size: 0.95em; line-height: 1.55;
+    display: flex; align-items: flex-start; gap: 8px; font-size: 0.94em; line-height: 1.55;
     color: var(--slide-text, #94a3b8);
 }
 .slide-compare-list li i {
@@ -963,7 +1058,7 @@ html, body {
 }
 
 /* ──────────────────────────────────────────────
-   5. CARDS GRID LAYOUT (.layout-cards-grid)
+   5. BENTO CARDS GRID LAYOUT (.layout-cards-grid)
 ─────────────────────────────────────────────── */
 .slide-cards-grid-row {
     display: flex; gap: 14px; width: 100%; height: 100%; align-items: stretch;
@@ -974,8 +1069,13 @@ html, body {
 .slide-grid-mini-tile {
     background: var(--tile-bg, rgba(255,255,255,0.05));
     border: 1px solid var(--tile-border, rgba(255,255,255,0.12));
-    border-radius: 16px; padding: 12px 16px; backdrop-filter: blur(10px);
+    border-radius: 16px; padding: 12px 16px; backdrop-filter: blur(12px);
     display: flex; align-items: center; gap: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.1);
+    transition: transform 0.2s, border-color 0.2s;
+}
+.slide-grid-mini-tile:hover {
+    border-color: var(--slide-accent, #38bdf8); transform: translateY(-2px);
 }
 .slide-mini-icon-box {
     width: 36px; height: 36px; border-radius: 10px;
@@ -984,7 +1084,7 @@ html, body {
     flex-shrink: 0;
 }
 .slide-mini-tile-content {
-    font-size: 0.95em; font-weight: 500; line-height: 1.5; color: var(--slide-text, #e2e8f0);
+    font-size: 0.94em; font-weight: 500; line-height: 1.5; color: var(--slide-text, #e2e8f0);
 }
 
 /* ──────────────────────────────────────────────
@@ -993,21 +1093,22 @@ html, body {
 .slide-insight-hero-tile {
     flex: 1.2; background: var(--tile-bg, rgba(255,255,255,0.05));
     border: 1px solid var(--tile-border, rgba(255,255,255,0.12));
-    border-radius: 24px; padding: 4.5% 5%; backdrop-filter: blur(12px);
+    border-radius: 24px; padding: 4.5% 5%; backdrop-filter: blur(14px);
     display: flex; flex-direction: column; justify-content: space-between;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.12);
 }
 .slide-insight-quote-icon {
-    font-size: 2.2em; color: var(--slide-accent, #38bdf8); opacity: 0.8; line-height: 1;
+    font-size: 2.2em; color: var(--slide-accent, #38bdf8); opacity: 0.85; line-height: 1;
 }
 .slide-insight-quote-text {
-    font-size: 1.22em; font-weight: 700; line-height: 1.45; color: var(--title-color, #f8fafc);
+    font-size: 1.20em; font-weight: 700; line-height: 1.45; color: var(--title-color, #f8fafc);
     margin: 0.4em 0;
 }
 .slide-insight-points {
     list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 0.4em;
 }
 .slide-insight-points li {
-    display: flex; align-items: center; gap: 8px; font-size: 0.95em; color: var(--slide-text, #94a3b8);
+    display: flex; align-items: center; gap: 8px; font-size: 0.94em; color: var(--slide-text, #94a3b8);
 }
 .slide-insight-points li::before {
     content: '✦'; color: var(--slide-accent, #38bdf8); font-weight: 800; font-size: 0.85em;
@@ -1025,18 +1126,19 @@ html, body {
 .slide-split-points-card {
     flex: 1.15; background: var(--tile-bg, rgba(255,255,255,0.05));
     border: 1px solid var(--tile-border, rgba(255,255,255,0.12));
-    border-radius: 24px; padding: 4% 5%; backdrop-filter: blur(12px);
+    border-radius: 24px; padding: 4% 5%; backdrop-filter: blur(14px);
     display: flex; flex-direction: column; justify-content: center;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.12);
 }
 .slide-points-ul {
     list-style: none; display: flex; flex-direction: column; gap: 12px;
 }
 .slide-points-ul li {
     display: flex; align-items: flex-start; gap: 10px;
-    font-size: 1.02em; line-height: 1.55; color: var(--slide-text, #e2e8f0);
+    font-size: 1.0em; line-height: 1.55; color: var(--slide-text, #e2e8f0);
 }
-.slide-points-ul li::before {
-    content: '✓'; display: inline-flex; align-items: center; justify-content: center;
+.slide-points-ul li .point-num {
+    display: inline-flex; align-items: center; justify-content: center;
     width: 22px; height: 22px; border-radius: 50%;
     background: rgba(56, 189, 248, 0.15); color: var(--slide-accent, #38bdf8);
     font-weight: 900; font-size: 0.72em; flex-shrink: 0; margin-top: 0.15em;
@@ -1056,26 +1158,73 @@ html, body {
 .presenter-close {
     position: fixed; top: 24px; right: 24px;
     background: rgba(255,255,255,0.15); border: none; color: #fff;
-    font-size: 14px; font-weight: 700; padding: 10px 18px; border-radius: 99px;
+    font-size: 13px; font-weight: 700; padding: 8px 16px; border-radius: 99px;
     cursor: pointer; transition: all 0.2s; z-index: 100;
 }
 .presenter-close:hover { background: rgba(255,255,255,0.3); }
 
+.presenter-notes-btn {
+    position: fixed; top: 24px; left: 24px;
+    background: rgba(124, 109, 246, 0.25); border: 1px solid rgba(124, 109, 246, 0.5);
+    color: #c4b5fd; font-size: 13px; font-weight: 700; padding: 8px 16px; border-radius: 99px;
+    cursor: pointer; transition: all 0.2s; z-index: 100;
+    display: flex; align-items: center; gap: 7px;
+}
+.presenter-notes-btn:hover { background: rgba(124, 109, 246, 0.4); color: #fff; }
+
+.presenter-notes-drawer {
+    position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%);
+    width: 90%; max-width: 800px; max-height: 160px; overflow-y: auto;
+    background: rgba(15, 23, 42, 0.92); border: 1px solid rgba(124, 109, 246, 0.4);
+    border-radius: 16px; padding: 14px 20px; backdrop-filter: blur(16px);
+    box-shadow: 0 16px 50px rgba(0,0,0,0.8); z-index: 105;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.presenter-notes-drawer.hidden {
+    opacity: 0; pointer-events: none; transform: translate(-50%, 20px);
+}
+.presenter-notes-header {
+    display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 800;
+    text-transform: uppercase; color: #a78bfa; letter-spacing: 0.5px; margin-bottom: 6px;
+}
+.presenter-notes-content {
+    font-size: 14px; line-height: 1.6; color: #f1f5f9;
+}
+
 .presenter-nav {
     position: fixed; top: 50%; transform: translateY(-50%);
-    width: 60px; height: 60px; border-radius: 50%;
-    background: rgba(255,255,255,0.1); border: none; color: #fff;
-    font-size: 22px; cursor: pointer; transition: all 0.2s; z-index: 100;
+    width: 56px; height: 56px; border-radius: 50%;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff;
+    font-size: 20px; cursor: pointer; transition: all 0.2s; z-index: 100;
     display: flex; align-items: center; justify-content: center;
 }
-.presenter-nav:hover { background: rgba(255,255,255,0.25); transform: translateY(-50%) scale(1.1); }
-.presenter-nav.prev { left: 30px; }
-.presenter-nav.next { right: 30px; }
+.presenter-nav:hover { background: rgba(255,255,255,0.25); transform: translateY(-50%) scale(1.08); }
+.presenter-nav.prev { left: 24px; }
+.presenter-nav.next { right: 24px; }
 
 .presenter-stage {
     width: 88vw; height: 49.5vw; max-width: 1440px; max-height: 810px;
     border-radius: 18px; overflow: hidden;
     box-shadow: 0 0 100px rgba(0,0,0,0.9);
+}
+
+.presenter-card {
+    font-size: clamp(14px, 2.2vw, 28px) !important;
+}
+
+.presenter-footer {
+    position: fixed; bottom: 16px; display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+.presenter-shortcuts-hint {
+    display: flex; gap: 8px; font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 500;
+}
+#presenter-counter { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.8); }
+
+.presenter-progress-bar {
+    width: 280px; height: 4px; background: rgba(255,255,255,0.15); border-radius: 99px; overflow: hidden;
+}
+.presenter-progress-fill {
+    height: 100%; background: var(--c-accent); width: 0%; transition: width 0.3s;
 }
 
 .presenter-card {

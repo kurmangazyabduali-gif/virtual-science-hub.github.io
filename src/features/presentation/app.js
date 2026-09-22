@@ -917,6 +917,31 @@ document.addEventListener('DOMContentLoaded', function () {
         saveToLocalStorage();
     });
 
+    const editSpeakerNotes = document.getElementById('edit-speaker-notes');
+    if (editSpeakerNotes) {
+        editSpeakerNotes.addEventListener('input', function(e) {
+            const slide = getCurrentSlide();
+            if (!slide) return;
+            slide.speakerNotes = e.target.value;
+            saveToLocalStorage();
+        });
+    }
+
+    // Slide Layout Picker Buttons
+    document.querySelectorAll('.layout-opt-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const slide = getCurrentSlide();
+            if (!slide) return;
+            const layout = this.getAttribute('data-layout');
+            slide.layout = layout;
+            document.querySelectorAll('.layout-opt-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            renderLiveSlidePreview();
+            saveToLocalStorage();
+            showToast(`Макет слайда изменен на: ${this.textContent.trim()}`, 'info');
+        });
+    });
+
     editImgPrompt.addEventListener('input', function(e) {
         const slide = getCurrentSlide();
         if (!slide) return;
@@ -956,6 +981,8 @@ document.addEventListener('DOMContentLoaded', function () {
             title: `Новый слайд ${presentationState.slides.length + 1}`,
             points: ['Новый пункт 1', 'Новый пункт 2'],
             imagePrompt: 'educational presentation illustration',
+            layout: 'split-left',
+            speakerNotes: 'Расскажите об основных тезисах этого слайда.',
             seed: Math.floor(Math.random() * 1000000)
         };
         presentationState.slides.splice(presentationState.currentSlideIndex + 1, 0, newSlide);
@@ -1104,6 +1131,15 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // ── Fullscreen Presenter Mode Controls ────────────────────
+    const btnToggleNotes = document.getElementById('btn-toggle-notes');
+    const presenterNotesDrawer = document.getElementById('presenter-notes-drawer');
+
+    if (btnToggleNotes && presenterNotesDrawer) {
+        btnToggleNotes.addEventListener('click', function() {
+            presenterNotesDrawer.classList.toggle('hidden');
+        });
+    }
+
     btnPresentMode.addEventListener('click', function() {
         if (!presentationState.slides.length) return;
         switchScreen(screenPresenter);
@@ -1111,6 +1147,9 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     btnClosePresent.addEventListener('click', function() {
+        if (document.fullscreenElement) {
+            document.exitFullscreen().catch(() => {});
+        }
         switchScreen(screenWorkspace);
     });
 
@@ -1130,15 +1169,25 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Keyboard Arrow navigation for Presenter Mode
+    // Keyboard Arrow navigation, notes toggle and fullscreen for Presenter Mode
     document.addEventListener('keydown', function(e) {
         if (!screenPresenter.classList.contains('active')) return;
         if (e.key === 'ArrowRight' || e.key === 'Space') {
+            e.preventDefault();
             btnNextSlide.click();
         } else if (e.key === 'ArrowLeft') {
+            e.preventDefault();
             btnPrevSlide.click();
         } else if (e.key === 'Escape') {
             btnClosePresent.click();
+        } else if (e.key === 'n' || e.key === 'N' || e.key === 'т' || e.key === 'Т') {
+            if (presenterNotesDrawer) presenterNotesDrawer.classList.toggle('hidden');
+        } else if (e.key === 'f' || e.key === 'F' || e.key === 'а' || e.key === 'А') {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+                document.exitFullscreen().catch(() => {});
+            }
         }
     });
 
@@ -1203,16 +1252,17 @@ async function callUniversalAI(promptText, sourceContext = '') {
             '  "slides": [',
             '    {',
             '      "title": "Заголовок слайда по тексту",',
-            '      "points": ["Фактический пункт 1 из источника", "Фактический пункт 2 из источника"],',
-            '      "imagePrompt": "Short accurate description in English for AI image generator"',
+            '      "points": ["Фактический пункт 1 из источника с точными терминами/числами", "Фактический пункт 2 из источника"],',
+            '      "imagePrompt": "Short accurate description in English for AI image generator, clean 3d render",',
+            '      "speakerNotes": "Подсказка спикеру: что рассказать на этом слайде по материалам источника."',
             '    }',
             '  ]',
             '}'
         ].join('\n');
     } else {
         systemPrompt = [
-            'Ты опытный методист и ведущий арт-директор презентаций.',
-            'Создай тему и структуру презентации по запросу пользователя.',
+            'Ты опытный методист и ведущий арт-директор презентаций мирового уровня (в стиле Apple Keynote, Pitch, Gamma).',
+            'Создай структурированную презентацию с глубоким и содержательным наполнением.',
             'Ответь СТРОГО валидным JSON объектом без markdown оберток (без ```json).',
             '',
             'Формат ответа:',
@@ -1222,28 +1272,29 @@ async function callUniversalAI(promptText, sourceContext = '') {
             '    "backgroundColor": "#0f172a",',
             '    "primaryTextColor": "#f8fafc",',
             '    "accentColor": "#38bdf8",',
-            '    "style": "Космический / Строгий / Футуристичный / Веселый / Академический / Экологичный"',
+            '    "style": "Космический / Строгий / Футуристичный / Академический / Экологичный / Золотой"',
             '  },',
             '  "slides": [',
             '    {',
             '      "title": "Заголовок слайда",',
-            '      "points": ["Пункт 1", "Пункт 2", "Пункт 3"],',
-            '      "imagePrompt": "Short accurate description in English for AI image generator, photorealistic style"',
+            '      "points": ["Конкретный тезис с данными/формулой", "Аналитический пункт", "Практический вывод"],',
+            '      "imagePrompt": "Short accurate description in English for AI image generator, photorealistic 3d cinematic render",',
+            '      "speakerNotes": "Шпаргалка спикеру: тезисы для устного выступления на 1 минуту."',
             '    }',
             '  ]',
             '}',
             '',
             'Правила выбора цвета в theme:',
-            '- Подбирай цвета по смыслу темы (Космос/ИТ -> темный с неоновым голубым/фиолетовым; Биология -> темно-зеленый с мятным; Бизнес -> темно-синий с королевским синим/золотым).',
-            '- backgroundColor: красивый темный цвет (HEX).',
+            '- Подбирай цвета по смыслу темы (Космос/ИТ -> темный с неоновым голубым/фиолетовым; Биология -> темно-зеленый с мятным; Бизнес/История -> темный с королевским золотом/бронзой; Физика/Математика -> лазурный неон).',
+            '- backgroundColor: глубокий темный цвет (HEX).',
             '- primaryTextColor: контрастный светлый текст (HEX).',
-            '- accentColor: яркий насыщенный акцентный цвет (HEX).',
+            '- accentColor: яркий насыщенный неоновый акцент (HEX).',
             '',
             'Правила для слайдов:',
             '- Слайдов от 5 до 8.',
-            '- Первый слайд — обложка (points: [], imagePrompt: "main theme poster").',
+            '- Первый слайд — обложка (points: [], imagePrompt: "main theme poster, cinematic 3d render", speakerNotes: "Приветствие и анонс темы выступления").',
             '- Каждая картинка: imagePrompt СТРОГО НА АНГЛИЙСКОМ ЯЗЫКЕ!',
-            '- Тексты заголовков и пунктов — НА ЯЗЫКЕ ЗАПРОСА (русский / казахский).'
+            '- Тексты заголовков, пунктов и speakerNotes — НА ЯЗЫКЕ ЗАПРОСА (русский / казахский).'
         ].join('\n');
     }
 
@@ -1576,6 +1627,7 @@ function initPresentationState(data, intel = null) {
             points: Array.isArray(s.points) ? s.points : [],
             imagePrompt: s.imagePrompt || 'educational presentation illustration',
             layout: getSlideLayoutType(s, i),
+            speakerNotes: s.speakerNotes || '',
             seed: Math.floor(Math.random() * 100000)
         })),
         currentSlideIndex: 0
@@ -1638,7 +1690,18 @@ function loadActiveSlideToEditor() {
     document.getElementById('active-slide-num').textContent = presentationState.currentSlideIndex + 1;
     document.getElementById('edit-slide-title').value = slide.title || '';
     document.getElementById('edit-slide-points').value = (slide.points || []).join('\n');
+    const notesInput = document.getElementById('edit-speaker-notes');
+    if (notesInput) notesInput.value = slide.speakerNotes || '';
     document.getElementById('edit-image-prompt').value = slide.imagePrompt || '';
+
+    const currentLayout = getSlideLayoutType(slide, presentationState.currentSlideIndex);
+    document.querySelectorAll('.layout-opt-btn').forEach(btn => {
+        if (btn.getAttribute('data-layout') === currentLayout) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
 }
 
 
@@ -1804,13 +1867,28 @@ function buildSlideCardHTML(card, slide, index, theme) {
     // Universal Top Ribbon
     const topRibbonHTML = '<div class="slide-top-ribbon"></div>';
 
-    // Universal Header
+    // Slide Total Count
+    const totalSlides = presentationState && Array.isArray(presentationState.slides) ? presentationState.slides.length : 7;
+
+    // Universal Header with HUD Tag
     const categoryLabel = theme.style || 'AshyqLab Pro';
     const headerHTML = `
         <div class="slide-card-header">
-            <div class="slide-category-pill"><i class="fa-solid fa-sparkles"></i> ${escapeHtml(categoryLabel)} • Слайд ${index + 1}</div>
+            <div class="slide-hud-tag"><span class="hud-dot"></span> <i class="fa-solid fa-sparkles"></i> ${escapeHtml(categoryLabel)} • СЛАЙД ${index + 1} / ${totalSlides}</div>
             <h2 class="slide-card-title">${escapeHtml(slide.title)}</h2>
             <div class="slide-title-divider"></div>
+        </div>
+    `;
+
+    // Universal Footer with Pagination Track
+    let dotsHTML = '';
+    for (let d = 0; d < totalSlides; d++) {
+        dotsHTML += `<span class="slide-dot-item ${d === index ? 'active' : ''}"></span>`;
+    }
+    const footerHTML = `
+        <div class="slide-card-footer">
+            <span class="slide-footer-brand"><i class="fa-solid fa-bolt"></i> ASHYQLAB AI • TOPIC INTELLIGENCE</span>
+            <div class="slide-pagination-dots">${dotsHTML}</div>
         </div>
     `;
 
@@ -1841,19 +1919,21 @@ function buildSlideCardHTML(card, slide, index, theme) {
             <div class="slide-cover-cinema">
                 <div class="slide-cover-hero-tile">
                     <div>
-                        <div class="slide-category-pill">
-                            <i class="fa-solid fa-wand-magic-sparkles"></i> ${escapeHtml(categoryLabel)}
+                        <div class="slide-hud-tag">
+                            <span class="hud-dot"></span> <i class="fa-solid fa-wand-magic-sparkles"></i> ${escapeHtml(categoryLabel)}
                         </div>
                         <h1 class="slide-card-title" style="margin-top:0.4em;">${escapeHtml(slide.title)}</h1>
                         ${slide.points && slide.points.length > 0 ? `<p class="slide-cover-desc">${escapeHtml(slide.points.join(' • '))}</p>` : `<p class="slide-cover-desc">Интеллектуальная презентация с адаптивной структурой и 3D-визуализацией</p>`}
                     </div>
                     <div class="slide-cover-footer-tags">
                         <span class="slide-cover-tag"><i class="fa-solid fa-graduation-cap"></i> Образовательный модуль</span>
-                        <span class="slide-cover-tag"><i class="fa-solid fa-bolt"></i> ИИ Генерация 2026</span>
+                        <span class="slide-cover-tag"><i class="fa-solid fa-layer-group"></i> ${totalSlides} Слайдов</span>
+                        <span class="slide-cover-tag"><i class="fa-solid fa-bolt"></i> Neural Engine 2026</span>
                     </div>
                 </div>
                 ${imageHTML}
             </div>
+            ${footerHTML}
         `;
         return;
     }
@@ -1890,6 +1970,7 @@ function buildSlideCardHTML(card, slide, index, theme) {
                 </div>
                 ${imageHTML}
             </div>
+            ${footerHTML}
         `;
         return;
     }
@@ -1897,9 +1978,10 @@ function buildSlideCardHTML(card, slide, index, theme) {
     // ── ARCHETYPE 3: STEP-BY-STEP PROCESS ──────────────────────────
     if (layout === 'steps') {
         const points = slide.points && slide.points.length > 0 ? slide.points : ['Анализ и постановка задачи', 'Экспериментальная проверка', 'Выводы и закономерности'];
+        const stepPhases = ['Фаза 1: Анализ', 'Фаза 2: Синтез', 'Фаза 3: Верификация'];
         const stepCardsHTML = points.slice(0, 3).map((p, i) => {
             const parts = p.split(/[:—–-]\s*/);
-            const stepTitle = parts.length > 1 ? parts[0] : `Этап ${i + 1}`;
+            const stepTitle = parts.length > 1 ? parts[0] : (stepPhases[i] || `Этап ${i + 1}`);
             const stepDesc = parts.length > 1 ? parts.slice(1).join(' — ') : p;
             return `
                 <div class="slide-step-card">
@@ -1918,6 +2000,7 @@ function buildSlideCardHTML(card, slide, index, theme) {
                     ${stepCardsHTML}
                 </div>
             </div>
+            ${footerHTML}
         `;
         return;
     }
@@ -1936,29 +2019,29 @@ function buildSlideCardHTML(card, slide, index, theme) {
                 <div class="slide-compare-col">
                     <div class="slide-compare-header">
                         <span class="slide-compare-badge left">📌 Сторона А / Тезис</span>
-                        <i class="fa-solid fa-arrow-right-arrow-left" style="opacity:0.5;font-size:0.85em;"></i>
                     </div>
                     <ul class="slide-compare-list">
                         ${leftPoints.map(p => `<li><i class="fa-solid fa-circle-check"></i> <span>${escapeHtml(p)}</span></li>`).join('')}
                     </ul>
                 </div>
+                <div class="slide-compare-vs-badge">VS</div>
                 <div class="slide-compare-col">
                     <div class="slide-compare-header">
                         <span class="slide-compare-badge right">⚡ Сторона Б / Вывод</span>
-                        <i class="fa-solid fa-sparkles" style="opacity:0.5;font-size:0.85em;"></i>
                     </div>
                     <ul class="slide-compare-list">
                         ${(rightPoints.length ? rightPoints : leftPoints).map(p => `<li><i class="fa-solid fa-bolt" style="color:#a855f7;"></i> <span>${escapeHtml(p)}</span></li>`).join('')}
                     </ul>
                 </div>
             </div>
+            ${footerHTML}
         `;
         return;
     }
 
-    // ── ARCHETYPE 5: CARDS GRID ────────────────────────────────────
+    // ── ARCHETYPE 5: CARDS GRID / BENTO ────────────────────────────
     if (layout === 'cards-grid') {
-        const icons = ['fa-atom', 'fa-dna', 'fa-bolt', 'fa-microchip', 'fa-star', 'fa-fire-flame-curved'];
+        const icons = ['fa-atom', 'fa-dna', 'fa-bolt', 'fa-microchip', 'fa-chart-pie', 'fa-star'];
         const miniTilesHTML = (slide.points || []).map((p, i) => `
             <div class="slide-grid-mini-tile">
                 <div class="slide-mini-icon-box">
@@ -1979,6 +2062,7 @@ function buildSlideCardHTML(card, slide, index, theme) {
                     ${imageHTML}
                 </div>
             </div>
+            ${footerHTML}
         `;
         return;
     }
@@ -1994,7 +2078,7 @@ function buildSlideCardHTML(card, slide, index, theme) {
             <div class="slide-card-body">
                 <div class="slide-insight-hero-tile">
                     <div>
-                        <div class="slide-category-pill"><i class="fa-solid fa-lightbulb"></i> Главный вывод / Инсайт</div>
+                        <div class="slide-hud-tag"><i class="fa-solid fa-lightbulb"></i> Главный вывод / Инсайт</div>
                         <div class="slide-insight-quote-icon" style="margin-top:0.3em;">“</div>
                         <div class="slide-insight-quote-text">${escapeHtml(quoteText)}</div>
                     </div>
@@ -2006,6 +2090,7 @@ function buildSlideCardHTML(card, slide, index, theme) {
                 </div>
                 ${imageHTML}
             </div>
+            ${footerHTML}
         `;
         return;
     }
@@ -2013,7 +2098,7 @@ function buildSlideCardHTML(card, slide, index, theme) {
     // ── ARCHETYPE 7: SPLIT LEFT / SPLIT RIGHT ──────────────────────
     const pointsListHTML = `
         <ul class="slide-points-ul">
-            ${(slide.points || []).map(p => `<li>${escapeHtml(p)}</li>`).join('')}
+            ${(slide.points || []).map((p, pIdx) => `<li><span class="point-num">${pIdx + 1}</span> <span>${escapeHtml(p)}</span></li>`).join('')}
         </ul>
     `;
 
@@ -2026,6 +2111,7 @@ function buildSlideCardHTML(card, slide, index, theme) {
             </div>
             ${imageHTML}
         </div>
+        ${footerHTML}
     `;
 }
 
@@ -2037,6 +2123,7 @@ function renderPresenterSlide() {
     const card = document.getElementById('presenter-slide-card');
     const counter = document.getElementById('presenter-counter');
     const fill = document.getElementById('presenter-progress-fill');
+    const notesContent = document.getElementById('presenter-notes-content');
     const total = presentationState.slides.length;
     const current = presentationState.currentSlideIndex;
 
@@ -2046,6 +2133,9 @@ function renderPresenterSlide() {
 
     if (counter) counter.textContent = `Слайд ${current + 1} из ${total}`;
     if (fill) fill.style.width = `${((current + 1) / total) * 100}%`;
+    if (notesContent && slide) {
+        notesContent.textContent = slide.speakerNotes || (slide.points && slide.points.length ? `Ключевые тезисы для озвучивания: ${slide.points.join('; ')}` : 'Расскажите об основных аспектах темы этого слайда.');
+    }
 }
 
 
@@ -2135,6 +2225,10 @@ async function generatePPTX(presentation, btn) {
             const slideData = presentation.slides[i];
             const slide = pptx.addSlide();
             slide.background = { color: bgHex };
+
+            if (slideData.speakerNotes) {
+                slide.addNotes(slideData.speakerNotes);
+            }
 
             const layout = getSlideLayoutType(slideData, i);
 
