@@ -51,6 +51,7 @@ const designCommands = [
 ];
 
 const apiKey = localStorage.getItem('ai_api_key') || localStorage.getItem('gemini_api_key') || atob('c2stWURjaEdfRFpxamtuVk5zdXlKd1NhQQ==');
+const photoApiKey = localStorage.getItem('photo_api_key') || atob('c2stR1dxWTk5cnFJekR3STVLTGFQdUkxdw==');
 const fallbackGeminiKey = atob('QVEuQWI4Uk42SnZ1V19xZ0FmSlpBaURwbE1EbEdxR0tvYlRiZ3hMc2l3aWI0c1BNZXJHQnc=');
 let pendingProposal = null;
 let previewIndex = 0;

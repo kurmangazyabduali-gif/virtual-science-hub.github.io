@@ -3,6 +3,7 @@
    ===================================================== */
 
 const API_KEY = localStorage.getItem('ai_api_key') || localStorage.getItem('gemini_api_key') || atob('c2stWURjaEdfRFpxamtuVk5zdXlKd1NhQQ==');
+const PHOTO_API_KEY = localStorage.getItem('photo_api_key') || atob('c2stR1dxWTk5cnFJekR3STVLTGFQdUkxdw==');
 const FALLBACK_GEMINI_KEY = atob('QVEuQWI4Uk42SnZ1V19xZ0FmSlpBaURwbE1EbEdxR0tvYlRiZ3hMc2l3aWI0c1BNZXJHQnc=');
 const GEMINI_ENDPOINTS = [
     'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
