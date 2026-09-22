@@ -1537,6 +1537,47 @@ function generateSvgIllustration(title, accentColor, bgColor) {
     return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
+function getTopicFallbackImage(prompt, title = '') {
+    const text = `${prompt || ''} ${title || ''}`.toLowerCase();
+    if (/ом|ток|кернеу|электр|резистор|circuit|physic|ньютон|динамика|күш|gravity|вольт|ампер/i.test(text)) {
+        return 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=800&auto=format&fit=crop&q=80';
+    }
+    if (/жасуша|клетка|митохондр|хлоропласт|днк|биолог|cell|dna|microscope|микроскоп|бактери/i.test(text)) {
+        return 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=800&auto=format&fit=crop&q=80';
+    }
+    if (/период|менделеев|химия|реакци|молекул|атом|chem|колба|раствор/i.test(text)) {
+        return 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&auto=format&fit=crop&q=80';
+    }
+    if (/ғарыш|космос|планет|астроном|space|universe|planet|stars|күн жүйе/i.test(text)) {
+        return 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&auto=format&fit=crop&q=80';
+    }
+    if (/абай|шоқан|ыбырай|тарих|батыр|хан|history|kazakh|культура|әдебиет/i.test(text)) {
+        return 'https://images.unsplash.com/photo-1461360370896-922624d12aa1?w=800&auto=format&fit=crop&q=80';
+    }
+    if (/жасанды интеллект|робот|информатик|нейро|ai|code|robot|cyber|программи/i.test(text)) {
+        return 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80';
+    }
+    if (/пифагор|геометр|үшбұрыш|математик|math|geometry|формула|алгебра/i.test(text)) {
+        return 'https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800&auto=format&fit=crop&q=80';
+    }
+    if (/экология|табиғат|природа|өсімдік|nature|forest|эко|су|ағаш/i.test(text)) {
+        return 'https://images.unsplash.com/photo-1511497584788-87676104235f?w=800&auto=format&fit=crop&q=80';
+    }
+    return 'https://images.unsplash.com/photo-1507668077129-56e32842fceb?w=800&auto=format&fit=crop&q=80';
+}
+
+function handleImageFallback(imgEl, title, svgFallback, prompt) {
+    if (!imgEl) return;
+    const stage = imgEl.getAttribute('data-fallback-stage') || 'ai';
+    if (stage === 'ai') {
+        imgEl.setAttribute('data-fallback-stage', 'topic');
+        imgEl.src = getTopicFallbackImage(prompt, title);
+    } else {
+        imgEl.onerror = null;
+        imgEl.src = svgFallback;
+    }
+}
+
 function buildPollinationsUrl(prompt, seed, slideTitle = '') {
     const tpl = getSelectedTemplate();
     const styleModifier = tpl && tpl.imageStyle ? `, ${tpl.imageStyle}` : ', high quality educational 3d render';
@@ -1544,7 +1585,7 @@ function buildPollinationsUrl(prompt, seed, slideTitle = '') {
     const fullPrompt = `${cleanPrompt}${styleModifier}`;
     const encoded = encodeURIComponent(fullPrompt);
     const seedParam = seed ? `&seed=${seed}` : `&seed=${Math.floor(Math.random() * 1000000)}`;
-    return `https://image.pollinations.ai/prompt/${encoded}?width=800&height=600&nologo=true&model=flux&enhance=true${seedParam}`;
+    return `https://image.pollinations.ai/prompt/${encoded}?width=800&height=600&nologo=true${seedParam}`;
 }
 
 /* Build Slide Card HTML inner structure with Diverse Layout Variations */
@@ -1565,22 +1606,55 @@ function buildSlideCardHTML(card, slide, index, theme) {
     const layout = getSlideLayoutType(slide, index);
     card.className = `slide-card layout-${layout} ${isDark ? 'theme-dark' : 'theme-light'}`;
 
-    if (layout === 'cover') {
-        card.classList.add('slide-card-cover');
-        card.innerHTML = `
-            <div class="slide-cover-tile">
-                <h1 class="slide-card-title">${escapeHtml(slide.title)}</h1>
-                ${slide.points.length > 0 ? `<p style="margin-top:1.2em;color:${theme.primaryTextColor || '#475569'};font-size:1.15em;line-height:1.6;font-weight:500;">${escapeHtml(slide.points.join(' • '))}</p>` : ''}
-            </div>
-        `;
-        return;
-    }
-
     const hasImage = Boolean(slide.imagePrompt && slide.imagePrompt.trim());
     const imageUrl = hasImage ? buildPollinationsUrl(slide.imagePrompt, slide.seed, slide.title) : '';
     const svgFallback = generateSvgIllustration(slide.title, theme.accentColor, theme.backgroundColor);
     const boxId = `slide-img-box-${index}`;
     const loaderId = `slide-loader-${index}`;
+    const safeTitle = escapeHtml(slide.title || '').replace(/'/g, "\\'");
+    const safePrompt = escapeHtml(slide.imagePrompt || '').replace(/'/g, "\\'");
+
+    if (layout === 'cover') {
+        card.classList.add('slide-card-cover');
+        if (hasImage) {
+            card.innerHTML = `
+                <div class="slide-cover-layout has-cover-image">
+                    <div class="slide-cover-tile">
+                        <div style="font-size:0.85em;font-weight:700;letter-spacing:1px;color:${theme.accentColor || '#3B82F6'};text-transform:uppercase;margin-bottom:0.6em;">
+                            ${escapeHtml(theme.style || 'NotebookLM Academic')}
+                        </div>
+                        <h1 class="slide-card-title">${escapeHtml(slide.title)}</h1>
+                        ${slide.points && slide.points.length > 0 ? `<p class="slide-cover-points">${escapeHtml(slide.points.join(' • '))}</p>` : ''}
+                    </div>
+                    <div class="slide-cover-image-box">
+                        <div class="slide-img-container" id="${boxId}">
+                            <div class="slide-img-loader" id="${loaderId}">
+                                <i class="fa-solid fa-spinner fa-spin"></i>
+                                <span>AI генерация...</span>
+                            </div>
+                            <img src="${imageUrl}" 
+                                 class="slide-ai-img" 
+                                 alt="AI Cover" 
+                                 loading="eager"
+                                 data-fallback-stage="ai"
+                                 onload="this.style.opacity='1'; const l = document.getElementById('${loaderId}'); if(l) l.style.display='none';" 
+                                 onerror="handleImageFallback(this, '${safeTitle}', '${svgFallback}', '${safePrompt}'); this.style.opacity='1'; const l = document.getElementById('${loaderId}'); if(l) l.style.display='none';" />
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            card.innerHTML = `
+                <div class="slide-cover-layout">
+                    <div class="slide-cover-tile">
+                        <h1 class="slide-card-title">${escapeHtml(slide.title)}</h1>
+                        ${slide.points && slide.points.length > 0 ? `<p class="slide-cover-points">${escapeHtml(slide.points.join(' • '))}</p>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+        return;
+    }
 
     const headerHTML = `
         <div class="slide-card-header">
@@ -1606,8 +1680,9 @@ function buildSlideCardHTML(card, slide, index, theme) {
                      class="slide-ai-img" 
                      alt="AI Generated" 
                      loading="eager"
+                     data-fallback-stage="ai"
                      onload="this.style.opacity='1'; const l = document.getElementById('${loaderId}'); if(l) l.style.display='none';" 
-                     onerror="this.onerror=null; this.src='${svgFallback}'; this.style.opacity='1'; const l = document.getElementById('${loaderId}'); if(l) l.style.display='none';" />
+                     onerror="handleImageFallback(this, '${safeTitle}', '${svgFallback}', '${safePrompt}'); this.style.opacity='1'; const l = document.getElementById('${loaderId}'); if(l) l.style.display='none';" />
             </div>
         </div>
     ` : '';
@@ -1772,25 +1847,59 @@ async function generatePPTX(presentation, btn) {
 
             // Cover slide (Index 0)
             if (layout === 'cover') {
-                slide.addShape(pptx.ShapeType.roundRect, {
-                    x: 1.0, y: 1.2, w: 8.0, h: 3.3,
-                    fill: { color: 'FFFFFF' },
-                    line: { color: 'E2E8F0', width: 1 },
-                    rectRadius: 0.15
-                });
+                const coverHasImage = Boolean(slideData.imagePrompt);
+                let coverImgBase64 = null;
+                if (coverHasImage) {
+                    const imageUrl = buildPollinationsUrl(slideData.imagePrompt, slideData.seed, slideData.title);
+                    showToast(`Загрузка обложки слайда 1/${totalSlides}...`, 'info');
+                    coverImgBase64 = await fetchImageAsBase64(imageUrl, slideData.title, theme);
+                }
 
-                slide.addText(slideData.title || '', {
-                    x: 1.2, y: 1.6, w: 7.6, h: 1.5,
-                    fontSize: 34, bold: true, color: titleHex,
-                    align: 'center', valign: 'middle', fontFace: 'Arial'
-                });
-
-                if (slideData.points && slideData.points.length > 0) {
-                    slide.addText(slideData.points.join(' • '), {
-                        x: 1.2, y: 3.2, w: 7.6, h: 0.8,
-                        fontSize: 15, color: textHex,
-                        align: 'center', valign: 'top', fontFace: 'Arial'
+                if (coverImgBase64) {
+                    slide.addShape(pptx.ShapeType.roundRect, {
+                        x: 0.8, y: 1.15, w: 4.6, h: 3.9,
+                        fill: { color: 'FFFFFF' },
+                        line: { color: 'E2E8F0', width: 1 },
+                        rectRadius: 0.15
                     });
+                    slide.addText(slideData.title || '', {
+                        x: 1.0, y: 1.5, w: 4.2, h: 2.0,
+                        fontSize: 28, bold: true, color: titleHex,
+                        align: 'left', valign: 'middle', fontFace: 'Arial'
+                    });
+                    if (slideData.points && slideData.points.length > 0) {
+                        slide.addText(slideData.points.join(' • '), {
+                            x: 1.0, y: 3.6, w: 4.2, h: 1.0,
+                            fontSize: 14, color: textHex,
+                            align: 'left', valign: 'top', fontFace: 'Arial'
+                        });
+                    }
+                    slide.addShape(pptx.ShapeType.roundRect, {
+                        x: 5.6, y: 1.15, w: 3.8, h: 3.9,
+                        fill: { color: 'FFFFFF' },
+                        line: { color: 'E2E8F0', width: 1 },
+                        rectRadius: 0.15
+                    });
+                    slide.addImage({ data: coverImgBase64, x: 5.7, y: 1.25, w: 3.6, h: 3.7 });
+                } else {
+                    slide.addShape(pptx.ShapeType.roundRect, {
+                        x: 1.0, y: 1.2, w: 8.0, h: 3.3,
+                        fill: { color: 'FFFFFF' },
+                        line: { color: 'E2E8F0', width: 1 },
+                        rectRadius: 0.15
+                    });
+                    slide.addText(slideData.title || '', {
+                        x: 1.2, y: 1.6, w: 7.6, h: 1.5,
+                        fontSize: 34, bold: true, color: titleHex,
+                        align: 'center', valign: 'middle', fontFace: 'Arial'
+                    });
+                    if (slideData.points && slideData.points.length > 0) {
+                        slide.addText(slideData.points.join(' • '), {
+                            x: 1.2, y: 3.2, w: 7.6, h: 0.8,
+                            fontSize: 15, color: textHex,
+                            align: 'center', valign: 'top', fontFace: 'Arial'
+                        });
+                    }
                 }
                 continue;
             }
