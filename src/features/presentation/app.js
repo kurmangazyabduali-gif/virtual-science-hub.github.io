@@ -928,10 +928,26 @@ document.addEventListener('DOMContentLoaded', function () {
     btnRefreshImg.addEventListener('click', function() {
         const slide = getCurrentSlide();
         if (!slide) return;
-        slide.seed = Math.floor(Math.random() * 1000000);
-        showToast('Генерация новой иллюстрации...', 'info');
+        
+        if (editImgPrompt && editImgPrompt.value.trim()) {
+            slide.imagePrompt = editImgPrompt.value.trim();
+        }
+        
+        slide.seed = Math.floor(Math.random() * 10000000);
+        showToast('Генерация нового варианта фото через ИИ...', 'info');
+        
+        const originalHtml = btnRefreshImg.innerHTML;
+        btnRefreshImg.disabled = true;
+        btnRefreshImg.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Генерация нового фото...';
+        
         renderLiveSlidePreview();
         saveToLocalStorage();
+        
+        setTimeout(() => {
+            btnRefreshImg.disabled = false;
+            btnRefreshImg.innerHTML = originalHtml;
+            showToast('Фотография успешно обновлена!', 'success');
+        }, 1000);
     });
 
     // ── Slide Management Toolbar ──────────────────────────────
@@ -1448,6 +1464,88 @@ function renderLiveSlidePreview() {
     buildSlideCardHTML(card, slide, presentationState.currentSlideIndex, presentationState.theme);
 }
 
+const CYRILLIC_MAP = {
+    'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ё':'yo','ж':'zh','з':'z','и':'i','й':'y','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'kh','ц':'ts','ч':'ch','ш':'sh','щ':'shch','ъ':'','ы':'y','ь':'','э':'e','ю':'yu','я':'ya','ә':'ae','і':'i','ң':'ng','ғ':'gh','ү':'u','ұ':'u','қ':'q','ө':'o','һ':'h'
+};
+
+function transliterateText(str) {
+    if (!str) return '';
+    return String(str).toLowerCase().split('').map(c => CYRILLIC_MAP[c] || c).join('');
+}
+
+function sanitizeImagePrompt(prompt, slideTitle = '', topicTitle = '') {
+    let text = (prompt || '').trim();
+    if (!text || text.length < 3) {
+        text = `${slideTitle} ${topicTitle}`.trim() || 'educational presentation science illustration';
+    }
+
+    // Common educational subject mappings to high quality visual prompts
+    const mappings = [
+        { regex: /абай|құнанбаев|кунанбаев/i, prompt: 'Abai Kunanbayev historical Kazakh poet philosopher national costume portrait painting masterpiece' },
+        { regex: /шоқан|уәлиханов|валиханов/i, prompt: 'Shoqan Walikhanov Kazakh scholar researcher portrait in historical study room' },
+        { regex: /ыбырай|алтынсарин/i, prompt: 'Ybyrai Altynsarin Kazakh educator teacher vintage classroom' },
+        { regex: /жасуша|клетка|митохондр|хлоропласт|днк|генетик/i, prompt: 'glowing biological cell structure DNA helix organelles 3D microscope scientific rendering' },
+        { regex: /ом|ток|кернеу|электр|резистор|тізбек|цепь/i, prompt: 'glowing electrical circuit physics laboratory experiment voltmeter ammeter 3D' },
+        { regex: /ньютон|гравитац|динамика|күш|сила|инерци/i, prompt: 'Newtonian physics laboratory experiment motion forces gravity 3D render' },
+        { regex: /период|менделеев|химия|реакци|молекул|атом/i, prompt: 'chemistry laboratory colorful test tubes chemical reaction glowing molecules 3D' },
+        { regex: /пифагор|геометр|үшбұрыш|треугольник/i, prompt: 'Pythagorean geometric mathematical theorem visual blueprint 3D' },
+        { regex: /ғарыш|космос|планет|күн жүйе|астроном/i, prompt: 'solar system planets orbiting sun in cosmic nebula space photorealistic 4k' },
+        { regex: /жасанды интеллект|робот|информатик|нейро|ai/i, prompt: 'futuristic artificial intelligence neural cybernetic network glowing holographic brain' },
+        { regex: /тарих|история|батыр|хан|қазақ/i, prompt: 'historical Kazakh warriors nomads yurt culture dramatic sunset landscape cinematic' },
+        { regex: /экология|табиғат|природа|өсімдік/i, prompt: 'nature ecology green blooming environment forest landscape clean energy' }
+    ];
+
+    for (const m of mappings) {
+        if (m.regex.test(text) || m.regex.test(slideTitle) || m.regex.test(topicTitle)) {
+            return m.prompt;
+        }
+    }
+
+    const hasCyrillic = /[а-яА-ЯёЁәіңғүұқөһӘІҢҒҮҰҚӨҺ]/.test(text);
+    if (hasCyrillic) {
+        return `educational visual concept of ${transliterateText(text)}, clean 3d render, studio lighting`;
+    }
+
+    return text;
+}
+
+function generateSvgIllustration(title, accentColor, bgColor) {
+    const safeTitle = escapeHtml((title || 'AshyqLab').slice(0, 32));
+    const accent = accentColor || '#38bdf8';
+    const bg = bgColor || '#0f172a';
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+        <defs>
+            <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="${bg}" />
+                <stop offset="100%" stop-color="#020617" />
+            </linearGradient>
+            <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="${accent}" />
+                <stop offset="100%" stop-color="#a855f7" />
+            </linearGradient>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#g1)" />
+        <circle cx="400" cy="260" r="160" fill="${accent}" opacity="0.12" />
+        <circle cx="400" cy="260" r="100" fill="none" stroke="${accent}" stroke-width="3" stroke-dasharray="6 6" opacity="0.6" />
+        <circle cx="400" cy="260" r="60" fill="url(#g2)" opacity="0.9" />
+        <path d="M375,235 L425,235 L425,285 L375,285 Z" fill="#ffffff" opacity="0.95" rx="8" />
+        <path d="M400,205 L400,315 M345,260 L455,260" stroke="#ffffff" stroke-width="3" stroke-linecap="round" />
+        <text x="400" y="440" fill="#f8fafc" font-size="22" font-weight="bold" font-family="system-ui, sans-serif" text-anchor="middle">${safeTitle}</text>
+        <text x="400" y="475" fill="${accent}" font-size="13" font-weight="700" font-family="system-ui, sans-serif" text-anchor="middle" letter-spacing="2">ASHYQLAB AI VISUAL</text>
+    </svg>`;
+    return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
+function buildPollinationsUrl(prompt, seed, slideTitle = '') {
+    const tpl = getSelectedTemplate();
+    const styleModifier = tpl && tpl.imageStyle ? `, ${tpl.imageStyle}` : ', high quality educational 3d render';
+    const cleanPrompt = sanitizeImagePrompt(prompt, slideTitle, presentationState ? presentationState.title : '');
+    const fullPrompt = `${cleanPrompt}${styleModifier}`;
+    const encoded = encodeURIComponent(fullPrompt);
+    const seedParam = seed ? `&seed=${seed}` : `&seed=${Math.floor(Math.random() * 1000000)}`;
+    return `https://image.pollinations.ai/prompt/${encoded}?width=800&height=600&nologo=true&model=flux&enhance=true${seedParam}`;
+}
+
 /* Build Slide Card HTML inner structure with Diverse Layout Variations */
 function buildSlideCardHTML(card, slide, index, theme) {
     const tpl = getSelectedTemplate();
@@ -1478,7 +1576,10 @@ function buildSlideCardHTML(card, slide, index, theme) {
     }
 
     const hasImage = Boolean(slide.imagePrompt && slide.imagePrompt.trim());
-    const imageUrl = hasImage ? buildPollinationsUrl(slide.imagePrompt, slide.seed) : '';
+    const imageUrl = hasImage ? buildPollinationsUrl(slide.imagePrompt, slide.seed, slide.title) : '';
+    const svgFallback = generateSvgIllustration(slide.title, theme.accentColor, theme.backgroundColor);
+    const boxId = `slide-img-box-${index}`;
+    const loaderId = `slide-loader-${index}`;
 
     const headerHTML = `
         <div class="slide-card-header">
@@ -1495,8 +1596,17 @@ function buildSlideCardHTML(card, slide, index, theme) {
 
     const imageHTML = hasImage ? `
         <div class="slide-col-image">
-            <div class="slide-img-container">
-                <img src="${imageUrl}" class="slide-ai-img" alt="AI Generated" onerror="this.src='https://via.placeholder.com/400x300?text=AI+Image';" />
+            <div class="slide-img-container" id="${boxId}">
+                <div class="slide-img-loader" id="${loaderId}">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                    <span>AI генерация...</span>
+                </div>
+                <img src="${imageUrl}" 
+                     class="slide-ai-img" 
+                     alt="AI Generated" 
+                     loading="eager"
+                     onload="this.style.opacity='1'; const l = document.getElementById('${loaderId}'); if(l) l.style.display='none';" 
+                     onerror="this.onerror=null; this.src='${svgFallback}'; this.style.opacity='1'; const l = document.getElementById('${loaderId}'); if(l) l.style.display='none';" />
             </div>
         </div>
     ` : '';
@@ -1543,15 +1653,6 @@ function buildSlideCardHTML(card, slide, index, theme) {
             </div>
         `;
     }
-}
-
-function buildPollinationsUrl(prompt, seed) {
-    const tpl = getSelectedTemplate();
-    const styleModifier = tpl && tpl.imageStyle ? `, ${tpl.imageStyle}` : '';
-    const fullPrompt = `${prompt || 'presentation illustration'}${styleModifier}`;
-    const encoded = encodeURIComponent(fullPrompt);
-    const seedParam = seed ? `&seed=${seed}` : '';
-    return `https://image.pollinations.ai/prompt/${encoded}?width=800&height=600&nologo=true${seedParam}`;
 }
 
 
@@ -1710,9 +1811,9 @@ async function generatePPTX(presentation, btn) {
 
             let imageBase64 = null;
             if (hasImage) {
-                const imageUrl = buildPollinationsUrl(slideData.imagePrompt, slideData.seed);
+                const imageUrl = buildPollinationsUrl(slideData.imagePrompt, slideData.seed, slideData.title);
                 showToast(`Загрузка картинки слайда ${i + 1}/${totalSlides}...`, 'info');
-                imageBase64 = await fetchImageAsBase64(imageUrl);
+                imageBase64 = await fetchImageAsBase64(imageUrl, slideData.title, theme);
             }
 
             if (layout === 'split-right') {
@@ -1864,9 +1965,13 @@ async function generatePPTX(presentation, btn) {
     }
 }
 
-async function fetchImageAsBase64(url) {
+async function fetchImageAsBase64(url, fallbackTitle = '', theme = {}) {
     try {
-        const res = await fetch(url);
+        if (!url) throw new Error('No URL');
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 6500);
+        const res = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeoutId);
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const blob = await res.blob();
         return new Promise((resolve, reject) => {
@@ -1876,8 +1981,8 @@ async function fetchImageAsBase64(url) {
             reader.readAsDataURL(blob);
         });
     } catch (e) {
-        console.warn('[Fetch Base64 Error]', e);
-        return null;
+        console.warn('[Fetch Base64 Fallback]', e);
+        return generateSvgIllustration(fallbackTitle, theme.accentColor, theme.backgroundColor);
     }
 }
 
