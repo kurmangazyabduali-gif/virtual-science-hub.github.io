@@ -1,15 +1,27 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" translate="no" class="notranslate">
 <head>
     <link rel="icon" type="image/png" href="assets/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Интерактивті ойын студиясы — AshyqLab</title>
+    <script>
+        (function() {
+            ['googtrans', 'googtrans_prev', 'googtrans_saved'].forEach(function(c) {
+                document.cookie = c + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                if (location.hostname) {
+                    document.cookie = c + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=" + location.hostname + ";";
+                    document.cookie = c + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=." + location.hostname + ";";
+                }
+            });
+        })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+
     <style>
         :root {
             --brand-primary: #1d4ed8;
@@ -186,25 +198,7 @@
         .nav-pill-btn.active { background: #eff6ff; color: #1d4ed8; font-weight: 700; border: 1px solid #bfdbfe; }
     </style>
 
-    <script id="early-lang-sync">
-        (function() {
-            let cl = localStorage.getItem('vsh-lang') || 'kk';
-            var gt = '/ru/' + cl;
-            if (cl === 'ru') { 
-                document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                if (location.hostname) {
-                    document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
-                    document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
-                }
-            } else {
-                document.cookie = "googtrans=" + gt + "; path=/";
-                if (location.hostname) {
-                    document.cookie = "googtrans=" + gt + "; domain=" + location.hostname + "; path=/";
-                    document.cookie = "googtrans=" + gt + "; domain=." + location.hostname + "; path=/";
-                }
-            }
-        })();
-    </script>
+    
 </head>
 <body class="min-h-screen flex flex-col relative bg-[#f8fafc]">
 
@@ -2342,106 +2336,7 @@
         window.onload = render;
     </script>
 
-    <!-- Global Language Switcher & Google Translate -->
-    <div id="google_translate_element" style="display:none;"></div>
-    <script type="text/javascript">
-    function googleTranslateElementInit() {
-      new google.translate.TranslateElement({pageLanguage: 'ru', includedLanguages: 'ru,en,kk', autoDisplay: false}, 'google_translate_element');
-    }
-    </script>
-    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-    <script>
-    (function() {
-        let currentLang = localStorage.getItem('vsh-lang') || 'kk';
-        var gtrans = '/ru/' + currentLang;
-        if (currentLang === 'ru') { 
-            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            if (location.hostname) {
-                document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
-                document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
-            }
-        } else {
-            document.cookie = "googtrans=" + gtrans + "; path=/";
-            if (location.hostname) {
-                document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
-            }
-        }
-
-        if (!document.querySelector('.floating-lang-switcher')) {
-            const style = document.createElement('style');
-            style.innerHTML = `
-                body { top: 0 !important; }
-                .skiptranslate { display: none !important; }
-                .floating-lang-switcher {
-                    position: fixed;
-                    bottom: 20px;
-                    left: 20px;
-                    background: rgba(255, 255, 255, 0.95);
-                    backdrop-filter: blur(10px);
-                    border: 1px solid #cbd5e1;
-                    border-radius: 14px;
-                    padding: 6px;
-                    display: flex;
-                    gap: 6px;
-                    z-index: 999999;
-                    box-shadow: 0 4px 15px rgba(15, 23, 42, 0.08);
-                    font-family: 'Inter', sans-serif;
-                }
-                .floating-lang-btn {
-                    background: #f8fafc;
-                    border: 1px solid #e2e8f0;
-                    color: #64748b;
-                    font-size: 12px;
-                    font-weight: 700;
-                    padding: 5px 10px;
-                    border-radius: 8px;
-                    cursor: pointer;
-                    transition: 0.15s;
-                }
-                .floating-lang-btn:hover {
-                    color: #0f172a;
-                    background: #f1f5f9;
-                }
-                .floating-lang-btn.active {
-                    background: #1d4ed8;
-                    color: #fff;
-                    border-color: #1d4ed8;
-                }
-            `;
-            document.head.appendChild(style);
-
-            const switcher = document.createElement('div');
-            switcher.className = 'floating-lang-switcher notranslate';
-            switcher.innerHTML = `
-                <button class="floating-lang-btn" onclick="changeLangGlobal('ru')">RU</button>
-                <button class="floating-lang-btn" onclick="changeLangGlobal('kk')">ҚАЗ</button>
-                <button class="floating-lang-btn" onclick="changeLangGlobal('en')">EN</button>
-            `;
-            
-            const btns = switcher.querySelectorAll('.floating-lang-btn');
-            if (currentLang === 'ru') btns[0].classList.add('active');
-            else if (currentLang === 'kk') btns[1].classList.add('active');
-            else if (currentLang === 'en') btns[2].classList.add('active');
-
-            document.body.appendChild(switcher);
-        }
-    })();
-
-    function changeLangGlobal(lang) {
-        localStorage.setItem('vsh-lang', lang);
-        var gtrans = '/ru/' + lang;
-        if (lang === 'ru') { 
-            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            if (location.hostname) {
-                document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
-                document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
-            }
-        } else {
-            document.cookie = "googtrans=" + gtrans + "; path=/";
-            if (location.hostname) document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/";
-        }
-        location.reload();
-    }
-    </script>
+    
+    
 </body>
 </html>

@@ -1,3 +1,15 @@
+// Purge Google Translate cookies to prevent unwanted browser machine auto-translation
+function purgeGoogleTranslateCookies() {
+    ['googtrans', 'googtrans_prev', 'googtrans_saved'].forEach(function(c) {
+        document.cookie = c + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (location.hostname) {
+            document.cookie = c + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=" + location.hostname + ";";
+            document.cookie = c + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=." + location.hostname + ";";
+        }
+    });
+}
+purgeGoogleTranslateCookies();
+
 /**
  * AshyqLab — Main Lobby Script
  */
@@ -785,20 +797,8 @@ function setLang(lang) {
     currentLang = lang;
     localStorage.setItem('vsh-lang', lang);
     
-    // Sync googtrans cookie for other pages
-    var gtrans = '/ru/' + lang;
-    if (lang === 'ru') { 
-        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        if (location.hostname) {
-            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
-            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
-        }
-    } else {
-        document.cookie = "googtrans=" + gtrans + "; path=/";
-        if (location.hostname) { 
-            document.cookie = "googtrans=" + gtrans + "; domain=" + location.hostname + "; path=/"; 
-            document.cookie = "googtrans=" + gtrans + "; domain=." + location.hostname + "; path=/"; 
-        }
+    // Purge googtrans cookie
+    purgeGoogleTranslateCookies();
     }
 
     // Sync all language buttons (both desktop and mobile drawer)

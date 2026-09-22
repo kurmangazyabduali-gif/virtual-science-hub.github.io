@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" translate="no" class="notranslate">
 
 <head>
     <meta charset="UTF-8">
@@ -206,56 +206,7 @@
         }
     </style>
 
-    <script id="early-lang-sync">
-        (function() {
-            let cl = localStorage.getItem('vsh-lang') || 'kk';
-            var gt = '/ru/' + cl;
-            if (cl === 'ru') { 
-        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        if (location.hostname) {
-            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
-            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
-        }
- } else {
-                document.cookie = "googtrans=" + gt + "; path=/";
-                if (location.hostname) {
-                    document.cookie = "googtrans=" + gt + "; domain=" + location.hostname + "; path=/";
-                    document.cookie = "googtrans=" + gt + "; domain=." + location.hostname + "; path=/";
-                }
-            }
-        })();
-        
-        // Theme System (Dark / Light)
-        window.applyTheme = function(theme) {
-            if (theme === 'light') {
-                document.documentElement.setAttribute('data-theme', 'light');
-            } else {
-                document.documentElement.removeAttribute('data-theme');
-            }
-            const icon = document.getElementById('themeIcon');
-            if (icon) {
-                icon.className = theme === 'light' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
-            }
-        };
-
-        window.toggleTheme = function() {
-            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-            const newTheme = isLight ? 'dark' : 'light';
-            localStorage.setItem('vsh-theme', newTheme);
-            window.applyTheme(newTheme);
-        };
-
-        // Initialize immediately
-        (function() {
-            const savedTheme = localStorage.getItem('vsh-theme') || 'dark';
-            window.applyTheme(savedTheme);
-        })();
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const savedTheme = localStorage.getItem('vsh-theme') || 'dark';
-            window.applyTheme(savedTheme);
-        });
-    </script>
+    
 </head>
 
 <body class="lab-lobby">
