@@ -37,15 +37,15 @@
             <h1 class="hero-title">Создайте презентацию<br>за 15 секунд</h1>
             <p class="hero-sub">Введите тему или загрузите методичку/лабораторную работу — ИИ сгенерирует слайды строго по вашему источнику</p>
 
-            <!-- ЕДИНАЯ ФОРМА ГЕНЕРАЦИИ С RAG ИСТОЧНИКОМ -->
+            <!-- ЕДИНАЯ ФОРМА ГЕНЕРАЦИИ С ИНТЕЛЛЕКТУАЛЬНЫМ АНАЛИЗОМ ТЕМЫ -->
             <div class="prompt-card">
 
-                <!-- NOTEBOOKLM RAG SOURCE MANAGEMENT -->
+                <!-- NOTEBOOKLM RAG SOURCE MANAGEMENT (Опциональный источник) -->
                 <div class="rag-source-card">
                     <div class="rag-source-header">
                         <div class="rag-title">
                             <i class="fa-solid fa-book-bookmark"></i>
-                            <span>Источник базы знаний (NotebookLM RAG):</span>
+                            <span>База знаний и контекст (NotebookLM RAG):</span>
                         </div>
                         <span class="rag-badge" id="rag-status-badge">Без файла (Общий ИИ)</span>
                     </div>
@@ -62,7 +62,7 @@
                             <i class="fa-solid fa-file-lines"></i> Вставить текст
                         </button>
                         <button type="button" class="rag-tab" data-source-tab="vsh">
-                            <i class="fa-solid fa-flask"></i> Лабы VSH
+                            <i class="fa-solid fa-flask"></i> Лабораторные VSH
                         </button>
                     </div>
 
@@ -102,75 +102,35 @@
                     </div>
                 </div>
 
-                <textarea
-                    id="prompt-input"
-                    class="prompt-textarea"
-                    placeholder="Тема презентации: например «Законы движения Ньютона, 7 класс» или «Лабораторная работа №3: Закон Ома»"
-                    rows="3"
-                ></textarea>
+                <!-- Главное поле ввода темы с интеллектуальным анализом -->
+                <div class="topic-input-container">
+                    <label for="prompt-input" class="topic-input-label">
+                        <i class="fa-solid fa-brain"></i>
+                        <span>Тема презентации или урока:</span>
+                        <span class="topic-ai-tag">✨ Автоматический подбор дизайна и структуры</span>
+                    </label>
+                    <textarea
+                        id="prompt-input"
+                        class="prompt-textarea"
+                        placeholder="Например: «Законы движения Ньютона», «Строение клетки и митохондрии», «Искусственный интеллект и будущее медицины», «Абай Құнанбаев: қара сөздері мен мұрасы», «Колонизация Марса»..."
+                        rows="3"
+                    ></textarea>
+                </div>
 
+                <!-- Быстрые идеи для тем -->
                 <div class="prompt-hints">
-                    <span class="hint-chip" data-text="История развития космонавтики, от первых ракет до МКС">🚀 Космонавтика</span>
-                    <span class="hint-chip" data-text="Законы движения Ньютона с примерами">⚛️ Физика</span>
-                    <span class="hint-chip" data-text="Строение и функции растительной клетки">🌿 Биология</span>
-                    <span class="hint-chip" data-text="Искусственный интеллект и будущее медицины">🤖 ИИ в медицине</span>
+                    <span class="hint-chip" data-text="Законы движения Ньютона с формулами и примерами">⚛️ Физика: Ньютон</span>
+                    <span class="hint-chip" data-text="Строение клетки, митохондрии и фотосинтез">🌿 Биология: Клетка</span>
+                    <span class="hint-chip" data-text="Искусственный интеллект и нейросети в 2026 году">🤖 ИИ и Нейросети</span>
+                    <span class="hint-chip" data-text="История развития космонавтики и исследование Марса">🚀 Космос и Марс</span>
+                    <span class="hint-chip" data-text="Периодический закон Менделеева и строение атомов">🧪 Химия: Менделеев</span>
+                    <span class="hint-chip" data-text="Абай Құнанбаевтың философиялық мұрасы мен Қара сөздері">📜 Абай мұрасы</span>
                 </div>
 
-                <div class="prompt-options">
-                    <div class="option-group">
-                        <label for="select-grade"><i class="fa-solid fa-graduation-cap"></i> Аудитория:</label>
-                        <select id="select-grade" class="prompt-select">
-                            <option value="">Любая аудитория</option>
-                            <option value="1-4 класс">1–4 класс</option>
-                            <option value="5-9 класс">5–9 класс</option>
-                            <option value="10-11 класс">10–11 класс</option>
-                            <option value="Студенты / ВУЗ">Студенты / ВУЗ</option>
-                        </select>
-                    </div>
-
-                    <div class="option-group">
-                        <label for="select-slides"><i class="fa-solid fa-layer-group"></i> Слайдов:</label>
-                        <select id="select-slides" class="prompt-select">
-                            <option value="5">5 слайдов</option>
-                            <option value="6">6 слайдов</option>
-                            <option value="7" selected>7 слайдов</option>
-                            <option value="8">8 слайдов</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- TEMPLATE DESIGN PICKER -->
-                <div class="template-picker-section">
-                    <div class="template-picker-header">
-                        <div class="template-picker-title">
-                            <i class="fa-solid fa-palette"></i>
-                            <span>Выберите дизайн презентации</span>
-                        </div>
-                        <div class="template-picker-actions">
-                            <button type="button" id="btn-random-template" class="btn-random-template" title="Случайный дизайн">
-                                <i class="fa-solid fa-dice"></i> <span>Случайный</span>
-                            </button>
-                            <span class="template-picker-count" id="template-count-badge">20 шаблонов</span>
-                        </div>
-                    </div>
-
-                    <!-- Категории шаблонов -->
-                    <div class="template-category-tabs" id="template-cat-tabs">
-                        <button type="button" class="tpl-cat-tab active" data-category="all">🌟 Все (20)</button>
-                        <button type="button" class="tpl-cat-tab" data-category="academic">🎓 Академические</button>
-                        <button type="button" class="tpl-cat-tab" data-category="tech">💻 IT & Технологии</button>
-                        <button type="button" class="tpl-cat-tab" data-category="creative">🎨 Креатив</button>
-                        <button type="button" class="tpl-cat-tab" data-category="business">💼 Бизнес & Премиум</button>
-                    </div>
-
-                    <div class="template-grid" id="template-grid">
-                        <!-- Templates are rendered dynamically by JS -->
-                    </div>
-                </div>
-
+                <!-- Кнопка генерации -->
                 <button id="btn-generate" class="btn-generate">
-                    <i class="fa-solid fa-sparkles" id="btn-gen-icon"></i>
-                    <span id="btn-gen-text">Сгенерировать презентацию</span>
+                    <i class="fa-solid fa-wand-magic-sparkles" id="btn-gen-icon"></i>
+                    <span id="btn-gen-text">Сгенерировать WOW-презентацию</span>
                 </button>
 
                 <!-- Шкала прогресса -->
@@ -178,7 +138,7 @@
                     <div class="gen-progress-bar">
                         <div id="gen-progress-fill" class="gen-progress-fill"></div>
                     </div>
-                    <span id="gen-progress-text" class="gen-progress-text">Анализируем тему...</span>
+                    <span id="gen-progress-text" class="gen-progress-text">Анализируем тему и подбираем палитру...</span>
                 </div>
             </div>
 

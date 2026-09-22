@@ -836,7 +836,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // ── Generate Button Click ─────────────────────────────────
+    // ── Generate Button Click with Topic Intelligence ─────────
     btnGenerate.addEventListener('click', async function() {
         const topic = promptInput.value.trim();
         if (!topic) {
@@ -845,34 +845,33 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        let fullPrompt = topic;
-        if (selectGrade && selectGrade.value) fullPrompt += `, для ${selectGrade.value}`;
-        if (selectSlides && selectSlides.value) fullPrompt += `, ровно ${selectSlides.value} слайдов`;
-
         const sourceContext = (ragSourceState.activeTab !== 'none') ? ragSourceState.sourceText : '';
 
         btnGenerate.disabled = true;
         btnGenIcon.className = 'fa-solid fa-spinner icon-spin';
-        btnGenText.textContent = 'Анализируем запрос...';
+        btnGenText.textContent = 'Анализ темы и подбор WOW-стиля...';
         genProgress.classList.remove('hidden');
-        setGenProgress(10, 'Анализируем запрос...');
+        setGenProgress(15, 'Глубокий анализ темы и палитры...');
 
         try {
+            const intel = detectTopicIntelligence(topic, sourceContext);
+            selectedTemplateId = intel.id;
+
             if (sourceContext) {
                 btnGenText.textContent = 'RAG извлечение фактов из источника...';
-                setGenProgress(25, 'Анализ методички и поиск фактов...');
+                setGenProgress(35, 'Анализ методички и извлечение данных...');
             } else {
-                btnGenText.textContent = 'Пишем тексты и подбираем тему...';
-                setGenProgress(30, 'Генерация слайдов через ИИ...');
+                btnGenText.textContent = 'Генерация слайдов через ИИ...';
+                setGenProgress(40, `Генерация слайдов в стиле «${intel.name}»...`);
             }
 
-            const rawData = await callGemini(fullPrompt, sourceContext);
+            const rawData = await callUniversalAI(topic, sourceContext, intel);
 
-            btnGenText.textContent = 'Создаем стильный дизайн...';
-            setGenProgress(70, 'Подбор динамической темы...');
+            btnGenText.textContent = 'Создаем кинематографичный WOW-дизайн...';
+            setGenProgress(75, 'Сборка визуальных макетов...');
             await sleep(200);
 
-            initPresentationState(rawData);
+            initPresentationState(rawData, intel);
 
             setGenProgress(100, '✅ Готово!');
             await sleep(300);
@@ -881,15 +880,15 @@ document.addEventListener('DOMContentLoaded', function () {
             switchScreen(screenWorkspace);
             renderWorkspace();
             saveToLocalStorage();
-            showToast('Презентация создана! Готова к редактированию.', 'success');
+            showToast(`Презентация создана в стиле «${intel.name}»!`, 'success');
 
         } catch (err) {
             console.error('[Generate error]', err);
             showToast(err.message || 'Ошибка генерации', 'error');
         } finally {
             btnGenerate.disabled = false;
-            btnGenIcon.className = 'fa-solid fa-sparkles';
-            btnGenText.textContent = 'Сгенерировать презентацию';
+            btnGenIcon.className = 'fa-solid fa-wand-magic-sparkles';
+            btnGenText.textContent = 'Сгенерировать WOW-презентацию';
             genProgress.classList.add('hidden');
         }
     });
@@ -1347,37 +1346,226 @@ const callGemini = callUniversalAI;
 /* ──────────────────────────────────────────────
    STATE & RENDER WORKSPACE
 ─────────────────────────────────────────────── */
+function detectTopicIntelligence(topicText, sourceText = '') {
+    const combined = `${topicText || ''} ${sourceText || ''}`.toLowerCase();
+
+    // 1. Space & Astronomy
+    if (/космос|ғарыш|планет|астроном|space|mars|марс|звезд|галактик|orbit|солнечн|астероид|юпитер|спутник/i.test(combined)) {
+        return {
+            id: 'space-deep',
+            name: 'Глубокий Космос',
+            category: 'space',
+            icon: '🚀',
+            isDark: true,
+            theme: {
+                backgroundColor: '#050814',
+                primaryTextColor: '#94a3b8',
+                accentColor: '#38bdf8',
+                style: 'Deep Cosmos 4K',
+                tileBg: 'rgba(15, 23, 42, 0.65)',
+                tileBorder: 'rgba(56, 189, 248, 0.25)',
+                titleColor: '#f8fafc'
+            },
+            imageStyle: 'cinematic deep cosmic space photorealistic 4k nebula stars solar system render'
+        };
+    }
+
+    // 2. Physics & Quantum
+    if (/физик|ньютон|ом|ток|электр|квант|гравитац|механик|динамик|резистор|энерги|термодинамик|voltage|physics|оптика|линз/i.test(combined)) {
+        return {
+            id: 'physics-quantum',
+            name: 'Квантовая Физика',
+            category: 'physics',
+            icon: '⚛️',
+            isDark: true,
+            theme: {
+                backgroundColor: '#070b19',
+                primaryTextColor: '#cbd5e1',
+                accentColor: '#60a5fa',
+                style: 'Quantum Physics',
+                tileBg: 'rgba(15, 23, 42, 0.65)',
+                tileBorder: 'rgba(96, 165, 250, 0.25)',
+                titleColor: '#ffffff'
+            },
+            imageStyle: 'physics science laboratory experiment glowing laser electrical circuit 3d render'
+        };
+    }
+
+    // 3. Biology & Genetics
+    if (/биолог|клетк|жасуша|днк|митохондр|хлоропласт|генет|эволюци|организм|микроскоп|бактери|био|анатоми|вирус/i.test(combined)) {
+        return {
+            id: 'bio-emerald',
+            name: 'Изумруд Биологии',
+            category: 'biology',
+            icon: '🌿',
+            isDark: true,
+            theme: {
+                backgroundColor: '#031711',
+                primaryTextColor: '#a7f3d0',
+                accentColor: '#10b981',
+                style: 'Bio Genetics',
+                tileBg: 'rgba(6, 46, 35, 0.6)',
+                tileBorder: 'rgba(16, 185, 129, 0.25)',
+                titleColor: '#ecfdf5'
+            },
+            imageStyle: 'microscopic glowing biological cell DNA structure 3d scientific rendering octane'
+        };
+    }
+
+    // 4. AI, IT, Coding & Robotics
+    if (/информатик|робот|жасанды интеллект|нейро|ai|код|программ|cyber|технолог|алгоритм|machine learning|python|web/i.test(combined)) {
+        return {
+            id: 'ai-cyber',
+            name: 'Кибер Интеллект',
+            category: 'tech',
+            icon: '🤖',
+            isDark: true,
+            theme: {
+                backgroundColor: '#090a16',
+                primaryTextColor: '#e2e8f0',
+                accentColor: '#a78bfa',
+                style: 'Cyber Neural AI',
+                tileBg: 'rgba(24, 24, 46, 0.65)',
+                tileBorder: 'rgba(167, 139, 250, 0.3)',
+                titleColor: '#f8fafc'
+            },
+            imageStyle: 'futuristic artificial intelligence glowing holographic neural brain cyberpunk 3d render'
+        };
+    }
+
+    // 5. Chemistry & Periodic Table
+    if (/хими|менделеев|период|атом|молекул|реакци|кислот|щелоч|колб|раствор|chem|элемент|оксид/i.test(combined)) {
+        return {
+            id: 'chem-neon',
+            name: 'Неоновая Химия',
+            category: 'chemistry',
+            icon: '🧪',
+            isDark: true,
+            theme: {
+                backgroundColor: '#0c071e',
+                primaryTextColor: '#f3e8ff',
+                accentColor: '#f43f5e',
+                style: 'Neon Chemistry',
+                tileBg: 'rgba(30, 15, 48, 0.65)',
+                tileBorder: 'rgba(244, 63, 94, 0.25)',
+                titleColor: '#ffffff'
+            },
+            imageStyle: 'glowing chemistry laboratory test tubes colorful reaction molecules 3d render'
+        };
+    }
+
+    // 6. History, Kazakh Culture & Literature
+    if (/абай|шоқан|ыбырай|тарих|батыр|хан|қазақ|мұра|әдебиет|культура|рухани|казахстан|истори|номад|шежире/i.test(combined)) {
+        return {
+            id: 'history-gold',
+            name: 'Алтын Мұра',
+            category: 'history',
+            icon: '📜',
+            isDark: true,
+            theme: {
+                backgroundColor: '#140f07',
+                primaryTextColor: '#fef3c7',
+                accentColor: '#f59e0b',
+                style: 'Golden Heritage',
+                tileBg: 'rgba(40, 28, 12, 0.65)',
+                tileBorder: 'rgba(245, 158, 11, 0.3)',
+                titleColor: '#fffbeb'
+            },
+            imageStyle: 'historical cultural artistic masterpiece portrait golden dramatic cinematic lighting'
+        };
+    }
+
+    // 7. Math, Geometry & Engineering
+    if (/математик|геометр|пифагор|үшбұрыш|инженер|формул|алгебр|уравнен|график|теорем|math|треугольник|числа/i.test(combined)) {
+        return {
+            id: 'math-blueprint',
+            name: 'Математический Чертеж',
+            category: 'math',
+            icon: '📐',
+            isDark: true,
+            theme: {
+                backgroundColor: '#0a1124',
+                primaryTextColor: '#bae6fd',
+                accentColor: '#38bdf8',
+                style: 'Precision Blueprint',
+                tileBg: 'rgba(15, 30, 60, 0.65)',
+                tileBorder: 'rgba(56, 189, 248, 0.3)',
+                titleColor: '#ffffff'
+            },
+            imageStyle: 'clean mathematical geometric formula blueprint isometric 3d visualization'
+        };
+    }
+
+    // 8. Nature, Ecology & Geography
+    if (/эколог|табиғат|природ|климат|географ|өзен|мұхит|жануар|nature|forest|water|планета земля|океан/i.test(combined)) {
+        return {
+            id: 'nature-emerald',
+            name: 'Живая Природа',
+            category: 'nature',
+            icon: '🌍',
+            isDark: true,
+            theme: {
+                backgroundColor: '#041812',
+                primaryTextColor: '#d1fae5',
+                accentColor: '#34d399',
+                style: 'Eco Living Earth',
+                tileBg: 'rgba(6, 40, 30, 0.65)',
+                tileBorder: 'rgba(52, 211, 153, 0.25)',
+                titleColor: '#ecfdf5'
+            },
+            imageStyle: 'lush green pristine nature landscape forest clean energy 3d octane render'
+        };
+    }
+
+    // 9. Default Modern Academic WOW theme
+    return {
+        id: 'modern-academic',
+        name: 'Современный Академический',
+        category: 'academic',
+        icon: '✨',
+        isDark: true,
+        theme: {
+            backgroundColor: '#0b0f19',
+            primaryTextColor: '#94a3b8',
+            accentColor: '#38bdf8',
+            style: 'Modern Academic Pro',
+            tileBg: 'rgba(18, 26, 46, 0.65)',
+            tileBorder: 'rgba(56, 189, 248, 0.25)',
+            titleColor: '#f8fafc'
+        },
+        imageStyle: 'high quality 3d educational concept illustration clean studio lighting'
+    };
+}
+
 function getSelectedTemplate() {
     return DESIGN_TEMPLATES.find(t => t.id === selectedTemplateId) || DESIGN_TEMPLATES[0];
 }
 
 function getSlideLayoutType(slide, index) {
     if (index === 0) return 'cover';
-    if (slide && slide.layout) return slide.layout;
-
-    const tpl = getSelectedTemplate();
-    if (tpl.layouts && tpl.layouts.length > index) {
-        return tpl.layouts[index];
+    if (slide && slide.layout && ['cover', 'stat', 'steps', 'compare', 'cards-grid', 'insight', 'split-left', 'split-right'].includes(slide.layout)) {
+        return slide.layout;
     }
-    const fallback = ['split-left', 'split-right', 'cards-grid', 'top-bottom', 'focus-card'];
-    return fallback[(index - 1) % fallback.length];
+    const sequence = ['split-left', 'stat', 'steps', 'cards-grid', 'compare', 'insight', 'split-right'];
+    return sequence[(index - 1) % sequence.length];
 }
 
-function initPresentationState(data) {
+function initPresentationState(data, intel = null) {
     const slides = Array.isArray(data.slides) ? data.slides : [];
     if (slides.length === 0) throw new Error('ИИ не сгенерировал ни одного слайда');
 
+    const activeIntel = intel || detectTopicIntelligence(data.title || 'Урок');
     const tpl = getSelectedTemplate();
 
     const theme = {
-        backgroundColor: tpl.theme.backgroundColor,
-        primaryTextColor: tpl.theme.primaryTextColor,
-        accentColor: tpl.theme.accentColor,
-        style: tpl.theme.style,
-        tileBg: tpl.theme.tileBg || (tpl.isDark ? '#1E293B' : '#FFFFFF'),
-        tileBorder: tpl.theme.tileBorder || (tpl.isDark ? 'rgba(255,255,255,0.12)' : '#E2E8F0'),
-        titleColor: tpl.theme.titleColor || (tpl.isDark ? '#F8FAFC' : '#0F172A'),
-        isDark: tpl.isDark
+        backgroundColor: activeIntel.theme.backgroundColor || tpl.theme.backgroundColor,
+        primaryTextColor: activeIntel.theme.primaryTextColor || tpl.theme.primaryTextColor,
+        accentColor: activeIntel.theme.accentColor || tpl.theme.accentColor,
+        style: activeIntel.theme.style || tpl.theme.style,
+        tileBg: activeIntel.theme.tileBg || (tpl.isDark ? '#1E293B' : '#FFFFFF'),
+        tileBorder: activeIntel.theme.tileBorder || (tpl.isDark ? 'rgba(255,255,255,0.12)' : '#E2E8F0'),
+        titleColor: activeIntel.theme.titleColor || (tpl.isDark ? '#F8FAFC' : '#0F172A'),
+        isDark: activeIntel.isDark !== undefined ? activeIntel.isDark : tpl.isDark
     };
 
     presentationState = {
@@ -1398,10 +1586,10 @@ function renderWorkspace() {
     const wsTitleInput    = document.getElementById('workspace-title-input');
     const themeStyleBadge = document.getElementById('theme-style-badge');
     const slidesCount     = document.getElementById('slides-count');
-    const tpl             = getSelectedTemplate();
+    const currentTheme    = presentationState.theme || {};
     
     if (wsTitleInput)    wsTitleInput.value = presentationState.title;
-    if (themeStyleBadge) themeStyleBadge.textContent = `Дизайн: ${tpl.icon} ${tpl.name}`;
+    if (themeStyleBadge) themeStyleBadge.textContent = `Дизайн: ${currentTheme.style || 'AshyqLab Pro'}`;
     if (slidesCount)     slidesCount.textContent = presentationState.slides.length;
 
     renderThumbnailsList();
@@ -1455,7 +1643,7 @@ function loadActiveSlideToEditor() {
 
 
 /* ──────────────────────────────────────────────
-   LIVE HTML SLIDE PREVIEW
+   LIVE HTML SLIDE PREVIEW WITH 7 WOW ARCHETYPES
 ─────────────────────────────────────────────── */
 function renderLiveSlidePreview() {
     const card = document.getElementById('live-slide-card');
@@ -1480,7 +1668,6 @@ function sanitizeImagePrompt(prompt, slideTitle = '', topicTitle = '') {
         text = `${slideTitle} ${topicTitle}`.trim() || 'educational presentation science illustration';
     }
 
-    // Common educational subject mappings to high quality visual prompts
     const mappings = [
         { regex: /абай|құнанбаев|кунанбаев/i, prompt: 'Abai Kunanbayev historical Kazakh poet philosopher national costume portrait painting masterpiece' },
         { regex: /шоқан|уәлиханов|валиханов/i, prompt: 'Shoqan Walikhanov Kazakh scholar researcher portrait in historical study room' },
@@ -1588,17 +1775,17 @@ function buildPollinationsUrl(prompt, seed, slideTitle = '') {
     return `https://image.pollinations.ai/prompt/${encoded}?width=800&height=600&nologo=true${seedParam}`;
 }
 
-/* Build Slide Card HTML inner structure with Diverse Layout Variations */
+/* Build Slide Card HTML inner structure with 7 Diverse WOW Archetypes */
 function buildSlideCardHTML(card, slide, index, theme) {
-    const tpl = getSelectedTemplate();
-    const isDark = theme.isDark || tpl.isDark;
-    const tileBg = theme.tileBg || (isDark ? '#1E293B' : '#FFFFFF');
-    const tileBorder = theme.tileBorder || (isDark ? 'rgba(255,255,255,0.12)' : '#E2E8F0');
+    const isDark = theme.isDark !== false;
+    const tileBg = theme.tileBg || (isDark ? 'rgba(15, 23, 42, 0.65)' : '#FFFFFF');
+    const tileBorder = theme.tileBorder || (isDark ? 'rgba(56, 189, 248, 0.25)' : '#E2E8F0');
     const titleColor = theme.titleColor || (isDark ? '#F8FAFC' : '#0F172A');
+    const accentColor = theme.accentColor || '#38BDF8';
 
-    card.style.setProperty('--slide-bg', theme.backgroundColor || '#F8FAFC');
-    card.style.setProperty('--slide-text', theme.primaryTextColor || '#475569');
-    card.style.setProperty('--slide-accent', theme.accentColor || '#3B82F6');
+    card.style.setProperty('--slide-bg', theme.backgroundColor || '#0B0F19');
+    card.style.setProperty('--slide-text', theme.primaryTextColor || '#94A3B8');
+    card.style.setProperty('--slide-accent', accentColor);
     card.style.setProperty('--tile-bg', tileBg);
     card.style.setProperty('--tile-border', tileBorder);
     card.style.setProperty('--title-color', titleColor);
@@ -1608,73 +1795,32 @@ function buildSlideCardHTML(card, slide, index, theme) {
 
     const hasImage = Boolean(slide.imagePrompt && slide.imagePrompt.trim());
     const imageUrl = hasImage ? buildPollinationsUrl(slide.imagePrompt, slide.seed, slide.title) : '';
-    const svgFallback = generateSvgIllustration(slide.title, theme.accentColor, theme.backgroundColor);
+    const svgFallback = generateSvgIllustration(slide.title, accentColor, theme.backgroundColor);
     const boxId = `slide-img-box-${index}`;
     const loaderId = `slide-loader-${index}`;
     const safeTitle = escapeHtml(slide.title || '').replace(/'/g, "\\'");
     const safePrompt = escapeHtml(slide.imagePrompt || '').replace(/'/g, "\\'");
 
-    if (layout === 'cover') {
-        card.classList.add('slide-card-cover');
-        if (hasImage) {
-            card.innerHTML = `
-                <div class="slide-cover-layout has-cover-image">
-                    <div class="slide-cover-tile">
-                        <div style="font-size:0.85em;font-weight:700;letter-spacing:1px;color:${theme.accentColor || '#3B82F6'};text-transform:uppercase;margin-bottom:0.6em;">
-                            ${escapeHtml(theme.style || 'NotebookLM Academic')}
-                        </div>
-                        <h1 class="slide-card-title">${escapeHtml(slide.title)}</h1>
-                        ${slide.points && slide.points.length > 0 ? `<p class="slide-cover-points">${escapeHtml(slide.points.join(' • '))}</p>` : ''}
-                    </div>
-                    <div class="slide-cover-image-box">
-                        <div class="slide-img-container" id="${boxId}">
-                            <div class="slide-img-loader" id="${loaderId}">
-                                <i class="fa-solid fa-spinner fa-spin"></i>
-                                <span>AI генерация...</span>
-                            </div>
-                            <img src="${imageUrl}" 
-                                 class="slide-ai-img" 
-                                 alt="AI Cover" 
-                                 loading="eager"
-                                 data-fallback-stage="ai"
-                                 onload="this.style.opacity='1'; const l = document.getElementById('${loaderId}'); if(l) l.style.display='none';" 
-                                 onerror="handleImageFallback(this, '${safeTitle}', '${svgFallback}', '${safePrompt}'); this.style.opacity='1'; const l = document.getElementById('${loaderId}'); if(l) l.style.display='none';" />
-                        </div>
-                    </div>
-                </div>
-            `;
-        } else {
-            card.innerHTML = `
-                <div class="slide-cover-layout">
-                    <div class="slide-cover-tile">
-                        <h1 class="slide-card-title">${escapeHtml(slide.title)}</h1>
-                        ${slide.points && slide.points.length > 0 ? `<p class="slide-cover-points">${escapeHtml(slide.points.join(' • '))}</p>` : ''}
-                    </div>
-                </div>
-            `;
-        }
-        return;
-    }
+    // Universal Top Ribbon
+    const topRibbonHTML = '<div class="slide-top-ribbon"></div>';
 
+    // Universal Header
+    const categoryLabel = theme.style || 'AshyqLab Pro';
     const headerHTML = `
         <div class="slide-card-header">
+            <div class="slide-category-pill"><i class="fa-solid fa-sparkles"></i> ${escapeHtml(categoryLabel)} • Слайд ${index + 1}</div>
             <h2 class="slide-card-title">${escapeHtml(slide.title)}</h2>
             <div class="slide-title-divider"></div>
         </div>
     `;
 
-    const pointsListHTML = `
-        <ul class="slide-points-ul">
-            ${slide.points.map(p => `<li>${escapeHtml(p)}</li>`).join('')}
-        </ul>
-    `;
-
+    // Universal Image Node
     const imageHTML = hasImage ? `
         <div class="slide-col-image">
             <div class="slide-img-container" id="${boxId}">
                 <div class="slide-img-loader" id="${loaderId}">
                     <i class="fa-solid fa-spinner fa-spin"></i>
-                    <span>AI генерация...</span>
+                    <span>AI 3D Visual...</span>
                 </div>
                 <img src="${imageUrl}" 
                      class="slide-ai-img" 
@@ -1683,52 +1829,204 @@ function buildSlideCardHTML(card, slide, index, theme) {
                      data-fallback-stage="ai"
                      onload="this.style.opacity='1'; const l = document.getElementById('${loaderId}'); if(l) l.style.display='none';" 
                      onerror="handleImageFallback(this, '${safeTitle}', '${svgFallback}', '${safePrompt}'); this.style.opacity='1'; const l = document.getElementById('${loaderId}'); if(l) l.style.display='none';" />
+                <div class="slide-img-meta-tag"><i class="fa-solid fa-sparkles"></i> 4K AI</div>
             </div>
         </div>
     ` : '';
 
+    // ── ARCHETYPE 1: CINEMA HERO COVER ─────────────────────────────
+    if (layout === 'cover') {
+        card.innerHTML = `
+            ${topRibbonHTML}
+            <div class="slide-cover-cinema">
+                <div class="slide-cover-hero-tile">
+                    <div>
+                        <div class="slide-category-pill">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> ${escapeHtml(categoryLabel)}
+                        </div>
+                        <h1 class="slide-card-title" style="margin-top:0.4em;">${escapeHtml(slide.title)}</h1>
+                        ${slide.points && slide.points.length > 0 ? `<p class="slide-cover-desc">${escapeHtml(slide.points.join(' • '))}</p>` : `<p class="slide-cover-desc">Интеллектуальная презентация с адаптивной структурой и 3D-визуализацией</p>`}
+                    </div>
+                    <div class="slide-cover-footer-tags">
+                        <span class="slide-cover-tag"><i class="fa-solid fa-graduation-cap"></i> Образовательный модуль</span>
+                        <span class="slide-cover-tag"><i class="fa-solid fa-bolt"></i> ИИ Генерация 2026</span>
+                    </div>
+                </div>
+                ${imageHTML}
+            </div>
+        `;
+        return;
+    }
+
+    // ── ARCHETYPE 2: STAT & METRIC HIGHLIGHT ───────────────────────
+    if (layout === 'stat') {
+        let statNum = '100%';
+        let statLabel = 'Ключевой показатель темы';
+        const numMatch = (slide.title + ' ' + (slide.points || []).join(' ')).match(/(\d+[\d.,]*%?|\b[E]=mc²\b|\b[F]=m[·*]a\b|\b[I]=U\/R\b|\b3\.0\s*×\s*10⁸\b|\b9\.8\b|\b№\s*\d+\b)/i);
+        if (numMatch) {
+            statNum = numMatch[1];
+        } else {
+            const mathList = ['№ 1', '100%', '3.0×10⁸', '9.8 м/с²', 'E=mc²', 'I = U/R', 'F = m·a', '98.5%'];
+            statNum = mathList[(index + slide.title.length) % mathList.length];
+        }
+        statLabel = slide.points && slide.points.length > 0 ? slide.points[0] : 'Фундаментальная закономерность';
+        const restPoints = slide.points && slide.points.length > 1 ? slide.points.slice(1) : (slide.points || []);
+
+        card.innerHTML = `
+            ${topRibbonHTML}
+            ${headerHTML}
+            <div class="slide-card-body">
+                <div class="slide-stat-hero-card">
+                    <div class="slide-stat-badge"><i class="fa-solid fa-chart-line"></i> Главная метрика / Закон</div>
+                    <div class="slide-stat-number-box">
+                        <div class="slide-stat-number">${escapeHtml(statNum)}</div>
+                        <div class="slide-stat-label">${escapeHtml(statLabel)}</div>
+                    </div>
+                    ${restPoints.length > 0 ? `
+                        <ul class="slide-stat-bullets">
+                            ${restPoints.map(p => `<li>${escapeHtml(p)}</li>`).join('')}
+                        </ul>
+                    ` : ''}
+                </div>
+                ${imageHTML}
+            </div>
+        `;
+        return;
+    }
+
+    // ── ARCHETYPE 3: STEP-BY-STEP PROCESS ──────────────────────────
+    if (layout === 'steps') {
+        const points = slide.points && slide.points.length > 0 ? slide.points : ['Анализ и постановка задачи', 'Экспериментальная проверка', 'Выводы и закономерности'];
+        const stepCardsHTML = points.slice(0, 3).map((p, i) => {
+            const parts = p.split(/[:—–-]\s*/);
+            const stepTitle = parts.length > 1 ? parts[0] : `Этап ${i + 1}`;
+            const stepDesc = parts.length > 1 ? parts.slice(1).join(' — ') : p;
+            return `
+                <div class="slide-step-card">
+                    <div class="slide-step-num-pill">0${i + 1}</div>
+                    <div class="slide-step-title">${escapeHtml(stepTitle)}</div>
+                    <div class="slide-step-desc">${escapeHtml(stepDesc)}</div>
+                </div>
+            `;
+        }).join('');
+
+        card.innerHTML = `
+            ${topRibbonHTML}
+            ${headerHTML}
+            <div class="slide-card-body">
+                <div class="slide-steps-row">
+                    ${stepCardsHTML}
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    // ── ARCHETYPE 4: SIDE-BY-SIDE COMPARISON ───────────────────────
+    if (layout === 'compare') {
+        const points = slide.points || [];
+        const mid = Math.ceil(points.length / 2);
+        const leftPoints = points.slice(0, mid);
+        const rightPoints = points.slice(mid);
+
+        card.innerHTML = `
+            ${topRibbonHTML}
+            ${headerHTML}
+            <div class="slide-card-body">
+                <div class="slide-compare-col">
+                    <div class="slide-compare-header">
+                        <span class="slide-compare-badge left">📌 Сторона А / Тезис</span>
+                        <i class="fa-solid fa-arrow-right-arrow-left" style="opacity:0.5;font-size:0.85em;"></i>
+                    </div>
+                    <ul class="slide-compare-list">
+                        ${leftPoints.map(p => `<li><i class="fa-solid fa-circle-check"></i> <span>${escapeHtml(p)}</span></li>`).join('')}
+                    </ul>
+                </div>
+                <div class="slide-compare-col">
+                    <div class="slide-compare-header">
+                        <span class="slide-compare-badge right">⚡ Сторона Б / Вывод</span>
+                        <i class="fa-solid fa-sparkles" style="opacity:0.5;font-size:0.85em;"></i>
+                    </div>
+                    <ul class="slide-compare-list">
+                        ${(rightPoints.length ? rightPoints : leftPoints).map(p => `<li><i class="fa-solid fa-bolt" style="color:#a855f7;"></i> <span>${escapeHtml(p)}</span></li>`).join('')}
+                    </ul>
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    // ── ARCHETYPE 5: CARDS GRID ────────────────────────────────────
     if (layout === 'cards-grid') {
-        const miniCardsHTML = slide.points.map((p, i) => `
-            <div class="slide-mini-card-tile">
-                <span class="slide-mini-card-badge">${i + 1}</span>
-                <p class="slide-mini-card-text">${escapeHtml(p)}</p>
+        const icons = ['fa-atom', 'fa-dna', 'fa-bolt', 'fa-microchip', 'fa-star', 'fa-fire-flame-curved'];
+        const miniTilesHTML = (slide.points || []).map((p, i) => `
+            <div class="slide-grid-mini-tile">
+                <div class="slide-mini-icon-box">
+                    <i class="fa-solid ${icons[i % icons.length]}"></i>
+                </div>
+                <div class="slide-mini-tile-content">${escapeHtml(p)}</div>
             </div>
         `).join('');
 
         card.innerHTML = `
+            ${topRibbonHTML}
             ${headerHTML}
             <div class="slide-card-body">
-                <div class="slide-cards-grid-container">
-                    <div class="slide-grid-column">
-                        ${miniCardsHTML}
+                <div class="slide-cards-grid-row">
+                    <div class="slide-grid-col-cards">
+                        ${miniTilesHTML}
                     </div>
                     ${imageHTML}
                 </div>
             </div>
         `;
-    } else if (layout === 'focus-card') {
-        card.innerHTML = `
-            ${headerHTML}
-            <div class="slide-card-body">
-                <div class="slide-focus-card-tile">
-                    <div class="slide-focus-badge"><i class="fa-solid fa-bookmark"></i> Обзор темы</div>
-                    ${pointsListHTML}
-                </div>
-                ${imageHTML}
-            </div>
-        `;
-    } else {
-        // split-left, split-right, top-bottom
-        card.innerHTML = `
-            ${headerHTML}
-            <div class="slide-card-body">
-                <div class="slide-col-points ${!hasImage ? 'slide-col-points-full' : ''}">
-                    ${pointsListHTML}
-                </div>
-                ${imageHTML}
-            </div>
-        `;
+        return;
     }
+
+    // ── ARCHETYPE 6: INSIGHT & FOCUS QUOTE ─────────────────────────
+    if (layout === 'insight') {
+        const quoteText = slide.points && slide.points.length > 0 ? slide.points[0] : slide.title;
+        const subPoints = slide.points && slide.points.length > 1 ? slide.points.slice(1) : [];
+
+        card.innerHTML = `
+            ${topRibbonHTML}
+            ${headerHTML}
+            <div class="slide-card-body">
+                <div class="slide-insight-hero-tile">
+                    <div>
+                        <div class="slide-category-pill"><i class="fa-solid fa-lightbulb"></i> Главный вывод / Инсайт</div>
+                        <div class="slide-insight-quote-icon" style="margin-top:0.3em;">“</div>
+                        <div class="slide-insight-quote-text">${escapeHtml(quoteText)}</div>
+                    </div>
+                    ${subPoints.length > 0 ? `
+                        <ul class="slide-insight-points">
+                            ${subPoints.map(p => `<li>${escapeHtml(p)}</li>`).join('')}
+                        </ul>
+                    ` : ''}
+                </div>
+                ${imageHTML}
+            </div>
+        `;
+        return;
+    }
+
+    // ── ARCHETYPE 7: SPLIT LEFT / SPLIT RIGHT ──────────────────────
+    const pointsListHTML = `
+        <ul class="slide-points-ul">
+            ${(slide.points || []).map(p => `<li>${escapeHtml(p)}</li>`).join('')}
+        </ul>
+    `;
+
+    card.innerHTML = `
+        ${topRibbonHTML}
+        ${headerHTML}
+        <div class="slide-card-body">
+            <div class="slide-split-points-card">
+                ${pointsListHTML}
+            </div>
+            ${imageHTML}
+        </div>
+    `;
 }
 
 
@@ -1926,7 +2224,147 @@ async function generatePPTX(presentation, btn) {
                 imageBase64 = await fetchImageAsBase64(imageUrl, slideData.title, theme);
             }
 
-            if (layout === 'split-right') {
+            if (layout === 'stat') {
+                // Large Stat & Formula Callout
+                const textW = imageBase64 ? 4.8 : 8.8;
+                slide.addShape(pptx.ShapeType.roundRect, {
+                    x: 0.6, y: 1.15, w: textW, h: 3.9,
+                    fill: { color: 'FFFFFF' }, line: { color: 'E2E8F0', width: 1 }, rectRadius: 0.15
+                });
+
+                let statNum = '100%';
+                let statLabel = slideData.points && slideData.points.length > 0 ? slideData.points[0] : 'Ключевой показатель';
+                const numMatch = (slideData.title + ' ' + (slideData.points || []).join(' ')).match(/(\d+[\d.,]*%?|\b[E]=mc²\b|\b[F]=m[·*]a\b|\b[I]=U\/R\b|\b3\.0\s*×\s*10⁸\b|\b9\.8\b|\b№\s*\d+\b)/i);
+                if (numMatch) statNum = numMatch[1];
+
+                slide.addText(statNum, {
+                    x: 0.8, y: 1.35, w: textW - 0.4, h: 1.1,
+                    fontSize: 38, bold: true, color: accentHex, fontFace: 'Arial'
+                });
+                slide.addText(statLabel, {
+                    x: 0.8, y: 2.5, w: textW - 0.4, h: 0.7,
+                    fontSize: 16, bold: true, color: titleHex, fontFace: 'Arial'
+                });
+
+                const restPoints = slideData.points && slideData.points.length > 1 ? slideData.points.slice(1) : [];
+                if (restPoints.length > 0) {
+                    const bulletItems = restPoints.map(p => ({
+                        text: p,
+                        options: { fontSize: 13, color: textHex, bullet: { code: '2713', color: accentHex }, paraSpaceBefore: 6 }
+                    }));
+                    slide.addText(bulletItems, { x: 0.8, y: 3.3, w: textW - 0.4, h: 1.6, fontFace: 'Arial', valign: 'top' });
+                }
+
+                if (imageBase64) {
+                    slide.addShape(pptx.ShapeType.roundRect, {
+                        x: 5.6, y: 1.15, w: 3.8, h: 3.9,
+                        fill: { color: 'FFFFFF' }, line: { color: 'E2E8F0', width: 1 }, rectRadius: 0.15
+                    });
+                    slide.addImage({ data: imageBase64, x: 5.7, y: 1.25, w: 3.6, h: 3.7 });
+                }
+            } else if (layout === 'steps') {
+                // 3 Horizontal Step Process Cards
+                const stepCount = Math.min(points.length, 3);
+                const stepW = (8.8 - (0.25 * (stepCount - 1))) / Math.max(stepCount, 1);
+
+                for (let k = 0; k < stepCount; k++) {
+                    const cardX = 0.6 + k * (stepW + 0.25);
+                    slide.addShape(pptx.ShapeType.roundRect, {
+                        x: cardX, y: 1.15, w: stepW, h: 3.9,
+                        fill: { color: 'FFFFFF' }, line: { color: 'E2E8F0', width: 1 }, rectRadius: 0.15
+                    });
+
+                    slide.addText(`0${k + 1}`, {
+                        x: cardX + 0.2, y: 1.35, w: 0.6, h: 0.5,
+                        fontSize: 18, bold: true, color: accentHex, fontFace: 'Arial'
+                    });
+
+                    const p = points[k] || '';
+                    const parts = p.split(/[:—–-]\s*/);
+                    const stepTitle = parts.length > 1 ? parts[0] : `Этап ${k + 1}`;
+                    const stepDesc = parts.length > 1 ? parts.slice(1).join(' — ') : p;
+
+                    slide.addText(stepTitle, {
+                        x: cardX + 0.2, y: 2.0, w: stepW - 0.4, h: 0.6,
+                        fontSize: 14, bold: true, color: titleHex, fontFace: 'Arial'
+                    });
+                    slide.addText(stepDesc, {
+                        x: cardX + 0.2, y: 2.7, w: stepW - 0.4, h: 2.1,
+                        fontSize: 12, color: textHex, fontFace: 'Arial', valign: 'top', lineSpacingMultiple: 1.2
+                    });
+                }
+            } else if (layout === 'compare') {
+                // 2 Balanced Comparative Columns
+                const colW = 4.25;
+                const mid = Math.ceil(points.length / 2);
+                const leftPoints = points.slice(0, mid);
+                const rightPoints = points.slice(mid);
+
+                // Left Column
+                slide.addShape(pptx.ShapeType.roundRect, {
+                    x: 0.6, y: 1.15, w: colW, h: 3.9,
+                    fill: { color: 'FFFFFF' }, line: { color: 'E2E8F0', width: 1 }, rectRadius: 0.15
+                });
+                slide.addText('📌 Сторона А / Тезис', {
+                    x: 0.8, y: 1.35, w: colW - 0.4, h: 0.4,
+                    fontSize: 13, bold: true, color: accentHex, fontFace: 'Arial'
+                });
+                if (leftPoints.length > 0) {
+                    const bulletItems = leftPoints.map(p => ({
+                        text: p,
+                        options: { fontSize: 13, color: textHex, bullet: { code: '2713', color: accentHex }, paraSpaceBefore: 6 }
+                    }));
+                    slide.addText(bulletItems, { x: 0.8, y: 1.85, w: colW - 0.4, h: 3.0, fontFace: 'Arial', valign: 'top' });
+                }
+
+                // Right Column
+                slide.addShape(pptx.ShapeType.roundRect, {
+                    x: 5.15, y: 1.15, w: colW, h: 3.9,
+                    fill: { color: 'FFFFFF' }, line: { color: 'E2E8F0', width: 1 }, rectRadius: 0.15
+                });
+                slide.addText('⚡ Сторона Б / Вывод', {
+                    x: 5.35, y: 1.35, w: colW - 0.4, h: 0.4,
+                    fontSize: 13, bold: true, color: '8B5CF6', fontFace: 'Arial'
+                });
+                const rPoints = rightPoints.length ? rightPoints : leftPoints;
+                if (rPoints.length > 0) {
+                    const bulletItems = rPoints.map(p => ({
+                        text: p,
+                        options: { fontSize: 13, color: textHex, bullet: { code: '2713', color: '8B5CF6' }, paraSpaceBefore: 6 }
+                    }));
+                    slide.addText(bulletItems, { x: 5.35, y: 1.85, w: colW - 0.4, h: 3.0, fontFace: 'Arial', valign: 'top' });
+                }
+            } else if (layout === 'insight') {
+                // Focus Insight Hero
+                const textW = imageBase64 ? 4.8 : 8.8;
+                slide.addShape(pptx.ShapeType.roundRect, {
+                    x: 0.6, y: 1.15, w: textW, h: 3.9,
+                    fill: { color: 'FFFFFF' }, line: { color: 'E2E8F0', width: 1 }, rectRadius: 0.15
+                });
+
+                const quoteText = points.length > 0 ? points[0] : slideData.title;
+                slide.addText(`“ ${quoteText} ”`, {
+                    x: 0.8, y: 1.4, w: textW - 0.4, h: 1.5,
+                    fontSize: 17, bold: true, color: titleHex, fontFace: 'Arial', italic: true
+                });
+
+                const subPoints = points.length > 1 ? points.slice(1) : [];
+                if (subPoints.length > 0) {
+                    const bulletItems = subPoints.map(p => ({
+                        text: p,
+                        options: { fontSize: 13, color: textHex, bullet: { code: '2713', color: accentHex }, paraSpaceBefore: 6 }
+                    }));
+                    slide.addText(bulletItems, { x: 0.8, y: 3.0, w: textW - 0.4, h: 1.8, fontFace: 'Arial', valign: 'top' });
+                }
+
+                if (imageBase64) {
+                    slide.addShape(pptx.ShapeType.roundRect, {
+                        x: 5.6, y: 1.15, w: 3.8, h: 3.9,
+                        fill: { color: 'FFFFFF' }, line: { color: 'E2E8F0', width: 1 }, rectRadius: 0.15
+                    });
+                    slide.addImage({ data: imageBase64, x: 5.7, y: 1.25, w: 3.6, h: 3.7 });
+                }
+            } else if (layout === 'split-right') {
                 // Image Left (0.6 -> 4.4), Text Right (4.6 -> 9.4)
                 if (imageBase64) {
                     slide.addShape(pptx.ShapeType.roundRect, {
@@ -1951,31 +2389,7 @@ async function generatePPTX(presentation, btn) {
                     }));
                     slide.addText(bulletItems, { x: textX + 0.2, y: 1.35, w: textW - 0.4, h: 3.5, fontFace: 'Arial', valign: 'top', lineSpacingMultiple: 1.2 });
                 }
-            } else if (layout === 'top-bottom') {
-                // Top Text Card, Bottom Image Card
-                const textH = imageBase64 ? 1.8 : 3.9;
-                slide.addShape(pptx.ShapeType.roundRect, {
-                    x: 0.6, y: 1.15, w: 8.8, h: textH,
-                    fill: { color: 'FFFFFF' }, line: { color: 'E2E8F0', width: 1 }, rectRadius: 0.15
-                });
-
-                if (points.length > 0) {
-                    const bulletItems = points.map(p => ({
-                        text: p,
-                        options: { fontSize: 14, color: textHex, bullet: { code: '2713', color: accentHex }, paraSpaceBefore: 4 }
-                    }));
-                    slide.addText(bulletItems, { x: 0.8, y: 1.25, w: 8.4, h: textH - 0.2, fontFace: 'Arial', valign: 'top', lineSpacingMultiple: 1.1 });
-                }
-
-                if (imageBase64) {
-                    slide.addShape(pptx.ShapeType.roundRect, {
-                        x: 0.6, y: 3.1, w: 8.8, h: 1.95,
-                        fill: { color: 'FFFFFF' }, line: { color: 'E2E8F0', width: 1 }, rectRadius: 0.15
-                    });
-                    slide.addImage({ data: imageBase64, x: 0.7, y: 3.15, w: 8.6, h: 1.85 });
-                }
             } else if (layout === 'cards-grid') {
-                // Mini cards for points
                 const maxTextWidth = imageBase64 ? 4.8 : 8.8;
                 const pointCount = Math.min(points.length, 3);
                 const cardWidth = pointCount > 0 ? (maxTextWidth - (0.2 * (pointCount - 1))) / pointCount : maxTextWidth;
@@ -2004,31 +2418,6 @@ async function generatePPTX(presentation, btn) {
                         fill: { color: 'FFFFFF' }, line: { color: 'E2E8F0', width: 1 }, rectRadius: 0.15
                     });
                     slide.addImage({ data: imageBase64, x: 5.7, y: 1.25, w: 3.6, h: 3.7 });
-                }
-            } else if (layout === 'focus-card') {
-                // Centered Hero Focus Card
-                const cardW = imageBase64 ? 5.2 : 8.0;
-                const cardX = imageBase64 ? 0.6 : 1.0;
-
-                slide.addShape(pptx.ShapeType.roundRect, {
-                    x: cardX, y: 1.15, w: cardW, h: 3.9,
-                    fill: { color: 'FFFFFF' }, line: { color: 'E2E8F0', width: 1 }, rectRadius: 0.15
-                });
-
-                if (points.length > 0) {
-                    const bulletItems = points.map(p => ({
-                        text: p,
-                        options: { fontSize: 16, color: textHex, bullet: { code: '2713', color: accentHex }, paraSpaceBefore: 10 }
-                    }));
-                    slide.addText(bulletItems, { x: cardX + 0.3, y: 1.4, w: cardW - 0.6, h: 3.4, fontFace: 'Arial', valign: 'top', lineSpacingMultiple: 1.25 });
-                }
-
-                if (imageBase64) {
-                    slide.addShape(pptx.ShapeType.roundRect, {
-                        x: 6.0, y: 1.15, w: 3.4, h: 3.9,
-                        fill: { color: 'FFFFFF' }, line: { color: 'E2E8F0', width: 1 }, rectRadius: 0.15
-                    });
-                    slide.addImage({ data: imageBase64, x: 6.1, y: 1.25, w: 3.2, h: 3.7 });
                 }
             } else {
                 // Default split-left
