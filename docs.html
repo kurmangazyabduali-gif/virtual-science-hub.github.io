@@ -254,13 +254,14 @@
 
             <!-- A4 Document Paper Container -->
             <div class="a4-stage-scroller" id="a4-stage-scroller">
-                <div class="a4-sheet" id="a4-document-paper" contenteditable="true" spellcheck="false">
-                    <!-- Default Initial Starter Template (Rendered on load) -->
-                    <div class="doc-header-block">
-                        <div class="doc-state-heading">ҚАЗАҚСТАН РЕСПУБЛИКАСЫ ОҚУ-АҒАРТУ МИНИСТРЛІГІ</div>
-                        <div class="doc-school-heading">«№ 1 МЕКТЕП-ЛИЦЕЙ» КММ</div>
-                        <h1 class="doc-main-title">ҚЫСҚА МЕРЗІМДІ САБАҚ ЖОСПАРЫ (ҚМЖ)</h1>
-                    </div>
+                <div class="a4-paper-wrapper" id="a4-paper-wrapper">
+                    <div class="a4-sheet" id="a4-document-paper" contenteditable="true" spellcheck="false">
+                        <!-- Default Initial Starter Template (Rendered on load) -->
+                        <div class="doc-header-block">
+                            <div class="doc-state-heading">ҚАЗАҚСТАН РЕСПУБЛИКАСЫ ОҚУ-АҒАРТУ МИНИСТРЛІГІ</div>
+                            <div class="doc-school-heading">«№ 1 МЕКТЕП-ЛИЦЕЙ» КММ</div>
+                            <h1 class="doc-main-title">ҚЫСҚА МЕРЗІМДІ САБАҚ ЖОСПАРЫ (ҚМЖ)</h1>
+                        </div>
 
                     <table class="doc-table-meta">
                         <tr>
@@ -344,20 +345,21 @@
                         <div class="sig-block">
                             <span>Пән мұғалімі: _________________ (қолы)</span>
                         </div>
-                        <div class="sig-block">
+                        <div class="sig-block" style="text-align: right;">
                             <span>Тексерген оқу ісінің меңгерушісі: _________________</span>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-        </main>
+    </main>
 
-    </div>
+</div>
 
-    <!-- Toast Notification Container -->
-    <div id="toast-container" class="toast-container"></div>
+<!-- Toast Notification Container -->
+<div id="toast-container" class="toast-container"></div>
 
-    <script src="./src/features/docs/app.js"></script>
+<script src="./src/features/docs/app.js"></script>
 </body>
 </html>
