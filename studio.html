@@ -5,23 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Интерактивті ойын студиясы — AshyqLab</title>
-    <script>
-        (function() {
-            ['googtrans', 'googtrans_prev', 'googtrans_saved'].forEach(function(c) {
-                document.cookie = c + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                if (location.hostname) {
-                    document.cookie = c + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=" + location.hostname + ";";
-                    document.cookie = c + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=." + location.hostname + ";";
-                }
-            });
-        })();
-    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
-
     <style>
         :root {
             --brand-primary: #1d4ed8;
@@ -242,6 +230,11 @@
                         <i class="fa-solid fa-gamepad text-xs"></i>
                         <span>Ойын студиясы</span>
                     </button>
+                    <a href="https://tilai-platform.vercel.app/teacher" target="_blank" rel="noopener noreferrer" class="nav-pill-btn">
+                        <i class="fa-solid fa-graduation-cap text-xs"></i>
+                        <span>TilAI Мұғалім</span>
+                        <span class="text-[10px] bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded font-bold border border-indigo-200">TilAI</span>
+                    </a>
                 </div>
                 
                 <!-- Right Action Buttons -->
